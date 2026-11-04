@@ -108,6 +108,12 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
   </section>
 
   <div id="panel" data-t="pend" hidden>
+    <section class="card" id="memCard" data-tab="pend">
+      <h2>👥 บัญชีสมาชิก<span class="pbadge" id="memBadge" hidden>0</span></h2>
+      <p class="cnt" id="memSum"></p>
+      <div id="memList"></div>
+      <button class="sec" id="memAll" type="button">แสดงสมาชิกทั้งหมด</button>
+    </section>
     <section class="card" id="pendCard" data-tab="pend">
       <h2>📥 รออนุมัติ<span class="pbadge" id="pendBadge" hidden>0</span></h2>
       <p class="cnt" id="pendSum"></p>
@@ -466,6 +472,40 @@ $("tabs").addEventListener("click", e => {
   scrollTo({ top: 0 });
 });
 const saved = sessionStorage.getItem("adm"); if (saved) { $("pass").value = saved; enter(true); }
+
+// ===== บัญชีสมาชิก (ล็อกอิน Discord) =====
+let MEMS = [], memAll = false;
+async function loadMembers() {
+  try { MEMS = (await rpc("admin_members", { p_pass: PASS })) || []; }
+  catch (e) { $("memSum").textContent = "โหลดบัญชีสมาชิกไม่ได้ (ยังไม่ได้รัน phase1.sql ใน Supabase?)"; return; }
+  renderMembers();
+}
+function renderMembers() {
+  const pend = MEMS.filter(m => m.status === "pending");
+  $("memBadge").hidden = !pend.length; $("memBadge").textContent = pend.length;
+  const list = memAll ? MEMS : pend;
+  $("memSum").textContent = memAll ? "ทั้งหมด " + MEMS.length + " บัญชี · รออนุมัติ " + pend.length : (pend.length ? "รออนุมัติ " + pend.length + " บัญชี" : "ไม่มีบัญชีรออนุมัติ");
+  $("memAll").textContent = memAll ? "แสดงเฉพาะที่รออนุมัติ" : "แสดงสมาชิกทั้งหมด (" + MEMS.length + ")";
+  $("memList").innerHTML = list.map(m => {
+    const lab = m.status === "approved" ? "อนุมัติแล้ว" : m.status === "rejected" ? "ไม่อนุมัติ" : "รออนุมัติ";
+    const cls = m.status === "approved" ? " a" : m.status === "rejected" ? " r" : "";
+    const bs = (m.status === "approved" ? '<button class="sec" data-s="approved" style="width:auto;padding:8px 14px">บันทึกชื่อ</button><button class="sec" data-s="rejected" style="width:auto;padding:8px 14px">ระงับ</button>'
+      : '<button class="sec" data-s="approved" style="width:auto;padding:8px 14px">✅ อนุมัติ</button>' + (m.status === "pending" ? '<button class="sec" data-s="rejected" style="width:auto;padding:8px 14px">❌ ปฏิเสธ</button>' : ""));
+    return '<div class="pc" data-u="' + esc(m.user_id) + '" style="margin-bottom:10px"><div class="ph" style="display:flex;gap:10px;align-items:center">' + (m.avatar_url ? '<img src="' + esc(m.avatar_url) + '" alt="" style="width:36px;height:36px;border-radius:50%">' : "") + "<strong>" + esc(m.discord_name || "-") + '</strong><span class="tag' + cls + '">' + lab + '</span></div><label style="display:block;margin:8px 0 4px;color:var(--mute);font-size:.8rem">ชื่อในเกม (แก้ให้ตรงกับประวัติเดิมได้)</label><input class="mi" value="' + esc(m.ign) + '" maxlength="50"><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' + bs + "</div></div>";
+  }).join("");
+}
+$("memAll").addEventListener("click", () => { memAll = !memAll; renderMembers(); });
+$("memList").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-s]"); if (!b) return;
+  const row = b.closest(".pc"), s = b.dataset.s;
+  let why = "";
+  if (s === "rejected") { const w = prompt("เหตุผลที่ไม่อนุมัติ/ระงับ (เว้นว่างได้)"); if (w === null) return; why = w; }
+  b.disabled = true;
+  try { await pcall("admin_member_decide", { p_user: row.dataset.u, p_status: s, p_ign: row.querySelector("input.mi").value.trim(), p_reason: why }); await loadMembers(); }
+  catch (er) { alert(er.message || "ไม่สำเร็จ"); b.disabled = false; }
+});
+new MutationObserver(() => { if (!$("panel").hidden) loadMembers(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
+setInterval(() => { if (PASS && !$("panel").hidden) loadMembers(); }, 20000);
 </script>
 </body>
 </html>
