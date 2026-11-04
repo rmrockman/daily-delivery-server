@@ -266,6 +266,16 @@ main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-
 .rc{display:block;margin-top:2px;font-size:.74rem;font-weight:600;line-height:1.3}.rc.up{color:var(--ok)}.rc.dn{color:var(--err)}.rc.eq{color:var(--mute);font-weight:400}
 .today.pending{color:var(--gold-hi);border-color:rgba(242,180,43,.6);background:rgba(242,180,43,.08)}
 .today.rej{color:var(--err);border-color:rgba(255,138,122,.5)}
+.dcbtn{display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;background:#5865F2;box-shadow:0 6px 20px rgba(88,101,242,.4)}
+.dcbtn:hover{background:#4752c4}
+.lgcard{text-align:center}.lgcard h2{margin:0 0 6px;font-size:1.15rem;color:var(--gold-hi)}.lgcard p{margin:0 0 16px;color:var(--mute);font-size:.9rem}
+#loginMsg{margin-top:12px;min-height:1.2em;font-size:.88rem;color:var(--err)}
+.userbar{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:#0e0d0c}
+.userbar img{width:32px;height:32px;border-radius:50%;background:#222}
+.userbar b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.92rem}
+.userbar .link{margin:0;flex:none}
+body.authed #forget{display:none!important}
+#ign[readonly]{opacity:.75;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -276,7 +286,17 @@ main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-
   <p class="sub">กรอกชื่อและแนบรูปหลักฐาน ส่งแล้วรอแอดมินอนุมัติ จึงจะลงอันดับและเข้า Discord</p>
   <div class="view" data-view="send">
   <div class="today" id="today" hidden></div>
-  <div class="card">
+  <div class="card lgcard" id="loginCard" hidden>
+    <h2>ล็อคอินก่อนส่งของ</h2>
+    <p>ใช้บัญชี Discord ของคุณ ชื่อและแต้มจะผูกกับบัญชีนี้</p>
+    <button type="button" class="dcbtn" id="loginBtn">เข้าสู่ระบบด้วย Discord</button>
+    <div id="loginMsg" role="status"></div>
+  </div>
+  <div class="userbar" id="userBar" hidden>
+    <img id="userAv" alt="" hidden><b id="userName"></b>
+    <button type="button" class="link" id="logoutBtn">ออกจากระบบ</button>
+  </div>
+  <div class="card" id="formCard" hidden>
     <div class="prog" aria-hidden="true"><i id="progBar"></i></div>
     <p class="progtxt" id="progTxt">กรอกข้อมูลแล้ว 0/6</p>
     <div class="field">
@@ -362,6 +382,7 @@ main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-
   <button type="button" data-v="rank" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4 4 5-7 5 7 4-4-2 12H5z"/></svg></span><span class="nl">อันดับ</span></button>
   <button type="button" data-v="hist" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></span><span class="nl">ประวัติ</span></button>
 </nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>document.write('<script src="config.js?t='+Date.now()+'"><\/script>')</script>
 <script>
 // ค่าตั้งต่างๆ อ่านจากไฟล์ config.js (แก้ที่ไฟล์นั้น ไม่ต้องแก้ไฟล์นี้)
@@ -554,14 +575,44 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) { re
 // ===== อันดับประจำเดือน (ใช้ Supabase เก็บข้อมูลกลาง) =====
 const BOARD_ON = !SUPABASE_URL.startsWith("PASTE_") && !SUPABASE_KEY.startsWith("PASTE_");
 const userErr = t => { const e = new Error(t); e.user = true; return e; };
+let AUTH_TOKEN = null; // access token ของผู้ใช้ที่ล็อคอิน Discord (ถ้ามี)
 async function rpc(name, args) {
   const h = { "Content-Type": "application/json", apikey: SUPABASE_KEY };
-  if (!SUPABASE_KEY.startsWith("sb_")) h.Authorization = "Bearer " + SUPABASE_KEY;
+  if (AUTH_TOKEN) h.Authorization = "Bearer " + AUTH_TOKEN;
+  else if (!SUPABASE_KEY.startsWith("sb_")) h.Authorization = "Bearer " + SUPABASE_KEY;
   const r = await fetch(SUPABASE_URL.replace(/\/+$/, "") + "/rest/v1/rpc/" + name, { method: "POST", headers: h, body: JSON.stringify(args || {}) });
   if (!r.ok) throw new Error("db " + r.status);
   const t = await r.text();
   return t ? JSON.parse(t) : null;
 }
+// ===== ล็อคอินด้วย Discord (Supabase Auth) =====
+const sbAuth = (window.supabase && BOARD_ON) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+let ME = null;
+const discordName = u => { const m = (u && u.user_metadata) || {}, c = m.custom_claims || {}; return c.global_name || m.full_name || m.name || m.user_name || "Discord"; };
+async function applyAuth(session) {
+  AUTH_TOKEN = session ? session.access_token : null;
+  ME = session ? session.user : null;
+  document.body.classList.toggle("authed", !!ME);
+  $("loginCard").hidden = !!ME; $("formCard").hidden = !ME; $("userBar").hidden = !ME;
+  if (!ME) return;
+  $("userName").textContent = discordName(ME);
+  const av = (ME.user_metadata || {}).avatar_url; $("userAv").hidden = !av; if (av) $("userAv").src = av;
+  try { // ชื่อในเกมผูกกับบัญชีแล้ว → ใส่ให้และล็อกช่อง
+    const p = await rpc("get_my_profile");
+    if (p && p.ign) { $("ign").value = p.ign; $("ign").readOnly = true; saveNames(p.ign); }
+    else $("ign").readOnly = false;
+  } catch (e) {}
+  refreshToday();
+}
+if (sbAuth) {
+  sbAuth.auth.onAuthStateChange((ev, s) => { setTimeout(() => applyAuth(s), 0); });
+  $("loginBtn").addEventListener("click", () => sbAuth.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: location.origin + location.pathname } }));
+  $("logoutBtn").addEventListener("click", () => sbAuth.auth.signOut());
+} else {
+  $("loginCard").hidden = false; $("loginBtn").disabled = true;
+  $("loginMsg").textContent = "โหลดระบบล็อคอินไม่สำเร็จ ลองรีเฟรชหน้าเว็บ";
+}
+
 // อัปโหลดรูปขึ้น Supabase Storage แล้วคืนลิงก์สาธารณะ (แทนการแนบไฟล์ตรงเข้า Discord)
 async function uploadToStorage(blob, path) {
   const h = { apikey: SUPABASE_KEY, "Content-Type": blob.type || "application/octet-stream" };
@@ -757,7 +808,8 @@ async function shrink(f, stamp) {
 
 $("send").addEventListener("click", async () => {
   ensureAudio();
-  const ign = $("ign").value.trim(), dc = ign;
+  if (!ME) return msg("กรุณาล็อคอินด้วย Discord ก่อนส่งของ", "err");
+  const ign = $("ign").value.trim();
   if (!ign) return msg("กรุณากรอกชื่อในเกม", "err");
   const type = $("type").value, qty = parseInt($("qty").value, 10), loc = $("loc").value;
   if (!qty || qty < 1) return msg("กรุณากรอกจำนวนชิ้น (อย่างน้อย 1)", "err");
@@ -788,7 +840,7 @@ $("send").addEventListener("click", async () => {
     const urls = await uploadPics(blobs, paths); // รูปของ... แล้วรูปตำแหน่งเป็นรูปสุดท้าย
 
     msg("กำลังส่งเรื่องให้แอดมิน...");
-    const res = await rpc("submit_pending", { p_ign: ign, p_dc: dc, p_items: items, p_loc: loc, p_photos: urls.slice(0, -1), p_loc_photo: urls[urls.length - 1] });
+    const res = await rpc("submit_pending_authed", { p_ign: ign, p_items: items, p_loc: loc, p_photos: urls.slice(0, -1), p_loc_photo: urls[urls.length - 1] });
     if (!res || !res.ok) throw userErr((res && res.error) || "ส่งเรื่องไม่สำเร็จ ลองใหม่อีกครั้ง");
     saveNames(ign); try { localStorage.setItem(PEND_KEY, String(res.id)); } catch (e) {}
     setToday("pending");
