@@ -376,6 +376,19 @@ button{border-radius:0!important}
 .nav button.on svg{filter:drop-shadow(0 0 6px var(--gold))}
 .snd{border-radius:0!important;border-color:var(--line)!important;background:#07101f!important;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
 .ft{letter-spacing:.2em;color:var(--mute)!important}
+.rav{display:block;object-fit:cover;background:#0a1830;color:var(--gold-hi);font-weight:700;display:grid;place-items:center;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);flex:none}
+.rav.pav{width:58px;height:58px;margin:4px auto 6px;font-size:1.4rem;outline:none;box-shadow:none;border:0}
+.p.gold .rav.pav{width:70px;height:70px;filter:drop-shadow(0 0 10px rgba(0,229,255,.8))}
+.rav.lav{width:38px;height:38px;font-size:1rem}
+.rows li.me .rav{filter:drop-shadow(0 0 6px rgba(255,61,242,.8))}
+#authCard .avwrap{position:relative;display:block;cursor:pointer;flex:none}
+#authCard .av.ini{width:58px;height:58px;display:grid;place-items:center;font-weight:700;font-size:1.4rem;color:#001018;background:var(--gold);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+#authCard .avcam{position:absolute;right:-6px;bottom:-4px;width:24px;height:24px;display:grid;place-items:center;font-size:.75rem;background:var(--pink);box-shadow:0 0 10px var(--pink);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+#authCard .dcn a{color:var(--gold-hi)}
+#avMsg{font-size:.78rem;color:var(--mute);margin-top:6px}#avMsg:empty{display:none}#avMsg.err{color:var(--err)}
+.shov{background:rgba(2,4,10,.86)!important}
+.shbox,.shbox img{border-radius:0!important;border-color:rgba(0,229,255,.6)!important;box-shadow:0 0 30px rgba(0,229,255,.35)!important}
+.shact button.ghost{background:#07101f!important;color:var(--gold-hi)!important;border:1px solid var(--line)!important}
 #ptsQuote{position:relative;margin:4px 0 14px;padding:12px 14px;border:1px solid var(--line);background:linear-gradient(90deg,rgba(0,229,255,.08),rgba(255,61,242,.06));clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
 #ptsQuote .qh{display:flex;align-items:center;justify-content:space-between;gap:10px}
 #ptsQuote .ql{font-size:.78rem;color:var(--mute);letter-spacing:.04em}
@@ -734,6 +747,17 @@ async function loadStreaks() {
   try { const a = await rpc("get_streaks"); STREAKS = {}; (a || []).forEach(x => { STREAKS[String(x.k).toLowerCase()] = x.n; }); } catch (e) {}
 }
 const fl = d => { const n = STREAKS[String(d.ign).toLowerCase()]; return n ? " 🔥" + n : ""; };
+let AVATARS = {};
+async function loadAvatars() { try { AVATARS = window.__tok && window.__tok() ? (await rpc("member_avatars")) || {} : {}; } catch (e) { AVATARS = {}; } }
+const avKey = d => String(d.ign || "").trim().toLowerCase();
+function avImg(d, cls) {
+  const u = AVATARS[avKey(d)], ini = String(d.ign || "?").trim().charAt(0).toUpperCase();
+  const mkIni = () => { const e = document.createElement("span"); e.className = "rav ini " + (cls || ""); e.textContent = ini; return e; };
+  if (!u) return mkIni();
+  const im = document.createElement("img"); im.className = "rav " + (cls || ""); im.alt = ""; im.loading = "lazy"; im.src = u;
+  im.onerror = () => im.replaceWith(mkIni());
+  return im;
+}
 async function postLastMonthSummary() {
   if (!BOARD_ON) return;
   try { await rpc("post_last_month_summary"); } catch (e) {} // ฐานข้อมูลสร้างข้อความและโพสต์เอง เดือนละครั้ง
@@ -766,7 +790,7 @@ async function loadBoard() {
   $("modeD").setAttribute("aria-pressed", rankMode === "d");
   rows.innerHTML = ""; $("pod").innerHTML = ""; $("mine").hidden = true; $("shareImg").hidden = true; tick();
   try {
-    await loadStreaks();
+    await Promise.all([loadStreaks(), loadAvatars()]);
     try { window.loadTypeBoard && window.loadTypeBoard(mo.key, mo.label); } catch (e) {}
     const data = mergeAliases(await rpc("leaderboard", { p_month: mo.key }));
     const byD = rankMode === "d", dayOf = x => Number(x.days) || 0;
@@ -797,7 +821,7 @@ async function loadBoard() {
       if (byD) { const sm = document.createElement("small"); sm.textContent = Number(d.total).toLocaleString("th-TH") + " ชิ้น"; pt.appendChild(sm); }
       pt.appendChild(meter((byD ? dayOf(d) : Number(d.total)) / max));
       const bar = document.createElement("div"); bar.className = "bar"; bar.textContent = medal[i];
-      w.append(nm, rcEl(d, i + 1), pt, bar); $("pod").appendChild(w);
+      w.append(avImg(d, "pav"), nm, rcEl(d, i + 1), pt, bar); $("pod").appendChild(w);
     });
     data.slice(3).forEach((d, k) => {
       const li = document.createElement("li"); if (isMe(d)) li.className = "me";
@@ -809,7 +833,7 @@ async function loadBoard() {
       if (byD) { const sm = document.createElement("small"); sm.textContent = Number(d.total).toLocaleString("th-TH") + " ชิ้น"; tt.append(sm); }
       tt.append(rcEl(d, k + 4));
       const mid = document.createElement("div"); mid.className = "mid"; mid.append(nm, meter((byD ? dayOf(d) : Number(d.total)) / max));
-      li.append(rk, mid, tt); rows.appendChild(li);
+      li.append(rk, avImg(d, "lav"), mid, tt); rows.appendChild(li);
     });
   } catch (e) {
     const p = document.createElement("p"); p.className = "empty"; p.textContent = "โหลดอันดับไม่สำเร็จ ลองรีเฟรชหน้า"; rows.appendChild(p);
@@ -1154,58 +1178,73 @@ $("send").addEventListener("click", async () => {
   const rr = (c, x, y, w, h, r) => { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
   const fit = (c, t, max) => { t = String(t); if (c.measureText(t).width <= max) return t; while (t.length > 1 && c.measureText(t + "…").width > max) t = t.slice(0, -1); return t + "…"; };
   const num = n => Number(n).toLocaleString("th-TH");
+  const loadImg = u => new Promise(res => { if (!u) return res(null); const im = new Image(); im.crossOrigin = "anonymous"; im.onload = () => res(im); im.onerror = () => res(null); im.src = u; setTimeout(() => res(null), 4000); });
+  const hexPath = (c, cx, cy, r) => { c.beginPath(); for (let k = 0; k < 6; k++) { const a = Math.PI / 3 * k; c.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a)); } c.closePath(); };
+  const chamfer = (c, x, y, w, h, k) => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + w - k, y); c.lineTo(x + w, y + k); c.lineTo(x + w, y + h); c.lineTo(x + k, y + h); c.lineTo(x, y + h - k); c.closePath(); };
+  function drawAv(c, im, ign, cx, cy, r, glow) {
+    c.save(); c.shadowColor = glow; c.shadowBlur = 30; hexPath(c, cx, cy, r + 6); c.fillStyle = glow; c.fill(); c.restore();
+    c.save(); hexPath(c, cx, cy, r); c.clip();
+    if (im) { const m = Math.min(im.width, im.height); c.drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, cx - r, cy - r, r * 2, r * 2); }
+    else { c.fillStyle = "#0a1830"; c.fillRect(cx - r, cy - r, r * 2, r * 2); c.fillStyle = "#7ff3ff"; c.font = "700 " + Math.round(r) + "px " + '"Chakra Petch",Prompt,sans-serif'; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(String(ign || "?").trim().charAt(0).toUpperCase(), cx, cy + 2); c.textBaseline = "alphabetic"; }
+    c.restore();
+  }
   async function makeImage() {
     const bd = window.__bd; if (!bd || !bd.data.length) return null;
-    try { await Promise.all([document.fonts.load('italic 800 60px Kanit'), document.fonts.load('600 40px Prompt'), document.fonts.load('700 40px Prompt')]); } catch (e) {}
+    try { await Promise.all([document.fonts.load('700 60px "Chakra Petch"'), document.fonts.load('600 40px "Chakra Petch"'), document.fonts.load('600 40px Prompt')]); } catch (e) {}
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
-    const c = cv.getContext("2d"), data = bd.data, F = 'Prompt,"Noto Sans Thai",sans-serif', K = 'Kanit,Prompt,sans-serif';
-    c.fillStyle = "#050505"; c.fillRect(0, 0, W, H);
-    let rg = c.createRadialGradient(W / 2, 0, 0, W / 2, 0, 950); rg.addColorStop(0, "#3d2d10"); rg.addColorStop(1, "rgba(5,5,5,0)"); c.fillStyle = rg; c.fillRect(0, 0, W, H);
-    rg = c.createRadialGradient(W / 2, H, 0, W / 2, H, 800); rg.addColorStop(0, "rgba(242,180,43,.2)"); rg.addColorStop(1, "rgba(5,5,5,0)"); c.fillStyle = rg; c.fillRect(0, 0, W, H);
-    c.strokeStyle = "rgba(242,180,43,.4)"; c.lineWidth = 3; rr(c, 24, 24, W - 48, H - 48, 40); c.stroke();
+    const c = cv.getContext("2d"), data = bd.data, F = '"Chakra Petch",Prompt,"Noto Sans Thai",sans-serif';
+    const CY = "#00e5ff", CYH = "#7ff3ff", PK = "#ff3df2", MU = "#7491ad";
+    c.fillStyle = "#05070f"; c.fillRect(0, 0, W, H);
+    c.strokeStyle = "rgba(0,229,255,.07)"; c.lineWidth = 2; for (let x = 0; x < W; x += 54) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, H); c.stroke(); } for (let y = 0; y < H; y += 54) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+    let rg = c.createRadialGradient(W / 2, 0, 0, W / 2, 0, 900); rg.addColorStop(0, "rgba(0,229,255,.22)"); rg.addColorStop(1, "rgba(0,229,255,0)"); c.fillStyle = rg; c.fillRect(0, 0, W, H);
+    rg = c.createRadialGradient(W, H, 0, W, H, 800); rg.addColorStop(0, "rgba(255,61,242,.2)"); rg.addColorStop(1, "rgba(255,61,242,0)"); c.fillStyle = rg; c.fillRect(0, 0, W, H);
+    c.save(); c.shadowColor = CY; c.shadowBlur = 24; c.strokeStyle = "rgba(0,229,255,.7)"; c.lineWidth = 3; chamfer(c, 30, 30, W - 60, H - 60, 50); c.stroke(); c.restore();
     const lg = document.querySelector(".logo");
-    if (lg && lg.complete && lg.naturalWidth) { const h = 200, w = h * lg.naturalWidth / lg.naturalHeight; c.globalCompositeOperation = "lighten"; c.drawImage(lg, (W - w) / 2, 60, w, h); c.globalCompositeOperation = "source-over"; }
-    c.textAlign = "center"; c.textBaseline = "alphabetic";
-    const tg = c.createLinearGradient(0, 300, 0, 360); tg.addColorStop(0, "#ffffff"); tg.addColorStop(1, "#f2b42b");
-    c.fillStyle = tg; c.font = "italic 800 62px " + K; c.fillText(bd.mode === "d" ? "อันดับส่งสม่ำเสมอประจำเดือน" : "อันดับส่งของประจำเดือน", W / 2, 340);
-    c.fillStyle = "#a7a59d"; c.font = "600 38px " + F; c.fillText(bd.mo.label, W / 2, 395);
-    // โพเดียม
-    const base = 940, slots = [[1, W / 2 - 300, 225, ["#f6f8fa", "#b9c0c7", "#7b838b"], "🥈"], [0, W / 2, 300, ["#ffe08a", "#f2b42b", "#b9780a"], "🥇"], [2, W / 2 + 300, 170, ["#f2b883", "#c27a3d", "#7a4318"], "🥉"]];
-    slots.forEach(([i, cx, h, cols, medal]) => {
+    if (lg && lg.complete && lg.naturalWidth) { const h = 150, w = h * lg.naturalWidth / lg.naturalHeight; c.globalCompositeOperation = "lighten"; c.drawImage(lg, 80, 70, w, h); c.globalCompositeOperation = "source-over"; }
+    c.textAlign = "left"; c.fillStyle = CYH; c.font = "700 54px " + F; c.save(); c.shadowColor = CY; c.shadowBlur = 18; c.fillText("ROCKMAN", 260, 140); c.restore();
+    c.fillStyle = MU; c.font = "600 28px " + F; c.fillText("DAILY SUPPLY · " + bd.mo.label, 262, 186);
+    c.textAlign = "center"; c.fillStyle = "#e8f4ff"; c.font = "700 58px " + F;
+    c.save(); c.shadowColor = CY; c.shadowBlur = 16; c.fillText(bd.mode === "d" ? "อันดับส่งสม่ำเสมอประจำเดือน" : "อันดับส่งของประจำเดือน", W / 2, 320); c.restore();
+    const ims = await Promise.all(data.slice(0, 6).map(d => loadImg(AVATARS[avKey(d)])));
+    const base = 985, slots = [[1, W / 2 - 300, 200, ["#e9eef3", "#9aa6b2"], "#cfd8e3"], [0, W / 2, 280, ["#7ff3ff", "#00a8c8"], CY], [2, W / 2 + 300, 150, ["#f2b883", "#a85f2a"], "#f2a35e"]];
+    slots.forEach(([i, cx, h, cols, glow]) => {
       const d = data[i]; if (!d) return; const top = base - h;
-      const gr = c.createLinearGradient(0, top, 0, base); gr.addColorStop(0, cols[0]); gr.addColorStop(.55, cols[1]); gr.addColorStop(1, cols[2]);
-      c.save(); c.shadowColor = i === 0 ? "rgba(242,180,43,.6)" : "rgba(255,255,255,.2)"; c.shadowBlur = 36; c.fillStyle = gr; rr(c, cx - 140, top, 280, h, 24); c.fill(); c.restore();
-      c.font = "80px " + EMO; c.fillStyle = "#fff"; c.fillText(medal, cx, top + 100);
-      c.font = "700 40px " + F; c.fillStyle = i === 0 ? "#ffd978" : "#eceff1"; c.fillText(fit(c, d.ign, 270), cx, top - 112);
-      c.font = "italic 800 46px " + K; c.fillStyle = "#ffd978"; c.fillText(bd.mode === "d" ? num(d.days) + " วัน" : num(d.total) + " ชิ้น", cx, top - 62);
-      if (bd.mode === "d") { c.font = "400 28px " + F; c.fillStyle = "#a7a59d"; c.fillText(num(d.total) + " ชิ้น", cx, top - 24); }
-      
-      if (i === 0) { c.font = "64px " + EMO; c.fillText("👑", cx, top - 150); }
+      const gr = c.createLinearGradient(0, top, 0, base); gr.addColorStop(0, cols[0]); gr.addColorStop(1, cols[1]);
+      c.save(); c.shadowColor = glow; c.shadowBlur = 34; c.fillStyle = gr; chamfer(c, cx - 135, top, 270, h, 24); c.fill(); c.restore();
+      c.fillStyle = "rgba(5,7,15,.55)"; c.font = "800 120px " + F; c.fillText(String(i + 1), cx, top + Math.min(h - 20, 130));
+      const r = i === 0 ? 66 : 54, ay = top - 160 - r;
+      drawAv(c, ims[i], d.ign, cx, ay, r, glow);
+      if (i === 0) { c.font = "56px " + EMO; c.fillText("👑", cx, ay - r - 8); }
+      c.font = "700 38px " + F; c.fillStyle = i === 0 ? CYH : "#e8f4ff"; c.fillText(fit(c, d.ign, 270), cx, top - 82);
+      c.font = "700 42px " + F; c.fillStyle = i === 0 ? CYH : "#e8f4ff"; c.save(); if (i === 0) { c.shadowColor = CY; c.shadowBlur = 14; } c.fillText(bd.mode === "d" ? num(d.days) + " วัน" : num(d.total) + " ชิ้น", cx, top - 30); c.restore();
     });
-    // การ์ดของฉัน / รายชื่ออันดับถัดไป
     const me = (savedNames().ign || "").trim().toLowerCase(), idx = me ? data.findIndex(d => String(d.ign).toLowerCase() === me) : -1;
     if (idx >= 0) {
-      const d = data[idx]; c.fillStyle = "rgba(242,180,43,.13)"; rr(c, 70, 1000, W - 140, 240, 32); c.fill(); c.strokeStyle = "#f2b42b"; c.lineWidth = 3; c.stroke();
-      c.font = "italic 800 66px " + K; c.fillStyle = "#ffd978"; c.fillText("คุณอยู่อันดับ " + (idx + 1), W / 2, 1085);
-      c.font = "600 44px " + F; c.fillStyle = "#fff"; c.fillText(fit(c, d.ign, 800) + " · " + (bd.mode === "d" ? num(d.days) + " วัน · " : "") + num(d.total) + " ชิ้น", W / 2, 1150);
-      c.font = "400 32px " + F; c.fillStyle = "#a7a59d";
-      const dd = x => Number(x.days) || 0;
+      const d = data[idx];
+      c.fillStyle = "rgba(255,61,242,.1)"; chamfer(c, 70, 1025, W - 140, 205, 28); c.fill(); c.save(); c.shadowColor = PK; c.shadowBlur = 18; c.strokeStyle = PK; c.lineWidth = 3; c.stroke(); c.restore();
+      const myIm = idx < 6 ? ims[idx] : await loadImg(AVATARS[avKey(d)]);
+      drawAv(c, myIm, d.ign, 170, 1120, 58, PK);
+      c.textAlign = "left"; c.font = "700 56px " + F; c.fillStyle = "#ff9cf8"; c.fillText("คุณอยู่อันดับ " + (idx + 1), 260, 1095);
+      c.font = "600 36px " + F; c.fillStyle = "#e8f4ff"; c.fillText(fit(c, d.ign, 380) + " · " + (bd.mode === "d" ? num(d.days) + " วัน · " : "") + num(d.total) + " ชิ้น", 260, 1148);
+      const dd = x => Number(x.days) || 0; c.font = "500 28px " + F; c.fillStyle = MU;
       c.fillText(bd.mode === "d"
-        ? (idx === 0 ? (data[1] ? (dd(d) > dd(data[1]) ? "👑 นำอันดับ 2 อยู่ " + num(dd(d) - dd(data[1])) + " วัน" : "👑 วันเท่าอันดับ 2 แต่ชิ้นมากกว่า") : "👑 นำอยู่คนเดียว") : (dd(data[idx - 1]) > dd(d) ? "ห่างอันดับ " + idx + " อยู่ " + num(dd(data[idx - 1]) - dd(d)) + " วัน" : "วันเท่าอันดับ " + idx + " · เพิ่มอีก " + num(data[idx - 1].total - d.total + 1) + " ชิ้นจะแซง"))
-        : (idx === 0 ? (data[1] ? "👑 นำอันดับ 2 อยู่ " + num(d.total - data[1].total) + " ชิ้น" : "👑 นำอยู่คนเดียว") : "อีก " + num(data[idx - 1].total - d.total + 1) + " ชิ้นจะแซงอันดับ " + idx), W / 2, 1205);
+        ? (idx === 0 ? "👑 นำเป็นอันดับ 1" : (dd(data[idx - 1]) > dd(d) ? "ห่างอันดับ " + idx + " อยู่ " + num(dd(data[idx - 1]) - dd(d)) + " วัน" : "เพิ่มอีก " + num(data[idx - 1].total - d.total + 1) + " ชิ้นจะแซงอันดับ " + idx))
+        : (idx === 0 ? (data[1] ? "👑 นำอันดับ 2 อยู่ " + num(d.total - data[1].total) + " ชิ้น" : "👑 นำอยู่คนเดียว") : "อีก " + num(data[idx - 1].total - d.total + 1) + " ชิ้นจะแซงอันดับ " + idx), 260, 1196);
+      c.textAlign = "center";
     } else {
       const rest = data.slice(3, 6);
-      if (!rest.length) { c.font = "600 42px " + F; c.fillStyle = "#ffd978"; c.fillText("ส่งของทุกวัน ไต่อันดับไปด้วยกัน 💪", W / 2, 1110); }
+      if (!rest.length) { c.font = "600 40px " + F; c.fillStyle = CYH; c.fillText("ส่งของทุกวัน ไต่อันดับไปด้วยกัน 💪", W / 2, 1110); }
       rest.forEach((d, k) => {
-        const y = 1000 + k * 84; c.fillStyle = "#15130f"; rr(c, 70, y, W - 140, 70, 20); c.fill(); c.strokeStyle = "#3d3322"; c.lineWidth = 2; c.stroke();
-        c.textAlign = "center"; c.font = "italic 800 34px " + K; c.fillStyle = "#ffd978"; c.fillText(String(k + 4), 118, y + 46);
-        c.textAlign = "left"; c.font = "600 32px " + F; c.fillStyle = "#eceff1"; c.fillText(fit(c, d.ign, 520), 165, y + 46);
-        c.textAlign = "right"; c.font = "700 32px " + F; c.fillStyle = "#ffd978"; c.fillText(bd.mode === "d" ? num(d.days) + " วัน · " + num(d.total) + " ชิ้น" : num(d.total) + " ชิ้น", W - 110, y + 46);
+        const y = 1010 + k * 76; c.fillStyle = "rgba(7,16,31,.9)"; chamfer(c, 70, y, W - 140, 64, 14); c.fill(); c.strokeStyle = "rgba(0,229,255,.35)"; c.lineWidth = 2; c.stroke();
+        c.textAlign = "center"; c.font = "700 32px " + F; c.fillStyle = CYH; c.fillText(String(k + 4), 115, y + 44);
+        drawAv(c, ims[k + 3], d.ign, 178, y + 32, 24, "rgba(0,229,255,.6)");
+        c.textAlign = "left"; c.font = "600 30px " + F; c.fillStyle = "#e8f4ff"; c.fillText(fit(c, d.ign, 480), 220, y + 43);
+        c.textAlign = "right"; c.font = "700 30px " + F; c.fillStyle = CYH; c.fillText(bd.mode === "d" ? num(d.days) + " วัน · " + num(d.total) + " ชิ้น" : num(d.total) + " ชิ้น", W - 105, y + 43);
       });
       c.textAlign = "center";
     }
-    c.textAlign = "center"; c.font = "600 32px " + F; c.fillStyle = "#a7a59d"; c.fillText("Rockman · ส่งของรายวัน", W / 2, 1298);
-    return new Promise(res => cv.toBlob(res, "image/png"));
+    c.textAlign = "center"; c.font = "600 26px " + F; c.fillStyle = MU; c.fillText("ROCKMAN · DAILY SUPPLY", W / 2, H - 62);
+    return new Promise(res => { try { cv.toBlob(res, "image/png"); } catch (e) { res(null); } });
   }
   async function openShare() {
     const btn = g("shareImg"), old = btn.textContent; btn.disabled = true; btn.textContent = "กำลังสร้างรูป…";
@@ -1269,12 +1308,13 @@ $("send").addEventListener("click", async () => {
       h = head("เข้าสู่ระบบแล้ว") + '<div class="today" style="display:block">⏳ รอแอดมินอนุมัติบัญชี · ชื่อในเกม <b>' + esc(member.ign) + '</b></div><button class="sm" id="aOut">ออกจากระบบ</button>';
       lock(true);
     } else { // approved
-      h = '<div class="who hud">' + (meta().av ? '<img class="av" alt="" src="' + esc(meta().av) + '">' : "") + '<div><div class="lvtag" id="hudLv">LV.-</div><b>' + esc(member.ign) + '</b><div class="dcn">' + esc(meta().name) + '</div></div></div><div id="aStats"></div><div class="hudft"><button class="sm" id="aOut">ออกจากระบบ</button><span>เวอร์ชัน P9</span></div>';
+      var pic = member.photo || meta().av;
+      h = '<div class="who hud"><label class="avwrap" title="เปลี่ยนรูปโปรไฟล์">' + (pic ? '<img class="av" alt="" src="' + esc(pic) + '">' : '<span class="av ini">' + esc(String(member.ign || "?").charAt(0).toUpperCase()) + "</span>") + '<span class="avcam">📷</span><input type="file" id="avFile" accept="image/*" hidden></label><div><div class="lvtag" id="hudLv">LV.-</div><b>' + esc(member.ign) + '</b><div class="dcn">' + esc(meta().name) + (member.custom ? ' · <a href="#" id="avReset">ใช้รูป Discord</a>' : "") + '</div></div></div><div id="avMsg"></div><div id="aStats"></div><div class="hudft"><button class="sm" id="aOut">ออกจากระบบ</button><span>เวอร์ชัน P11</span></div>';
       lock(false);
       $("ign").value = member.ign; $("ign").readOnly = true;
       try { localStorage.setItem("rm_names", JSON.stringify({ ign: member.ign })); } catch (e) {}
       var fg = $("forget"); if (fg) { fg.hidden = true; fg.style.display = "none"; }
-      if (lastIgn !== member.ign) { lastIgn = member.ign; try { refreshToday(); } catch (e) {} }
+      if (lastIgn !== member.ign) { lastIgn = member.ign; try { refreshToday(); loadBoard(); } catch (e) {} }
     }
     card.innerHTML = h;
     document.getElementById("authCard").classList.toggle("is-hud", st === "approved");
@@ -1289,7 +1329,24 @@ $("send").addEventListener("click", async () => {
   }
   function startPoll() { if (!poll) poll = setInterval(refresh, 15000); }
   function stopPoll() { if (poll) { clearInterval(poll); poll = null; } }
+  async function avUpload(file) {
+    var msg = $("avMsg"); msg.textContent = "กำลังอัปโหลดรูป..."; msg.className = "";
+    try {
+      var img = await new Promise(function (res, rej) { var i = new Image(); i.onload = function () { res(i); }; i.onerror = function () { rej(new Error("อ่านไฟล์รูปไม่ได้")); }; i.src = URL.createObjectURL(file); });
+      var S = 320, c = document.createElement("canvas"); c.width = S; c.height = S;
+      var m = Math.min(img.width, img.height); c.getContext("2d").drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, S, S);
+      var blob = await new Promise(function (res) { c.toBlob(res, "image/jpeg", .88); }); if (!blob) throw new Error("แปลงรูปไม่ได้");
+      var uid = session.user.id, path = uid + "/" + Date.now() + ".jpg", base = (window.APP_CONFIG || {}).supabaseUrl.replace(/\/+$/, "");
+      var r = await fetch(base + "/storage/v1/object/avatars/" + path, { method: "POST", headers: { apikey: (window.APP_CONFIG || {}).supabaseKey, Authorization: "Bearer " + session.access_token, "Content-Type": "image/jpeg" }, body: blob });
+      if (!r.ok) throw new Error("อัปโหลดไม่สำเร็จ (" + r.status + ")" + (r.status === 400 || r.status === 404 ? " — ยังไม่ได้รัน phase11.sql?" : ""));
+      var res = await rpc("set_my_avatar", { p_url: base + "/storage/v1/object/public/avatars/" + path });
+      if (!res || !res.ok) throw new Error((res && res.error) || "บันทึกรูปไม่สำเร็จ");
+      msg.textContent = ""; await refresh(); try { loadBoard(); } catch (e) {}
+    } catch (er) { msg.textContent = er.message; msg.className = "err"; }
+  }
+  card.addEventListener("change", function (e) { if (e.target.id === "avFile" && e.target.files[0]) avUpload(e.target.files[0]); });
   card.addEventListener("click", async function (e) {
+    if (e.target.id === "avReset") { e.preventDefault(); try { await rpc("set_my_avatar", { p_url: "" }); await refresh(); loadBoard(); } catch (er) {} return; }
     var b = e.target.closest("button"); if (!b) return;
     var msg = $("aMsg");
     if (b.id === "aLogin") {
