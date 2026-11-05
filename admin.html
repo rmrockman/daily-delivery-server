@@ -833,7 +833,7 @@ function renderMembers() {
   $("memList").innerHTML = list.map(m => {
     const lab = m.status === "approved" ? "อนุมัติแล้ว" : m.status === "rejected" ? "ไม่อนุมัติ" : "รออนุมัติ";
     const cls = m.status === "approved" ? " a" : m.status === "rejected" ? " r" : "";
-    const bs = (m.status === "approved" ? '<button class="sec" data-s="approved" style="width:auto;padding:8px 14px">บันทึกชื่อ</button><button class="sec" data-s="rejected" style="width:auto;padding:8px 14px">ระงับ</button><button class="sec" data-adj="1" style="width:auto;padding:8px 14px">± แต้ม</button>'
+    const bs = (m.status === "approved" ? '<button class="sec" data-s="approved" style="width:auto;padding:8px 14px">บันทึกชื่อ</button><button class="sec" data-s="rejected" style="width:auto;padding:8px 14px">ระงับ</button><button class="sec" data-adj="1" style="width:auto;padding:8px 14px">± แต้ม</button><button class="sec" data-lv="-1" style="width:auto;padding:8px 12px">⬇️ -เวล</button><button class="sec" data-lv="1" style="width:auto;padding:8px 12px">⬆️ +เวล</button>'
       : '<button class="sec" data-s="approved" style="width:auto;padding:8px 14px">✅ อนุมัติ</button>' + (m.status === "pending" ? '<button class="sec" data-s="rejected" style="width:auto;padding:8px 14px">❌ ปฏิเสธ</button>' : ""));
     return '<div class="pc" data-u="' + esc(m.user_id) + '" style="margin-bottom:10px"><div class="ph" style="display:flex;gap:10px;align-items:center">' + (m.avatar_url ? '<img src="' + esc(m.avatar_url) + '" alt="" style="width:36px;height:36px;border-radius:50%">' : "") + "<strong>" + esc(m.discord_name || "-") + '</strong><span class="tag' + cls + '">' + lab + '</span>' + (m.status === "approved" ? '<span style="margin-left:auto;color:var(--gold);font-weight:700">⭐ ' + (m.points || 0) + " · Lv." + (m.level || 1) + "</span>" : "") + '</div><label style="display:block;margin:8px 0 4px;color:var(--mute);font-size:.8rem">ชื่อในเกม (แก้ให้ตรงกับประวัติเดิมได้)</label><input class="mi" value="' + esc(m.ign) + '" maxlength="50"><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' + bs + "</div></div>";
   }).join("");
@@ -1319,6 +1319,18 @@ const _lvSave = $("lvSave"); _lvSave.addEventListener("click", () => setTimeout(
   new MutationObserver(() => { if (!$("panel").hidden) load(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
 })();
 
+
+// ===== +เวล / -เวล (เฟส 14) =====
+$("memList").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-lv]"); if (!b) return;
+  const row = b.closest(".pc"), up = b.dataset.lv === "1", m = MEMS.find(x => x.user_id === row.dataset.u) || {};
+  const cur = m.level || 1, nx = up ? cur + 1 : cur - 1;
+  if (!up && cur <= 1) { alert("อยู่เลเวลต่ำสุดแล้ว"); return; }
+  if (!confirm((up ? "เพิ่ม" : "ลด") + "เลเวลของ " + (m.ign || "") + " จาก Lv." + cur + " เป็น Lv." + nx + " ?\n(แต้มคงเหลือที่ใช้แลกของเท่าเดิม)")) return;
+  b.disabled = true;
+  try { const r = await pcall("admin_member_level", { p_user: row.dataset.u, p_dir: up ? 1 : -1 }); await loadMembers(); if (r && r.level_name) say((m.ign || "") + " → Lv." + r.level + " · " + r.level_name + " ✓", "ok"); }
+  catch (er) { alert(er.message || "ไม่สำเร็จ (ยังไม่ได้รัน phase14.sql?)"); b.disabled = false; }
+});
 </script>
 </body>
 </html>
