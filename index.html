@@ -235,7 +235,7 @@ p.sub{line-height:1.5}
 
 /* ===== v4: แยกหน้า + เมนูลอยด้านล่าง ===== */
 body{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
-main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-view=rank]),main[data-v=hist] .view:not([data-view=hist]){display:none}
+main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-view=rank]),main[data-v=hist] .view:not([data-view=hist]),main[data-v=shop] .view:not([data-view=shop]){display:none}
 .view{animation:up .4s ease-out both}
 .view>.card+.card{margin-top:20px}
 .nav{position:fixed;z-index:50;left:0;right:0;bottom:0;display:flex;align-items:stretch;padding:12px max(8px,calc((100% - 480px)/2)) max(16px,env(safe-area-inset-bottom,0px));background:#15130f;border-top:1px solid rgba(242,180,43,.28);box-shadow:0 -8px 28px rgba(0,0,0,.55)}
@@ -272,7 +272,21 @@ main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-
 #authCard{margin-bottom:14px}
 #authCard .bar{height:8px;border-radius:99px;background:#26221a;overflow:hidden;margin:8px 0 4px}
 #authCard .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));transition:width .6s}
-body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-view="hist"]{display:none!important}
+body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-view="hist"],body.rm-lock .view[data-view="shop"]{display:none!important}
+.shopTop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.shopBal{font-size:1.25rem;font-weight:800;color:var(--gold-hi)}
+.shopGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.si{border:1px solid var(--line);border-radius:14px;padding:12px;background:#0e0d0c;display:flex;flex-direction:column;gap:6px}
+.si .em{font-size:1.8rem;line-height:1}
+.si b{font-size:.98rem}
+.si .ds{color:var(--mute);font-size:.8rem;flex:1}
+.si .ct{color:var(--gold-hi);font-weight:800}
+.si .lm{color:var(--mute);font-size:.72rem}
+.si button{padding:9px;font-size:.9rem}
+.si button:disabled{opacity:.45;filter:grayscale(1)}
+.myr{list-style:none;padding:0;margin:0}
+.myr li{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.9rem}
+.myr .st{font-size:.78rem;font-weight:700;white-space:nowrap}
 #authCard h2{margin:0 0 6px;font-size:1.05rem}
 #authCard p{margin:6px 0 12px;color:var(--mute);font-size:.92rem}
 #authCard .who{display:flex;align-items:center;gap:10px;margin-bottom:10px}
@@ -370,12 +384,26 @@ body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-v
     <button type="button" class="more" id="hmore" hidden></button>
   </section>
   </div>
+  <div class="view" data-view="shop">
+  <section class="card" id="shopCard">
+    <h2>🛒 ร้านค้าแลกแต้ม</h2>
+    <div class="shopTop"><span style="color:var(--mute)">แต้มคงเหลือ</span><span class="shopBal" id="shopBal">-</span></div>
+    <div class="shopGrid" id="shopGrid"></div>
+    <div id="shopMsg" role="status" style="margin-top:12px;min-height:1.2em;font-size:.92rem"></div>
+  </section>
+  <section class="card" style="margin-top:20px">
+    <h2>🎁 ของที่ฉันแลก</h2>
+    <ul class="myr" id="shopMine"></ul>
+    <p style="color:var(--mute);font-size:.8rem;margin:10px 0 0">แลกแล้วรอแอดมินมอบของให้ในเกม ถ้าแอดมินยกเลิก แต้มจะคืนให้อัตโนมัติ</p>
+  </section>
+  </div>
   <p class="ft">Rockman · ส่งของรายวัน</p>
 </main>
 <nav class="nav" id="nav" aria-label="เมนูหลัก">
   <button type="button" data-v="send" class="on" aria-current="page"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span><span class="nl">ส่งของ</span></button>
   <button type="button" data-v="rank" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4 4 5-7 5 7 4-4-2 12H5z"/></svg></span><span class="nl">อันดับ</span></button>
   <button type="button" data-v="hist" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></span><span class="nl">ประวัติ</span></button>
+  <button type="button" data-v="shop" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v7h14v-7"/></svg></span><span>ร้านค้า</span></button>
 </nav>
 <script>document.write('<script src="config.js?t='+Date.now()+'"><\/script>')</script>
 <script>
@@ -1147,7 +1175,7 @@ $("send").addEventListener("click", async () => {
       h = head("เข้าสู่ระบบแล้ว") + '<div class="today" style="display:block">⏳ รอแอดมินอนุมัติบัญชี · ชื่อในเกม <b>' + esc(member.ign) + '</b></div><button class="sm" id="aOut">ออกจากระบบ</button>';
       lock(true);
     } else { // approved
-      h = head("ชื่อในเกม: <b>" + esc(member.ign) + "</b> · อนุมัติแล้ว ✅") + '<div id="aStats" style="margin-top:6px"></div><button class="sm" id="aOut">ออกจากระบบ</button>';
+      h = head("ชื่อในเกม: <b>" + esc(member.ign) + "</b> · อนุมัติแล้ว ✅") + '<div id="aStats" style="margin-top:6px"></div><button class="sm" id="aOut">ออกจากระบบ</button><div style="color:var(--mute);font-size:.7rem;margin-top:6px;opacity:.6">เวอร์ชัน P3</div>';
       lock(false);
       $("ign").value = member.ign; $("ign").readOnly = true;
       try { localStorage.setItem("rm_names", JSON.stringify({ ign: member.ign })); } catch (e) {}
@@ -1189,17 +1217,69 @@ $("send").addEventListener("click", async () => {
   var nf = function (n) { return Number(n).toLocaleString("en-US"); };
   async function loadStats() {
     var box = $("aStats"); if (!box || !member || member.status !== "approved") return;
-    try {
-      var st = await rpc("my_stats");
-      if (!st || st.level == null) { box.innerHTML = ""; return; }
-      var cur = st.cur_min || 0, nx = st.next_min, pct = nx != null ? Math.max(0, Math.min(100, Math.round((st.lifetime - cur) / (nx - cur) * 100))) : 100;
-      box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b>Lv.' + st.level + " · " + esc(st.level_name) + "</b><span>⭐ " + nf(st.balance) + ' แต้ม</span></div><div class="bar"><i style="width:' + pct + '%"></i></div><div style="color:var(--mute);font-size:.82rem">' + (nx != null ? "อีก " + nf(nx - st.lifetime) + " แต้มถึง Lv." + st.next_lv + " · " + esc(st.next_name) : "เลเวลสูงสุดแล้ว 🏆") + "</div>";
-    } catch (e) {}
+    if (!box.innerHTML) box.innerHTML = '<div style="color:var(--mute);font-size:.82rem">กำลังโหลดแต้ม...</div>';
+    var st;
+    try { st = await rpc("my_stats"); }
+    catch (e) {
+      var c = String(e.message || "").replace("db ", "");
+      box.innerHTML = '<div style="color:var(--err);font-size:.82rem">โหลดแต้มไม่ได้ (' + esc(c) + ")" + (c === "404" ? " — ยังไม่ได้รัน phase2.sql ในโปรเจกต์ RM CLAN" : "") + "</div>";
+      return;
+    }
+    if (!st || st.level == null) { box.innerHTML = '<div style="color:var(--err);font-size:.82rem">ยังไม่มีตารางเลเวล (ตรวจว่ารัน phase2.sql ครบ)</div>'; return; }
+    var cur = st.cur_min || 0, nx = st.next_min, pct = nx != null ? Math.max(0, Math.min(100, Math.round((st.lifetime - cur) / (nx - cur) * 100))) : 100;
+    box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b>Lv.' + st.level + " · " + esc(st.level_name) + "</b><span>⭐ " + nf(st.balance) + ' แต้ม</span></div><div class="bar"><i style="width:' + pct + '%"></i></div><div style="color:var(--mute);font-size:.82rem">' + (nx != null ? "อีก " + nf(nx - st.lifetime) + " แต้มถึง Lv." + st.next_lv + " · " + esc(st.next_name) : "เลเวลสูงสุดแล้ว 🏆") + "</div>";
   }
   setInterval(loadStats, 30000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) loadStats(); });
   paint("load");
   SBA.auth.onAuthStateChange(function (ev, s) { session = s; setTimeout(refresh, 0); });
+})();
+</script>
+
+<script>
+// ===== ร้านค้าแลกแต้ม (เฟส 3) =====
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var nf = function (n) { return Number(n || 0).toLocaleString("en-US"); };
+  var busy = false, BAL = 0;
+  var PER = { total: "", week: "/สัปดาห์", month: "/เดือน" };
+  var ST = { pending: ["⏳ รอมอบของ", "var(--gold-hi)"], delivered: ["✅ ได้รับแล้ว", "var(--ok)"], cancelled: ["↩️ ยกเลิก (คืนแต้ม)", "var(--mute)"] };
+  function smsg(t, ok) { $("shopMsg").textContent = t || ""; $("shopMsg").style.color = ok ? "var(--ok)" : "var(--err)"; }
+  async function loadShop() {
+    var r;
+    try { r = await rpc("shop_list"); }
+    catch (e) { var c = String(e.message || "").replace("db ", ""); smsg("โหลดร้านค้าไม่ได้ (" + c + ")" + (c === "404" ? " — ยังไม่ได้รัน phase3.sql" : "")); return; }
+    if (!r || !r.ok) { smsg((r && r.error) || "โหลดร้านค้าไม่ได้"); return; }
+    BAL = r.balance; $("shopBal").textContent = "⭐ " + nf(r.balance);
+    var items = r.items || [];
+    $("shopGrid").innerHTML = items.length ? items.map(function (it) {
+      var out = it.stock != null && it.stock < 1, lim = it.per_user_limit != null && it.used >= it.per_user_limit, poor = BAL < it.cost;
+      var why = out ? "หมดแล้ว" : lim ? "แลกครบแล้ว" : poor ? "แต้มไม่พอ" : "แลกเลย";
+      var meta = [];
+      if (it.stock != null) meta.push("เหลือ " + nf(it.stock));
+      if (it.per_user_limit != null) meta.push("จำกัด " + it.per_user_limit + " ครั้ง" + (PER[it.limit_period] || "") + " (ใช้ไป " + it.used + ")");
+      return '<div class="si"><span class="em">' + esc(it.emoji || "🎁") + "</span><b>" + esc(it.name) + '</b><span class="ds">' + esc(it.description || "") + '</span><span class="ct">⭐ ' + nf(it.cost) + "</span>" + (meta.length ? '<span class="lm">' + esc(meta.join(" · ")) + "</span>" : "") + '<button type="button" data-id="' + it.id + '" data-n="' + esc(it.name) + '" data-c="' + it.cost + '"' + (out || lim || poor ? " disabled" : "") + ">" + why + "</button></div>";
+    }).join("") : '<p style="color:var(--mute);grid-column:1/-1;margin:0">ยังไม่มีสินค้าในร้าน</p>';
+    var mine = r.mine || [];
+    $("shopMine").innerHTML = mine.length ? mine.map(function (x) {
+      var s = ST[x.status] || [x.status, "var(--mute)"];
+      return "<li><span>" + esc(x.item_name) + ' <span style="color:var(--mute)">· ⭐ ' + nf(x.cost) + " · " + new Date(x.created_at).toLocaleDateString("th-TH", { day: "numeric", month: "short" }) + "</span>" + (x.note ? '<br><small style="color:var(--mute)">' + esc(x.note) + "</small>" : "") + '</span><span class="st" style="color:' + s[1] + '">' + s[0] + "</span></li>";
+    }).join("") : '<li style="color:var(--mute)">ยังไม่เคยแลกของ</li>';
+  }
+  $("shopGrid").addEventListener("click", async function (e) {
+    var b = e.target.closest("button[data-id]"); if (!b || b.disabled || busy) return;
+    if (!confirm("แลก “" + b.dataset.n + "” ใช้ " + nf(b.dataset.c) + " แต้ม?")) return;
+    busy = true; b.disabled = true; smsg("กำลังแลก...", true);
+    try {
+      var r = await rpc("shop_redeem", { p_item: Number(b.dataset.id) });
+      if (!r || !r.ok) smsg((r && r.error) || "แลกไม่สำเร็จ");
+      else smsg("แลกสำเร็จ 🎉 รอแอดมินมอบของให้ในเกม · แต้มคงเหลือ " + nf(r.balance), true);
+    } catch (er) { smsg("แลกไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่"); }
+    busy = false; await loadShop();
+  });
+  $("nav").addEventListener("click", function (e) { var b = e.target.closest("button[data-v]"); if (b && b.dataset.v === "shop") { smsg(""); loadShop(); } });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && document.querySelector("main").dataset.v === "shop") loadShop(); });
 })();
 </script>
 </body>

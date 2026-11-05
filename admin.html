@@ -84,7 +84,7 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
 .tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.72rem;font-weight:700;margin-right:6px}
 .tag.a{background:#12301d;color:var(--ok)}.tag.r{background:#3a1814;color:var(--bad)}
 #panel .card[data-tab]{display:none}
-#panel[data-t="pend"] .card[data-tab="pend"],#panel[data-t="mem"] .card[data-tab="mem"],#panel[data-t="sum"] .card[data-tab="sum"],#panel[data-t="tools"] .card[data-tab="tools"],#panel[data-t="list"] .card[data-tab="list"],#panel[data-t="hist"] .card[data-tab="hist"]{display:block}
+#panel[data-t="pend"] .card[data-tab="pend"],#panel[data-t="mem"] .card[data-tab="mem"],#panel[data-t="shop"] .card[data-tab="shop"],#panel[data-t="sum"] .card[data-tab="sum"],#panel[data-t="tools"] .card[data-tab="tools"],#panel[data-t="list"] .card[data-tab="list"],#panel[data-t="hist"] .card[data-tab="hist"]{display:block}
 #tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;padding:10px max(6px,calc((100% - 480px)/2)) max(14px,env(safe-area-inset-bottom,0px));background:#15130f;border-top:1px solid var(--line)}
 #tabs button{flex:1;width:auto;min-width:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:var(--mute);font-size:.78rem;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;transform:none}
 #tabs .pill{position:relative;display:flex;align-items:center;justify-content:center;width:min(64px,100%);height:32px;border-radius:16px;transition:background .25s}
@@ -108,6 +108,22 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
   </section>
 
   <div id="panel" data-t="pend" hidden>
+    <section class="card" id="redCard" data-tab="shop">
+      <h2>🛒 คำขอแลกของ</h2>
+      <p class="cnt" id="redSum"></p>
+      <div id="redList"></div>
+      <button class="sec" id="redAll" type="button">แสดงทั้งหมด</button>
+      <p class="pmsg" id="shopMsgA" role="status"></p>
+    </section>
+    <section class="card" id="itemCard" data-tab="shop">
+      <h2>🎁 สินค้าในร้าน</h2>
+      <p class="cnt">สต็อก / จำกัดต่อคน เว้นว่าง = ไม่จำกัด · ปิดขายชั่วคราวได้โดยไม่ต้องลบ</p>
+      <div id="itemList"></div>
+      <button class="sec" id="itemAdd" type="button">+ เพิ่มสินค้า</button>
+      <p class="cnt" style="margin-top:18px">ห้อง Discord ที่แจ้งการแลกของ (เว้นว่าง = ใช้ห้องรออนุมัติเดิม)</p>
+      <input id="shopHook" placeholder="https://discord.com/api/webhooks/..." autocomplete="off">
+      <button class="sec" id="shopHookSave" type="button" style="margin-top:8px">บันทึก Webhook ร้านค้า</button>
+    </section>
     <section class="card" id="memCard" data-tab="mem">
       <h2>👥 บัญชีสมาชิก<span class="pbadge" id="memBadge" hidden>0</span></h2>
       <p class="cnt" id="memSum"></p>
@@ -176,6 +192,7 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
 <nav id="tabs" aria-label="เมนูแอดมิน" hidden>
   <button type="button" data-t="pend" class="on" aria-current="page"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13l3.5 7v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z"/></svg><i class="tbd" id="tabBadge" hidden>0</i></span><span>รออนุมัติ</span></button>
   <button type="button" data-t="mem" aria-current="false"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14a6 6 0 0 1 3.5 6"/></svg><i class="tbd" id="memTabBadge" hidden>0</i></span><span>สมาชิก</span></button>
+  <button type="button" data-t="shop" aria-current="false"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v7h14v-7"/></svg><i class="tbd" id="shopTabBadge" hidden>0</i></span><span>ร้านค้า</span></button>
   <button type="button" data-t="sum" aria-current="false"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></span><span>สรุป</span></button>
   <button type="button" data-t="tools" aria-current="false"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></span><span>จัดการ</span></button>
   <button type="button" data-t="hist" aria-current="false"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span>ประวัติ</span></button>
@@ -563,6 +580,61 @@ $("memList").addEventListener("click", async e => {
   try { await pcall("admin_adjust_points", { p_user: row.dataset.u, p_points: n, p_note: why }); await loadMembers(); } catch (er) { alert(er.message || "ไม่สำเร็จ"); }
 });
 new MutationObserver(() => { if (!$("panel").hidden) loadPts(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
+
+// ===== ร้านค้า (เฟส 3) =====
+let SHOP = { items: [], requests: [] }, redAll = false;
+const smA = (t, ok) => { $("shopMsgA").textContent = t || ""; $("shopMsgA").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+const RST = { pending: ["รอมอบของ", ""], delivered: ["ส่งมอบแล้ว", " a"], cancelled: ["ยกเลิก", " r"] };
+async function loadShopA() {
+  try { SHOP = await rpc("admin_shop", { p_pass: PASS }); }
+  catch (e) { $("redSum").textContent = "โหลดร้านค้าไม่ได้ (ยังไม่ได้รัน phase3.sql ใน Supabase?)"; return; }
+  renderRed(); renderItems(); $("shopHook").value = SHOP.shop_webhook || "";
+}
+function renderRed() {
+  const pend = SHOP.requests.filter(r => r.status === "pending"), list = redAll ? SHOP.requests : pend;
+  $("shopTabBadge").hidden = !pend.length; $("shopTabBadge").textContent = pend.length;
+  $("redSum").textContent = pend.length ? "รอมอบของ " + pend.length + " รายการ" : "ไม่มีคำขอรอมอบของ";
+  $("redAll").textContent = redAll ? "แสดงเฉพาะที่รอมอบของ" : "แสดงทั้งหมด (" + SHOP.requests.length + ")";
+  $("redList").innerHTML = list.map(r => {
+    const s = RST[r.status] || [r.status, ""];
+    return '<div class="pc" data-r="' + r.id + '" style="margin-bottom:10px"><div class="ph" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><strong>' + esc(r.ign) + '</strong><span class="tag' + s[1] + '">' + s[0] + '</span><small style="margin-left:auto">#' + r.id + " · " + new Date(r.created_at).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + '</small></div><p class="pl" style="margin:6px 0">🎁 ' + esc(r.item_name) + " · ⭐ " + r.cost + (r.discord_name && r.discord_name !== r.ign ? " · 💬 " + esc(r.discord_name) : "") + "</p>" + (r.note ? '<p class="pl" style="margin:0 0 6px">📝 ' + esc(r.note) + "</p>" : "") + (r.status === "pending" ? '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="sec" data-d="delivered" style="width:auto;padding:8px 14px">✅ ส่งมอบแล้ว</button><button class="sec" data-d="cancelled" style="width:auto;padding:8px 14px">↩️ ยกเลิก + คืนแต้ม</button></div>' : "") + "</div>";
+  }).join("");
+}
+const IG = "display:grid;gap:6px;margin-bottom:6px;grid-template-columns:repeat(2,minmax(0,1fr))";
+function itemForm(it) {
+  const v = k => esc(it[k] == null ? "" : it[k]);
+  return '<div class="pc it" data-id="' + v("id") + '" style="margin-bottom:12px"><div style="' + IG + '"><input class="f-emoji" placeholder="อีโมจิ เช่น 🏠" value="' + v("emoji") + '"><input class="f-name" placeholder="ชื่อสินค้า" value="' + v("name") + '"></div><input class="f-desc" placeholder="รายละเอียด (ไม่บังคับ)" value="' + v("description") + '" style="margin-bottom:6px"><div style="' + IG + '"><label style="font-size:.75rem;color:var(--mute)">ราคา (แต้ม)<input class="f-cost" type="number" min="1" value="' + v("cost") + '"></label><label style="font-size:.75rem;color:var(--mute)">สต็อก<input class="f-stock" type="number" min="0" placeholder="ไม่จำกัด" value="' + v("stock") + '"></label><label style="font-size:.75rem;color:var(--mute)">จำกัดต่อคน<input class="f-lim" type="number" min="1" placeholder="ไม่จำกัด" value="' + v("per_user_limit") + '"></label><label style="font-size:.75rem;color:var(--mute)">ช่วงเวลาจำกัด<select class="f-per">' + [["total", "ตลอด"], ["week", "ต่อสัปดาห์"], ["month", "ต่อเดือน"]].map(o => '<option value="' + o[0] + '"' + ((it.limit_period || "total") === o[0] ? " selected" : "") + ">" + o[1] + "</option>").join("") + '</select></label></div><label style="display:flex;gap:8px;align-items:center;font-size:.85rem;margin:6px 0"><input class="f-act" type="checkbox" style="width:auto"' + (it.active === false ? "" : " checked") + '> เปิดขาย</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="sec f-save" type="button" style="width:auto;padding:8px 14px">💾 บันทึก</button>' + (it.id ? '<button class="sec f-del" type="button" style="width:auto;padding:8px 14px">🗑️ ลบ</button>' : '<button class="sec f-cancel" type="button" style="width:auto;padding:8px 14px">ยกเลิก</button>') + "</div></div>";
+}
+function renderItems() { $("itemList").innerHTML = SHOP.items.length ? SHOP.items.map(itemForm).join("") : '<p class="cnt">ยังไม่มีสินค้า กด “+ เพิ่มสินค้า”</p>'; }
+$("redAll").addEventListener("click", () => { redAll = !redAll; renderRed(); });
+$("redList").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-d]"); if (!b) return;
+  const id = Number(b.closest(".pc").dataset.r), d = b.dataset.d;
+  let note = "";
+  if (d === "cancelled") { const w = prompt("เหตุผลที่ยกเลิก (สมาชิกจะเห็น เว้นว่างได้)"); if (w === null) return; note = w; }
+  else if (!confirm("มอบของในเกมให้เรียบร้อยแล้ว?")) return;
+  b.disabled = true;
+  try { await pcall("admin_redemption_decide", { p_id: id, p_status: d, p_note: note }); smA(d === "cancelled" ? "ยกเลิกและคืนแต้มแล้ว" : "บันทึกว่าส่งมอบแล้ว ✓", true); }
+  catch (er) { smA(er.message || "ไม่สำเร็จ"); }
+  loadShopA();
+});
+$("itemAdd").addEventListener("click", () => { if ($("itemList").querySelector('.it[data-id=""]')) return; const p = $("itemList").querySelector(".cnt"); if (p) p.remove(); $("itemList").insertAdjacentHTML("afterbegin", itemForm({ limit_period: "total", active: true })); });
+$("itemList").addEventListener("click", async e => {
+  const f = e.target.closest(".it"); if (!f) return;
+  if (e.target.closest(".f-cancel")) { renderItems(); return; }
+  if (e.target.closest(".f-del")) {
+    if (!confirm("ลบสินค้านี้? (ประวัติการแลกยังอยู่) ถ้าแค่อยากหยุดขาย ให้เอาติ๊ก “เปิดขาย” ออกแทน")) return;
+    try { await pcall("admin_shop_delete", { p_id: Number(f.dataset.id) }); smA("ลบแล้ว", true); } catch (er) { smA(er.message); }
+    loadShopA(); return;
+  }
+  if (!e.target.closest(".f-save")) return;
+  const q = c => f.querySelector(c);
+  const item = { id: f.dataset.id, emoji: q(".f-emoji").value, name: q(".f-name").value, description: q(".f-desc").value, cost: q(".f-cost").value.trim(), stock: q(".f-stock").value.trim(), per_user_limit: q(".f-lim").value.trim(), limit_period: q(".f-per").value, active: q(".f-act").checked };
+  try { await pcall("admin_shop_save", { p_item: item }); smA("บันทึกสินค้าแล้ว ✓", true); loadShopA(); } catch (er) { smA(er.message); }
+});
+$("shopHookSave").addEventListener("click", async () => { try { await pcall("admin_shop_webhook", { p_url: $("shopHook").value.trim() }); smA("บันทึก Webhook ร้านค้าแล้ว ✓", true); } catch (er) { smA(er.message); } });
+new MutationObserver(() => { if (!$("panel").hidden) loadShopA(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
+setInterval(() => { if (PASS && !$("panel").hidden) loadShopA(); }, 30000);
 </script>
 </body>
 </html>
