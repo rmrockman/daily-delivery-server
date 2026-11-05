@@ -270,6 +270,18 @@ main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <style>
 #authCard{margin-bottom:14px}
+#evBanner{position:relative;overflow:hidden;margin:0 0 14px;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,120,40,.55);background:linear-gradient(120deg,#3a1206,#1d0c05 55%,#3a1a06);box-shadow:0 0 26px rgba(255,110,30,.28)}
+#evBanner::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 0deg,transparent,rgba(255,140,40,.18),transparent 30%);animation:evspin 6s linear infinite;pointer-events:none}
+@keyframes evspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#evBanner::before{animation:none}}
+#evBanner .ev{position:relative;display:flex;align-items:center;gap:12px}
+#evBanner .ev+.ev{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,140,40,.25)}
+#evBanner .mx{flex:none;font-size:1.7rem;font-weight:900;font-style:italic;line-height:1;color:#ffd56b;text-shadow:0 0 14px rgba(255,150,40,.8)}
+#evBanner .tx{flex:1;min-width:0}
+#evBanner .tx b{display:block;color:#fff;font-size:.98rem}
+#evBanner .tx small{color:#ffcf9a;font-size:.8rem}
+#evBanner .cd{flex:none;font-variant-numeric:tabular-nums;font-weight:800;color:#fff;background:rgba(0,0,0,.35);border:1px solid rgba(255,140,40,.4);border-radius:10px;padding:6px 8px;font-size:.85rem;text-align:center;line-height:1.2}
+#evBanner .cd i{display:block;font-style:normal;font-size:.62rem;font-weight:600;color:#ffcf9a}
 #authCard .bar{height:8px;border-radius:99px;background:#26221a;overflow:hidden;margin:8px 0 4px}
 #authCard .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));transition:width .6s}
 body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-view="hist"],body.rm-lock .view[data-view="shop"]{display:none!important}
@@ -304,6 +316,7 @@ body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-v
   <h1>ส่งของรายวัน</h1>
   <p class="sub">กรอกชื่อและแนบรูปหลักฐาน ส่งแล้วรอแอดมินอนุมัติ จึงจะลงอันดับและเข้า Discord</p>
   <div class="view" data-view="send">
+  <div id="evBanner" hidden></div>
   <div class="card" id="authCard"><p style="margin:0">กำลังตรวจสอบบัญชี...</p></div>
   <div class="today" id="today" hidden></div>
   <div class="card">
@@ -1176,7 +1189,7 @@ $("send").addEventListener("click", async () => {
       h = head("เข้าสู่ระบบแล้ว") + '<div class="today" style="display:block">⏳ รอแอดมินอนุมัติบัญชี · ชื่อในเกม <b>' + esc(member.ign) + '</b></div><button class="sm" id="aOut">ออกจากระบบ</button>';
       lock(true);
     } else { // approved
-      h = head("ชื่อในเกม: <b>" + esc(member.ign) + "</b> · อนุมัติแล้ว ✅") + '<div id="aStats" style="margin-top:6px"></div><button class="sm" id="aOut">ออกจากระบบ</button><div style="color:var(--mute);font-size:.7rem;margin-top:6px;opacity:.6">เวอร์ชัน P3.1</div>';
+      h = head("ชื่อในเกม: <b>" + esc(member.ign) + "</b> · อนุมัติแล้ว ✅") + '<div id="aStats" style="margin-top:6px"></div><button class="sm" id="aOut">ออกจากระบบ</button><div style="color:var(--mute);font-size:.7rem;margin-top:6px;opacity:.6">เวอร์ชัน P6</div>';
       lock(false);
       $("ign").value = member.ign; $("ign").readOnly = true;
       try { localStorage.setItem("rm_names", JSON.stringify({ ign: member.ign })); } catch (e) {}
@@ -1282,6 +1295,33 @@ $("send").addEventListener("click", async () => {
   $("shopGrid").addEventListener("click", function (e) { var im = e.target.closest("img.pic"); if (im) window.open(im.src, "_blank", "noopener"); });
   $("nav").addEventListener("click", function (e) { var b = e.target.closest("button[data-v]"); if (b && b.dataset.v === "shop") { smsg(""); loadShop(); } });
   document.addEventListener("visibilitychange", function () { if (!document.hidden && document.querySelector("main").dataset.v === "shop") loadShop(); });
+})();
+</script>
+
+<script>
+// ===== อีเวนต์แต้มคูณ (เฟส 6) =====
+(function () {
+  var box = document.getElementById("evBanner"), EVS = [];
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var two = function (n) { return (n < 10 ? "0" : "") + n; };
+  function left(ms) {
+    if (ms <= 0) return "0:00:00";
+    var s = Math.floor(ms / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+    return (d ? d + " วัน " : "") + h + ":" + two(m) + ":" + two(x);
+  }
+  function mx(v) { return "x" + String(Number(v)); }
+  function paint() {
+    var now = Date.now(), list = EVS.filter(function (e) { return new Date(e.ends_at).getTime() > now; });
+    if (!list.length) { box.hidden = true; return; }
+    box.innerHTML = list.map(function (e) {
+      var st = new Date(e.starts_at).getTime(), en = new Date(e.ends_at).getTime(), live = now >= st;
+      return '<div class="ev"><span class="mx">' + mx(e.multiplier) + '</span><span class="tx"><b>' + (live ? "🔥 " : "⏳ ") + esc(e.name) + "</b><small>" + (live ? "กำลังจัด · " : "เร็ว ๆ นี้ · ") + "ส่ง" + (e.item_type ? esc(e.item_type) : "ของทุกหมวด") + " ได้แต้ม " + mx(e.multiplier) + '</small></span><span class="cd"><i>' + (live ? "เหลือเวลา" : "เริ่มใน") + "</i>" + left((live ? en : st) - now) + "</span></div>";
+    }).join("");
+    box.hidden = false;
+  }
+  async function load() { try { EVS = (await rpc("active_events")) || []; } catch (e) { EVS = []; } paint(); }
+  load(); setInterval(paint, 1000); setInterval(load, 60000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
 })();
 </script>
 </body>

@@ -158,10 +158,29 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
 .rres b{color:var(--hi)}
 .subnav{position:sticky;top:0;z-index:4;display:flex;flex-wrap:wrap;gap:8px;scrollbar-width:none;margin:0 -4px 14px;padding:8px 4px;background:linear-gradient(180deg,var(--bg) 70%,transparent)}
 .subnav::-webkit-scrollbar{display:none}
-.subnav button{flex:1 1 auto;width:auto;padding:8px 12px;border-radius:999px;font-size:.84rem;font-weight:700;background:#0d0c0a;color:var(--mute);border:1px solid var(--line);box-shadow:none;white-space:nowrap;position:relative}
+.subnav button{flex:0 1 auto;width:auto;padding:8px 12px;border-radius:999px;font-size:.84rem;font-weight:700;background:#0d0c0a;color:var(--mute);border:1px solid var(--line);box-shadow:none;white-space:nowrap;position:relative}
 .subnav button.on{background:linear-gradient(180deg,var(--hi),var(--gold) 55%,var(--lo));color:#1b1205;border-color:transparent;box-shadow:0 0 14px rgba(242,180,43,.3)}
 .subnav .sb{display:inline-block;min-width:18px;height:18px;margin-left:6px;padding:0 5px;border-radius:999px;background:var(--bad);color:#1b0b07;font-size:.7rem;line-height:18px;text-align:center}
 #panel .card.subhide{display:none!important}
+.evf label:not(.sw){display:block;font-size:.78rem;color:var(--mute);margin-bottom:10px}
+.evf label:not(.sw) input,.evf label select{width:100%;margin-top:4px}
+.evf .sw{margin:4px 0 14px}
+.evm{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.evm button{padding:12px 0;font-size:1.2rem;font-weight:900;font-style:italic;background:#0d0c0a;color:var(--mute);border:1px solid var(--line);box-shadow:none}
+.evm button.on{background:linear-gradient(135deg,#ff9a3c,#ff5a1f);color:#fff;border-color:transparent;box-shadow:0 0 18px rgba(255,100,30,.45)}
+.evq{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.evq span{width:34px;font-size:.78rem;color:var(--mute)}
+.evq button{width:auto;padding:7px 12px;font-size:.8rem}
+.evq button.on{border-color:var(--gold);color:var(--hi);box-shadow:0 0 0 1px var(--gold) inset}
+#evStart{width:100%;margin:-2px 0 10px}
+#evGo{background:linear-gradient(135deg,#ffb054,#ff6a26 60%,#e2470f);color:#fff;box-shadow:0 0 22px rgba(255,100,30,.4)}
+.evi{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:#0d0c0a}
+.evi.live{border-color:rgba(255,120,40,.6);background:linear-gradient(120deg,#2a1006,#0d0c0a)}
+.evi .x{font-weight:900;font-style:italic;font-size:1.15rem;color:#ffb054;width:44px;flex:none}
+.evi .t{flex:1;min-width:0;font-size:.85rem}.evi .t small{display:block;color:var(--mute);font-size:.74rem}
+.evi button{width:auto;padding:6px 10px;font-size:.76rem;flex:none}
+.est{display:inline-block;font-size:.66rem;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:4px}
+.est.live{background:#ff6a26;color:#fff}.est.soon{background:#2a2316;color:var(--hi)}.est.ended{background:#1f1f1f;color:var(--mute)}
 </style>
 </head>
 <body>
@@ -210,6 +229,26 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
       <p class="cnt" style="margin-top:18px">ของที่ส่งก่อนเริ่มระบบแต้มจะไม่มีแต้ม กดปุ่มนี้เพื่อนับย้อนหลังจากประวัติเดิมให้สมาชิกที่อนุมัติแล้ว (ชื่อในเกมต้องตรงกับประวัติ กดซ้ำได้ ไม่นับซ้ำ)</p>
       <button class="sec" id="ptsBackfill" type="button">📥 นับแต้มย้อนหลังจากประวัติเดิม</button>
       <p class="pmsg" id="ptsMsg" role="status"></p>
+    </section>
+    <section class="card" data-sub="ev" data-label="🔥 อีเวนต์" id="evCard" data-tab="tools">
+      <h2>🔥 อีเวนต์แต้มคูณ</h2>
+      <p class="cnt">ส่งของในช่วงอีเวนต์ได้แต้มคูณ นับตามเวลาที่สมาชิกกดส่ง (อนุมัติทีหลังก็ได้แต้มคูณ) · หน้าสมาชิกจะมีป้ายนับถอยหลังขึ้นเอง</p>
+      <div class="evf">
+        <label>ชื่ออีเวนต์<input id="evName" placeholder="เช่น เตรียมเรดวันเสาร์" maxlength="80"></label>
+        <div class="evm" id="evMul"><button type="button" data-m="1.5">x1.5</button><button type="button" data-m="2" class="on">x2</button><button type="button" data-m="3">x3</button></div>
+        <label>หมวดของ<select id="evType"><option value="">ทุกหมวด</option></select></label>
+        <div class="evq"><span>เริ่ม</span><button type="button" class="sec on" data-st="now">ตอนนี้เลย</button><button type="button" class="sec" data-st="at">ตั้งเวลา</button></div>
+        <input id="evStart" type="datetime-local" hidden>
+        <div class="evq"><span>นาน</span><button type="button" class="sec" data-h="2">2 ชม.</button><button type="button" class="sec on" data-h="6">6 ชม.</button><button type="button" class="sec" data-h="24">1 วัน</button><button type="button" class="sec" data-h="72">3 วัน</button></div>
+        <label class="sw"><input id="evAnn" type="checkbox" checked><i></i>ประกาศใน Discord (แท็ก @everyone)</label>
+        <button id="evGo" type="button">🔥 เริ่มอีเวนต์</button>
+      </div>
+      <p class="pmsg" id="evMsg" role="status"></p>
+      <h2 style="margin-top:18px;font-size:1rem">รายการอีเวนต์</h2>
+      <div id="evList"></div>
+      <p class="cnt" style="margin-top:14px">ห้องประกาศอีเวนต์ (เว้นว่าง = ใช้ห้องประกาศเลเวลอัพ)</p>
+      <input id="evHook" placeholder="https://discord.com/api/webhooks/..." autocomplete="off">
+      <button class="sec" id="evHookSave" type="button" style="margin-top:8px">บันทึก Webhook อีเวนต์</button>
     </section>
     <section class="card" data-sub="dc" data-label="🎖️ Discord" id="dcCard" data-tab="tools">
       <h2>🎖️ Discord: ประกาศเลเวลอัพ + ยศอัตโนมัติ</h2>
@@ -927,6 +966,54 @@ const _lvSave = $("lvSave"); _lvSave.addEventListener("click", () => setTimeout(
   const sb = $("shopTabBadge"); if (sb) new MutationObserver(build).observe(sb, { attributes: true, childList: true, characterData: true, subtree: true });
   const lr = $("logRef"); if (lr) lr.addEventListener("click", () => { const tb = document.querySelector('#tabs button[data-t="tools"]'); if (tb) tb.click(); });
   build();
+})();
+
+// ===== อีเวนต์แต้มคูณ (เฟส 6) =====
+(function () {
+  let mul = "2", startMode = "now", hours = 6, EVD = null;
+  const em = (t, ok) => { $("evMsg").textContent = t || ""; $("evMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+  const fmtT = t => new Date(t).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const X = v => "x" + String(Number(v));
+  const localNow = () => { const d = new Date(Date.now() + 10 * 60000); d.setSeconds(0, 0); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
+  $("evMul").addEventListener("click", e => { const b = e.target.closest("button[data-m]"); if (!b) return; mul = b.dataset.m; $("evMul").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); upd(); });
+  $("evCard").addEventListener("click", e => {
+    const s = e.target.closest("button[data-st]"), h = e.target.closest("button[data-h]");
+    if (s) { startMode = s.dataset.st; s.parentNode.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === s)); $("evStart").hidden = startMode !== "at"; if (startMode === "at" && !$("evStart").value) $("evStart").value = localNow(); upd(); }
+    if (h) { hours = Number(h.dataset.h); h.parentNode.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === h)); }
+  });
+  function upd() { $("evGo").textContent = (startMode === "now" ? "🔥 เริ่มอีเวนต์ " : "⏰ ตั้งเวลาอีเวนต์ ") + X(mul); }
+  async function loadEv() {
+    try { EVD = await rpc("admin_events", { p_pass: PASS }); } catch (e) { $("evList").innerHTML = '<p class="cnt">โหลดไม่ได้ (ยังไม่ได้รัน phase6.sql ใน Supabase?)</p>'; return; }
+    const cur = $("evType").value;
+    $("evType").innerHTML = '<option value="">ทุกหมวด</option>' + (EVD.types || []).map(t => '<option value="' + esc(t) + '">' + esc(t) + "</option>").join("");
+    $("evType").value = cur; $("evHook").value = EVD.event_webhook || "";
+    const ST = { live: "กำลังจัด", soon: "รอเริ่ม", ended: "จบแล้ว" };
+    $("evList").innerHTML = (EVD.events || []).length ? EVD.events.map(e => '<div class="evi ' + e.state + '" data-id="' + e.id + '"><span class="x">' + X(e.multiplier) + '</span><span class="t"><b>' + esc(e.name) + '</b><span class="est ' + e.state + '">' + ST[e.state] + "</span><small>" + (e.item_type ? esc(e.item_type) : "ทุกหมวด") + " · " + fmtT(e.starts_at) + " → " + fmtT(e.ends_at) + "</small></span>" + (e.state === "live" ? '<button class="sec" data-end="1" type="button">⏹️ จบตอนนี้</button>' : e.state === "soon" ? '<button class="sec" data-end="1" type="button">ยกเลิก</button>' : "") + "</div>").join("") : '<p class="cnt">ยังไม่เคยจัดอีเวนต์</p>';
+  }
+  $("evGo").addEventListener("click", async () => {
+    const name = $("evName").value.trim(); if (!name) { em("ตั้งชื่ออีเวนต์ก่อน"); $("evName").focus(); return; }
+    let st = new Date();
+    if (startMode === "at") { if (!$("evStart").value) { em("เลือกวันเวลาเริ่ม"); return; } st = new Date($("evStart").value); }
+    const en = new Date(st.getTime() + hours * 3600000);
+    const ann = $("evAnn").checked;
+    if (!confirm((startMode === "now" ? "เริ่ม" : "ตั้งเวลา") + "อีเวนต์ “" + name + "” " + X(mul) + "\n" + fmtT(st) + " → " + fmtT(en) + (ann ? "\n(จะประกาศใน Discord และแท็ก @everyone)" : ""))) return;
+    $("evGo").disabled = true;
+    try { await pcall("admin_event_save", { p: { name, multiplier: mul, item_type: $("evType").value, starts_at: st.toISOString(), ends_at: en.toISOString(), announce: ann } }); em("สร้างอีเวนต์แล้ว 🔥", true); $("evName").value = ""; }
+    catch (er) { em(er.message); }
+    $("evGo").disabled = false; loadEv();
+  });
+  $("evList").addEventListener("click", async e => {
+    const b = e.target.closest("button[data-end]"); if (!b) return;
+    const row = b.closest(".evi"), live = row.classList.contains("live");
+    if (!confirm(live ? "จบอีเวนต์นี้ตอนนี้เลย?" : "ยกเลิกอีเวนต์ที่ยังไม่เริ่มนี้?")) return;
+    try { await pcall("admin_event_end", { p_id: Number(row.dataset.id), p_announce: live }); em(live ? "จบอีเวนต์แล้ว" : "ยกเลิกแล้ว", true); } catch (er) { em(er.message); }
+    loadEv();
+  });
+  $("evHookSave").addEventListener("click", async () => { try { await pcall("admin_event_webhook", { p_url: $("evHook").value.trim() }); em("บันทึก Webhook อีเวนต์แล้ว ✓", true); } catch (er) { em(er.message); } });
+  upd();
+  $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "tools") loadEv(); });
+  new MutationObserver(() => { if (!$("panel").hidden) loadEv(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
+  setInterval(() => { if (PASS && !$("panel").hidden && $("panel").dataset.t === "tools") loadEv(); }, 60000);
 })();
 </script>
 </body>
