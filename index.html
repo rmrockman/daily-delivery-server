@@ -297,6 +297,33 @@ body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-v
 .si button{padding:9px;font-size:.9rem}
 .si button:disabled{opacity:.45;filter:grayscale(1)}
 .myr{list-style:none;padding:0;margin:0}
+.bdg{display:inline-block;margin-left:4px;font-size:.85em;letter-spacing:1px;vertical-align:1px}
+.pod .p[data-ign],.rows li[data-ign]{cursor:pointer}
+.pod .p .pn .bdg{display:block;margin:2px 0 0;font-size:.95rem}
+.rows .bdg.bl{display:block;margin:1px 0 3px;font-size:.8rem}
+.pfme{display:block;width:100%;margin-top:10px;padding:9px!important;font-size:.85rem!important;background:none!important;border:1px solid var(--line)!important;color:var(--gold-hi)!important;box-shadow:none!important}
+#pfSheet{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,4,12,.72);backdrop-filter:blur(3px)}
+#pfSheet[hidden]{display:none}
+#pfSheet .sh{width:100%;max-width:480px;max-height:88vh;overflow:auto;background:#050c1a;border:1px solid var(--line);border-bottom:0;padding:18px 16px max(20px,env(safe-area-inset-bottom));animation:pfup .25s ease-out;box-shadow:0 -12px 40px rgba(0,229,255,.18)}
+@keyframes pfup{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.pfh{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.pfh .pa{width:62px;height:62px;flex:none;object-fit:cover;border:2px solid var(--gold-hi);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:grid;place-items:center;font-size:1.6rem;font-weight:800;background:#07101f;color:var(--gold-hi)}
+.pfh b{display:block;font-size:1.15rem}.pfh small{color:var(--mute);font-size:.8rem}
+.pfh .x{margin-left:auto;width:auto!important;padding:6px 12px!important;background:none!important;border:1px solid var(--line)!important;color:var(--mute)!important;box-shadow:none!important}
+.pfs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:16px}
+.pfs div{padding:8px;border:1px solid var(--line);background:rgba(0,229,255,.05);font-size:.7rem;color:var(--mute);line-height:1.3}
+.pfs b{display:block;font-size:1rem;color:var(--gold-hi)}
+.pfb{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.pfb div{text-align:center;padding:10px 4px;border:1px solid var(--line);background:#07101f;font-size:.72rem;line-height:1.3;color:var(--mute)}
+.pfb div i{display:block;font-style:normal;font-size:1.7rem;margin-bottom:4px}
+.pfb div b{display:block;color:#e8f6ff;font-size:.78rem}
+.pfb .t2{border-color:rgba(192,210,230,.55)}.pfb .t3{border-color:rgba(255,200,80,.7);box-shadow:0 0 10px rgba(255,200,80,.15)}.pfb .t4{border-color:#ff3df2;box-shadow:0 0 12px rgba(255,61,242,.25)}
+.pfn{list-style:none;padding:0;margin:0}
+.pfn li{display:flex!important;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.82rem}
+.pfn li i{font-style:normal;font-size:1.3rem;filter:grayscale(1);opacity:.6}
+.pfn li span{flex:1}.pfn li small{display:block;color:var(--mute)}
+.pfn .bar{height:5px;background:#0d1a2e;margin-top:4px}.pfn .bar u{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-hi))}
+.pfh3{margin:4px 0 8px;font-size:.85rem;color:var(--mute);font-weight:700}
 .phs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 12px}
 .phs div{padding:8px;border:1px solid var(--line);background:rgba(0,229,255,.05);font-size:.72rem;color:var(--mute);line-height:1.3}
 .phs b{display:block;font-size:1rem;color:var(--gold-hi)}
@@ -801,6 +828,9 @@ async function loadStreaks() {
   try { const a = await rpc("get_streaks"); STREAKS = {}; (a || []).forEach(x => { STREAKS[String(x.k).toLowerCase()] = x.n; }); } catch (e) {}
 }
 const fl = d => { const n = STREAKS[String(d.ign).toLowerCase()]; return n ? " 🔥" + n : ""; };
+let BADGES = {};
+async function loadBadges() { try { BADGES = window.__tok && window.__tok() ? (await rpc("member_badges")) || {} : {}; } catch (e) { BADGES = {}; } }
+const bdgEl = d => { const b = BADGES[String(d.ign || "").trim().toLowerCase()]; if (!b) return null; const e = document.createElement("span"); e.className = "bdg"; e.textContent = b; return e; };
 let AVATARS = {};
 async function loadAvatars() { try { AVATARS = window.__tok && window.__tok() ? (await rpc("member_avatars")) || {} : {}; } catch (e) { AVATARS = {}; } }
 const avKey = d => String(d.ign || "").trim().toLowerCase();
@@ -842,7 +872,7 @@ async function loadBoard() {
   $("modeD").setAttribute("aria-pressed", rankMode === "d");
   rows.innerHTML = ""; $("pod").innerHTML = ""; $("mine").hidden = true; $("shareImg").hidden = true; tick();
   try {
-    await Promise.all([loadStreaks(), loadAvatars()]);
+    await Promise.all([loadStreaks(), loadAvatars(), loadBadges()]);
     try { window.loadTypeBoard && window.loadTypeBoard(mo.key, mo.label); } catch (e) {}
     const data = mergeAliases(await rpc("leaderboard", { p_month: mo.key }));
     if (mySeq !== BOARD_SEQ) return; // มีการโหลดอันดับรอบใหม่แล้ว ไม่วาดซ้อน
@@ -870,6 +900,7 @@ async function loadBoard() {
       const w = document.createElement("div"); w.className = "p " + cls[i] + (isMe(d) ? " me" : "");
       if (i === 0) { const c = document.createElement("div"); c.className = "crown"; c.textContent = "👑"; w.appendChild(c); }
       const nm = document.createElement("div"); nm.className = "pn"; nm.textContent = d.ign + fl(d) + (isMe(d) ? " ⭐" : "");
+      { const bg = bdgEl(d); if (bg) nm.appendChild(bg); } w.dataset.ign = d.ign;
       const pt = document.createElement("div"); pt.className = "pt";
       const tv = document.createElement("span"); byD ? countUp(tv, dayOf(d), "วัน") : countUp(tv, Number(d.total)); pt.appendChild(tv);
       if (byD) { const sm = document.createElement("small"); sm.textContent = Number(d.total).toLocaleString("th-TH") + " ชิ้น"; pt.appendChild(sm); }
@@ -881,12 +912,13 @@ async function loadBoard() {
       const li = document.createElement("li"); if (isMe(d)) li.className = "me";
       const rk = document.createElement("span"); rk.className = "rk"; rk.textContent = k + 4;
       const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = d.ign + fl(d) + (isMe(d) ? " ⭐ (คุณ)" : "");
+      li.dataset.ign = d.ign;
       const tt = document.createElement("span"); tt.className = "tt";
       const b = document.createElement("b"); byD ? countUp(b, dayOf(d), "วัน") : countUp(b, Number(d.total));
       tt.append(b);
       if (byD) { const sm = document.createElement("small"); sm.textContent = Number(d.total).toLocaleString("th-TH") + " ชิ้น"; tt.append(sm); }
       tt.append(rcEl(d, k + 4));
-      const mid = document.createElement("div"); mid.className = "mid"; mid.append(nm, meter((byD ? dayOf(d) : Number(d.total)) / max));
+      const mid = document.createElement("div"); mid.className = "mid"; mid.append(nm); { const bg = bdgEl(d); if (bg) { bg.classList.add("bl"); mid.append(bg); } } mid.append(meter((byD ? dayOf(d) : Number(d.total)) / max));
       li.append(rk, avImg(d, "lav"), mid, tt); rows.appendChild(li);
     });
   } catch (e) {
@@ -1432,7 +1464,7 @@ $("send").addEventListener("click", async () => {
     } catch (e) {}
     var cur = st.cur_min || 0, nx = st.next_min, pct = nx != null ? Math.max(0, Math.min(100, Math.round((st.lifetime - cur) / (nx - cur) * 100))) : 100;
     var lvEl = document.getElementById("hudLv"); if (lvEl) lvEl.textContent = "LV." + st.level + " · " + st.level_name;
-    box.innerHTML = '<div class="xp"><i style="width:' + pct + '%"></i></div><div class="xprow"><span>XP ' + nf(st.lifetime) + (nx != null ? " / " + nf(nx) : "") + "</span><span>" + (nx != null ? "อีก " + nf(nx - st.lifetime) + " ถึง LV." + st.next_lv : "MAX LEVEL 👑") + '</span></div><div class="hstat"><div data-ph="1" title="ดูประวัติแต้ม"><b>⭐ ' + nf(st.balance) + '</b><span>แต้ม · ดูประวัติ ›</span></div><div><b>🔥 ' + esc(streak) + '</b><span>วันติด</span></div><div><b>' + esc(rank) + "</b><span>อันดับเดือนนี้</span></div></div>";
+    box.innerHTML = '<div class="xp"><i style="width:' + pct + '%"></i></div><div class="xprow"><span>XP ' + nf(st.lifetime) + (nx != null ? " / " + nf(nx) : "") + "</span><span>" + (nx != null ? "อีก " + nf(nx - st.lifetime) + " ถึง LV." + st.next_lv : "MAX LEVEL 👑") + '</span></div><div class="hstat"><div data-ph="1" title="ดูประวัติแต้ม"><b>⭐ ' + nf(st.balance) + '</b><span>แต้ม · ดูประวัติ ›</span></div><div><b>🔥 ' + esc(streak) + '</b><span>วันติด</span></div><div><b>' + esc(rank) + "</b><span>อันดับเดือนนี้</span></div></div><button type=\"button\" class=\"pfme\" data-pf=\"" + esc(member.ign) + "\">🏅 เหรียญ & โปรไฟล์ของฉัน ›</button>";
   }
   setInterval(loadStats, 30000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) loadStats(); });
@@ -1734,6 +1766,51 @@ $("send").addEventListener("click", async () => {
     if (!e.target.closest("[data-ph]")) return;
     var b = document.querySelector('#nav button[data-v="shop"]'); if (b) b.click();
     setTimeout(function () { $("phCard").scrollIntoView({ behavior: "smooth", block: "start" }); }, 150);
+  });
+})();
+</script>
+<script>
+// ===== โปรไฟล์สมาชิก + เหรียญ (เฟส 24) =====
+(function () {
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var nf = function (n) { return Number(n || 0).toLocaleString("en-US"); };
+  var sh = document.createElement("div"); sh.id = "pfSheet"; sh.hidden = true; sh.setAttribute("role", "dialog"); sh.setAttribute("aria-modal", "true");
+  sh.innerHTML = '<div class="sh" id="pfBody"></div>'; document.body.appendChild(sh);
+  var body = document.getElementById("pfBody"), seq = 0;
+  function close() { sh.hidden = true; document.body.style.overflow = ""; }
+  sh.addEventListener("click", function (e) { if (e.target === sh || e.target.closest(".x")) close(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !sh.hidden) close(); });
+  function short(n) { return n >= 1e6 ? (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + "M" : n >= 1e4 ? Math.round(n / 1e3) + "k" : nf(n); }
+  async function open(ign) {
+    if (!ign) return;
+    var my = ++seq;
+    sh.hidden = false; document.body.style.overflow = "hidden";
+    body.innerHTML = '<div class="pfh"><span class="pa">' + esc(String(ign).charAt(0).toUpperCase()) + '</span><div><b>' + esc(ign) + '</b><small>กำลังโหลด…</small></div><button type="button" class="x">ปิด</button></div>';
+    var r; try { r = await rpc("member_profile", { p_ign: ign }); } catch (e) { r = { ok: false, error: String(e.message || "").indexOf("404") >= 0 ? "ยังไม่ได้รัน phase24.sql" : "โหลดไม่ได้" }; }
+    if (my !== seq) return;
+    if (!r || !r.ok) { body.querySelector("small").textContent = (r && r.error) || "โหลดไม่ได้"; return; }
+    var since = r.since ? new Date(r.since).toLocaleDateString("th-TH", { month: "short", year: "numeric" }) : "-";
+    var av = r.avatar ? '<img class="pa" alt="" src="' + esc(r.avatar) + '">' : '<span class="pa">' + esc(String(r.ign).charAt(0).toUpperCase()) + "</span>";
+    var h = '<div class="pfh">' + av + "<div><b>" + esc(r.ign) + (r.self ? " (คุณ)" : "") + "</b><small>" + (r.level != null ? "LV." + r.level + " · " + esc(r.level_name) : "ยังไม่ได้ผูกบัญชี") + " · ส่งตั้งแต่ " + since + '</small></div><button type="button" class="x">ปิด</button></div>';
+    h += '<div class="pfs"><div><b>' + (r.month_rank ? "#" + r.month_rank : "-") + "</b>อันดับเดือนนี้</div><div><b>" + short(r.month_total) + "</b>ชิ้นเดือนนี้</div><div><b>🔥 " + nf(r.cur_streak) + "</b>วันติดตอนนี้</div>"
+       + "<div><b>" + nf(r.days) + "</b>วันที่ส่งทั้งหมด</div><div><b>" + short(r.total) + "</b>ชิ้นทั้งหมด</div><div><b>" + nf(r.best_streak) + "</b>ติดกันนานสุด</div></div>";
+    var b = r.badges || [];
+    h += '<p class="pfh3">🏅 เหรียญ (' + b.length + ")</p>";
+    h += b.length ? '<div class="pfb">' + b.map(function (x) { return '<div class="t' + x.tier + '"><i>' + esc(x.icon) + "</i><b>" + esc(x.name) + (x.count > 1 ? " ×" + x.count : "") + "</b>" + esc(x.desc) + "</div>"; }).join("") + "</div>"
+         : '<p style="color:var(--mute);font-size:.85rem;margin:0 0 14px">ยังไม่มีเหรียญ ' + (r.self ? "ส่งของครบ 7 วันเพื่อรับเหรียญแรก 📅" : "") + "</p>";
+    var nx = r.next || [];
+    if (r.self && nx.length) {
+      h += '<p class="pfh3">🎯 เหรียญถัดไป</p><ul class="pfn">' + nx.map(function (x) {
+        var pct = Math.max(2, Math.min(100, Math.round(x.have / x.need * 100)));
+        return "<li><i>" + esc(x.icon) + "</i><span><b>" + esc(x.name) + "</b><small>" + esc(x.desc) + " · " + nf(x.have) + "/" + nf(x.need) + '</small><div class="bar"><u style="width:' + pct + '%"></u></div></span></li>';
+      }).join("") + "</ul>";
+    }
+    body.innerHTML = h;
+  }
+  window.openProfile = open;
+  document.addEventListener("click", function (e) {
+    var pf = e.target.closest("[data-pf]"); if (pf) { open(pf.dataset.pf); return; }
+    var row = e.target.closest("#pod [data-ign], #rows [data-ign]"); if (row) open(row.dataset.ign);
   });
 })();
 </script>
