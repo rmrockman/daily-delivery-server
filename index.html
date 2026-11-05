@@ -297,6 +297,19 @@ body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-v
 .si button{padding:9px;font-size:.9rem}
 .si button:disabled{opacity:.45;filter:grayscale(1)}
 .myr{list-style:none;padding:0;margin:0}
+.phs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 12px}
+.phs div{padding:8px;border:1px solid var(--line);background:rgba(0,229,255,.05);font-size:.72rem;color:var(--mute);line-height:1.3}
+.phs b{display:block;font-size:1rem;color:var(--gold-hi)}
+.phl{list-style:none;padding:0;margin:0}
+.phl li{display:flex!important;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.phl .pi{flex:none;width:30px;height:30px;display:grid;place-items:center;font-size:1.05rem;border:1px solid var(--line);background:#07101f}
+.phl .pt{flex:1;min-width:0;font-style:normal}.phl .pt span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-style:normal;line-height:1.35}
+.phl li *{font-style:normal!important}
+#phMore{background:none!important;border:1px solid var(--line)!important;color:var(--gold-hi)!important;box-shadow:none!important;margin-top:12px}
+.phl .pt small,.phl .pv small{display:block;color:var(--mute);font-size:.72rem}
+.phl .pv{flex:none;text-align:right;font-weight:800}.phl .pv.p{color:var(--ok)}.phl .pv.m{color:#ff6b8a}.phl .pv.z{color:var(--gold-hi)}
+.phl .phn{display:block!important;color:var(--mute);border:0}
+.hstat [data-ph]{cursor:pointer}
 .myr li{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.9rem}
 .myr .st{font-size:.78rem;font-weight:700;white-space:nowrap}
 #authCard h2{margin:0 0 6px;font-size:1.05rem}
@@ -549,6 +562,12 @@ button{border-radius:0!important}
     <div class="shopTop"><span style="color:var(--mute)">แต้มคงเหลือ</span><span class="shopBal" id="shopBal">-</span></div>
     <div class="shopGrid" id="shopGrid"></div>
     <div id="shopMsg" role="status" style="margin-top:12px;min-height:1.2em;font-size:.92rem"></div>
+  </section>
+  <section class="card" id="phCard" style="margin-top:20px">
+    <h2>⭐ ประวัติแต้มของฉัน</h2>
+    <div class="phs" id="phSum"></div>
+    <ul class="phl" id="phList"><li class="phn">กำลังโหลด…</li></ul>
+    <button type="button" class="more" id="phMore" hidden>ดูเพิ่ม</button>
   </section>
   <section class="card" style="margin-top:20px">
     <h2>🎁 ของที่ฉันแลก</h2>
@@ -1413,7 +1432,7 @@ $("send").addEventListener("click", async () => {
     } catch (e) {}
     var cur = st.cur_min || 0, nx = st.next_min, pct = nx != null ? Math.max(0, Math.min(100, Math.round((st.lifetime - cur) / (nx - cur) * 100))) : 100;
     var lvEl = document.getElementById("hudLv"); if (lvEl) lvEl.textContent = "LV." + st.level + " · " + st.level_name;
-    box.innerHTML = '<div class="xp"><i style="width:' + pct + '%"></i></div><div class="xprow"><span>XP ' + nf(st.lifetime) + (nx != null ? " / " + nf(nx) : "") + "</span><span>" + (nx != null ? "อีก " + nf(nx - st.lifetime) + " ถึง LV." + st.next_lv : "MAX LEVEL 👑") + '</span></div><div class="hstat"><div><b>⭐ ' + nf(st.balance) + '</b><span>แต้ม</span></div><div><b>🔥 ' + esc(streak) + '</b><span>วันติด</span></div><div><b>' + esc(rank) + "</b><span>อันดับเดือนนี้</span></div></div>";
+    box.innerHTML = '<div class="xp"><i style="width:' + pct + '%"></i></div><div class="xprow"><span>XP ' + nf(st.lifetime) + (nx != null ? " / " + nf(nx) : "") + "</span><span>" + (nx != null ? "อีก " + nf(nx - st.lifetime) + " ถึง LV." + st.next_lv : "MAX LEVEL 👑") + '</span></div><div class="hstat"><div data-ph="1" title="ดูประวัติแต้ม"><b>⭐ ' + nf(st.balance) + '</b><span>แต้ม · ดูประวัติ ›</span></div><div><b>🔥 ' + esc(streak) + '</b><span>วันติด</span></div><div><b>' + esc(rank) + "</b><span>อันดับเดือนนี้</span></div></div>";
   }
   setInterval(loadStats, 30000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) loadStats(); });
@@ -1675,6 +1694,47 @@ $("send").addEventListener("click", async () => {
   apply(document.getElementById("type"), j.item_types);
   document.querySelectorAll('select[id^="xt"]').forEach(function (s) { apply(s, j.item_types); });
   apply(document.getElementById("loc"), j.locations);
+})();
+</script>
+<script>
+// ===== ประวัติแต้มของฉัน (เฟส 23) =====
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var nf = function (n) { return Number(n || 0).toLocaleString("en-US"); };
+  var sg = function (n) { return (n > 0 ? "+" : n < 0 ? "−" : "") + nf(Math.abs(n)); };
+  var last = null, busy = false;
+  function when(t) { return new Date(t).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); }
+  function row(r) {
+    var lv = r.cat === "level", cls = lv ? "z" : r.points > 0 ? "p" : r.points < 0 ? "m" : "";
+    var val = lv ? "เลเวล" : sg(r.points);
+    var sub = lv ? "สะสม " + sg(r.life) : "คงเหลือ " + nf(r.bal_after);
+    return '<li><span class="pi">' + esc(r.icon) + '</span><span class="pt"><span>' + esc(r.label) + "</span><small>" + when(r.at) + '</small></span><span class="pv ' + cls + '">' + val + "<small>" + sub + "</small></span></li>";
+  }
+  async function load(more) {
+    if (busy || !window.__tok || !window.__tok()) return; busy = true;
+    var r;
+    try { r = await rpc("my_points_history", { p_before: more ? last : null, p_limit: 30 }); }
+    catch (e) { busy = false; var c = String(e.message || "").replace("db ", ""); $("phList").innerHTML = '<li class="phn">โหลดประวัติแต้มไม่ได้ (' + esc(c) + ")" + (c === "404" ? " — ยังไม่ได้รัน phase23.sql" : "") + "</li>"; return; }
+    busy = false;
+    if (!r || !r.ok) { $("phList").innerHTML = '<li class="phn">' + esc((r && r.error) || "โหลดไม่ได้") + "</li>"; return; }
+    var rows = r.rows || [], sm = r.summary || {};
+    if (!more) {
+      $("phSum").innerHTML = '<div><b>' + nf(sm.delivery) + "</b>📦 จากส่งของ</div><div><b>" + nf(sm.reward) + "</b>🎯 จากภารกิจ/รางวัล</div><div><b>" + nf(sm.spent) + "</b>🛒 ใช้แลกของ</div>"
+        + (sm.admin ? '<div style="grid-column:1/-1"><b style="display:inline">' + sg(sm.admin) + "</b> 🛡️ แอดมินปรับให้</div>" : "");
+      $("phList").innerHTML = rows.length ? rows.map(row).join("") : '<li class="phn">ยังไม่มีประวัติแต้ม ส่งของครั้งแรกเพื่อเริ่มสะสม</li>';
+    } else $("phList").insertAdjacentHTML("beforeend", rows.map(row).join(""));
+    if (rows.length) last = rows[rows.length - 1].id;
+    $("phMore").hidden = !r.more;
+  }
+  $("phMore").addEventListener("click", function () { load(true); });
+  $("nav").addEventListener("click", function (e) { var b = e.target.closest("button[data-v]"); if (b && b.dataset.v === "shop") load(false); });
+  new MutationObserver(function () { if (document.querySelector("main").dataset.v === "shop") load(false); }).observe($("shopBal"), { childList: true, characterData: true, subtree: true });
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest("[data-ph]")) return;
+    var b = document.querySelector('#nav button[data-v="shop"]'); if (b) b.click();
+    setTimeout(function () { $("phCard").scrollIntoView({ behavior: "smooth", block: "start" }); }, 150);
+  });
 })();
 </script>
 </body>
