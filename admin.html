@@ -427,6 +427,21 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       </ol>
       <p class="pmsg" id="dcMsg" role="status"></p>
     </section>
+    <section class="card" data-sub="dm" data-label="📨 แจ้ง DM" id="dmCard" data-tab="tools">
+      <h2>📨 แจ้งเตือนสมาชิกทาง DM</h2>
+      <p class="cnt">บอทจะส่งข้อความส่วนตัวหาสมาชิกเมื่อ: อนุมัติ/ปฏิเสธการส่งของ (บอกแต้มที่ได้) · อนุมัติบัญชี · มอบของรางวัล/ยกเลิกการแลก · อนุมัติ/ปฏิเสธคำขอเบิกของ · ได้อันดับประจำเดือน</p>
+      <ol class="wz" id="dmWz">
+        <li data-s="1"><b>อัปเดตโค้ดบอท (ทำครั้งเดียว)</b><span>Supabase (RM CLAN) → Edge Functions → กดฟังก์ชัน <code>discord-roles</code> → แท็บ Code → ลบโค้ดเก่าทั้งหมด → วางโค้ด discord-roles.ts ตัวใหม่ → Deploy</span>
+          <div class="wr"><a class="sec wbtn" href="https://supabase.com/dashboard/project/kjnnjkhneeagjjcsgxus/functions" target="_blank" rel="noopener">เปิดหน้า Edge Functions</a></div></li>
+        <li data-s="2"><b>ทดสอบส่ง DM หาตัวเอง</b><span>กดส่ง รอ 5 วินาที แล้วกดตรวจผล ควรได้ DM จากบอทใน Discord</span>
+          <div class="wr"><button class="sec" id="dmTest" type="button">📨 ส่ง DM ทดสอบ</button><button class="sec" id="dmCheck" type="button">🔍 ตรวจผล</button></div>
+          <div id="dmRes"></div></li>
+        <li data-s="3"><b>เปิดใช้งาน</b>
+          <label class="sw"><input id="dmOn" type="checkbox"><i></i>ส่ง DM แจ้งสมาชิกอัตโนมัติ</label>
+          <span>ถ้าสมาชิกคนไหนไม่ได้ DM แปลว่าเขาปิดรับข้อความจากคนในเซิร์ฟเวอร์ (Discord → ตั้งค่าเซิร์ฟเวอร์ → ความเป็นส่วนตัว → เปิด “ข้อความส่วนตัว”)</span></li>
+      </ol>
+      <p class="pmsg" id="dmMsg" role="status"></p>
+    </section>
     <section class="card" data-sub="team" data-label="🛡️ ทีม" id="teamCard" data-tab="tools">
       <h2>🛡️ ทีมแอดมิน</h2>
       <p class="cnt">เข้าหน้าแอดมินได้เฉพาะบัญชี Discord ในรายชื่อนี้ · เจ้าของเท่านั้นที่เพิ่ม/ถอดแอดมินได้</p>
@@ -472,9 +487,25 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <select id="sumMonth"><option value="0">เดือนนี้</option><option value="-1">เดือนที่แล้ว</option></select>
       <div id="sumBox"><p class="empty">กำลังโหลด…</p></div>
     </section>
-    <section class="card" data-tab="sum">
-      <h2>📣 ประกาศสรุปเดือนที่แล้วอีกครั้ง</h2>
-      <button class="sec" id="sum">โพสต์สรุปเข้า Discord</button>
+    <section class="card" data-tab="sum" id="moCard">
+      <h2>🏆 สรุปประจำเดือนอัตโนมัติ</h2>
+      <p class="cnt" id="moState">กำลังโหลด…</p>
+      <label class="sw"><input id="moOn" type="checkbox"><i></i>โพสต์สรุป + แจกแต้ม Top 3 อัตโนมัติ</label>
+      <p class="cnt" style="margin:4px 0 6px">แต้มรางวัล (ใส่ 0 = ไม่แจก)</p>
+      <div style="display:grid;gap:6px;grid-template-columns:repeat(3,minmax(0,1fr))">
+        <label style="font-size:.75rem;color:var(--mute)">🥇 อันดับ 1<input id="moR1" type="number" min="0" inputmode="numeric"></label>
+        <label style="font-size:.75rem;color:var(--mute)">🥈 อันดับ 2<input id="moR2" type="number" min="0" inputmode="numeric"></label>
+        <label style="font-size:.75rem;color:var(--mute)">🥉 อันดับ 3<input id="moR3" type="number" min="0" inputmode="numeric"></label>
+      </div>
+      <p class="cnt" style="margin:10px 0 6px">ห้องที่โพสต์สรุป (เว้นว่าง = ห้องประกาศเลเวลอัพ)</p>
+      <input id="moHook" placeholder="https://discord.com/api/webhooks/..." autocomplete="off">
+      <button class="sec" id="moSave" type="button" style="margin-top:8px">💾 บันทึกการตั้งค่า</button>
+      <h3 style="margin:18px 0 8px;font-size:1rem" id="moPvT">ตัวอย่างเดือนที่แล้ว</h3>
+      <div id="moPv"></div>
+      <button class="sec" id="moRun" type="button" style="margin-top:8px"></button>
+      <button class="sec" id="sum" type="button" style="margin-top:8px">📣 โพสต์สรุปเดือนที่แล้วซ้ำ (ไม่แจกแต้ม)</button>
+      <p class="pmsg" id="moMsg" role="status"></p>
+      <div id="moHist"></div>
     </section>
 
     
@@ -1120,6 +1151,69 @@ $("dcCheck").onclick = async () => {
   dcRender();
 };
 $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "tools") dcLoad(); });
+
+// ===== แจ้ง DM (เฟส 16) =====
+const dmm = (t, ok) => { $("dmMsg").textContent = t || ""; $("dmMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+function dmRender() {
+  $("dmOn").checked = DCC.dm_enabled === "on";
+  const done = { 1: !!window.__dmOk, 2: !!window.__dmOk, 3: DCC.dm_enabled === "on" };
+  document.querySelectorAll("#dmWz>li").forEach(li => li.classList.toggle("done", !!done[li.dataset.s]));
+}
+const _dcRender = dcRender; dcRender = function () { _dcRender(); dmRender(); };
+$("dmOn").onchange = async () => { try { await pcall("admin_discord_save", { p: { dm_enabled: $("dmOn").checked ? "on" : "off" } }); dmm($("dmOn").checked ? "เปิดแจ้ง DM แล้ว ✓" : "ปิดแจ้ง DM แล้ว", true); await dcLoad(); } catch (e) { dmm(e.message); } };
+$("dmTest").onclick = async () => { try { await pcall("admin_dm_test"); dmm("ส่งแล้ว รอ 5 วินาที แล้วกด 🔍 ตรวจผล", true); setTimeout(() => $("dmCheck").click(), 6000); } catch (e) { dmm(e.message || "ส่งไม่ได้ (ยังไม่ได้รัน phase16.sql?)"); } };
+const MHINT = { 400: "ยังไม่ได้อัปเดตโค้ด discord-roles เป็นตัวใหม่ (ขั้นที่ 1)", 401: RHINT[401], 404: RHINT[404], 500: RHINT[500] };
+$("dmCheck").onclick = async () => {
+  let rows; try { rows = await rpc("admin_dm_check", { p_pass: PASS }) || []; } catch (e) { dmm("ตรวจไม่ได้ (ยังไม่ได้รัน phase16.sql?)"); return; }
+  if (!rows.length) { $("dmRes").innerHTML = '<div class="rres">ยังไม่มีการส่ง DM กด 📨 ส่ง DM ทดสอบ ก่อน</div>'; return; }
+  $("dmRes").innerHTML = rows.map(r => {
+    let inner = [], st = r.http; try { inner = JSON.parse(r.body || "[]"); } catch (e) {}
+    const x = Array.isArray(inner) ? inner[0] : null, ok = st && st < 300 && x && x.status < 300;
+    if (ok) window.__dmOk = true;
+    let why = "";
+    if (!ok && st != null) {
+      if (st >= 300) why = MHINT[st] || r.body;
+      else if (x) why = /50007/.test(x.error || "") ? "คนนี้ปิดรับ DM จากคนในเซิร์ฟเวอร์" : x.status === 401 ? DHINT[401] : x.status === 403 ? "บอทส่ง DM ไม่ได้ (คนนี้ไม่ได้อยู่เซิร์ฟเวอร์เดียวกับบอท หรือปิด DM)" : (x.error || "");
+      else why = "ยังไม่ได้อัปเดตโค้ด discord-roles เป็นตัวใหม่ (ขั้นที่ 1)";
+    }
+    return '<div class="rres"><b>' + esc(r.ign) + "</b> · " + esc(r.kind) + " · " + (st == null ? "⏳ กำลังส่ง..." : ok ? "✅ ส่งถึงแล้ว" : "❌ " + esc(why)) + "</div>";
+  }).join("");
+  dmRender();
+};
+
+// ===== สรุปประจำเดือนอัตโนมัติ (เฟส 16) =====
+let MO = null;
+const mom = (t, ok) => { $("moMsg").textContent = t || ""; $("moMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+async function moLoad() {
+  try { MO = await rpc("admin_monthly", { p_pass: PASS }); } catch (e) { $("moState").textContent = "ยังไม่ได้รัน phase16.sql ใน Supabase"; return; }
+  const ae = document.activeElement;
+  if (![$("moR1"), $("moR2"), $("moR3"), $("moHook")].includes(ae)) { $("moR1").value = MO.r1; $("moR2").value = MO.r2; $("moR3").value = MO.r3; $("moHook").value = MO.webhook || ""; }
+  $("moOn").checked = MO.enabled === "on";
+  $("moState").innerHTML = !MO.cron ? '<b style="color:var(--bad)">⚠️ ตัวตั้งเวลายังไม่ทำงาน</b> ลองรัน phase16.sql อีกครั้ง' : MO.enabled === "on" ? "✅ เปิดอยู่ · จะสรุปเดือน" + esc(MO.next_label) + " ให้เองตอน 00:10 ของวันที่ 1 เดือนหน้า" : "⏸️ ปิดอยู่ · ไม่โพสต์และไม่แจกแต้มอัตโนมัติ";
+  const md = ["🥇", "🥈", "🥉"], rw = [MO.r1, MO.r2, MO.r3].map(Number);
+  $("moPvT").textContent = (MO.last_done ? "ผลเดือน" : "ตัวอย่างเดือน") + MO.last_label;
+  const wrap = (MO.wraps || []).find(w => w.month === MO.last), list = wrap ? wrap.top || [] : MO.preview || [];
+  $("moPv").innerHTML = list.length ? list.map((t, i) => {
+    const r = wrap ? t.reward : (t.member_id ? rw[i] : 0);
+    return '<div class="pc" style="display:flex;gap:10px;align-items:center;margin-bottom:6px;padding:10px"><span style="font-size:1.4rem">' + md[i] + '</span><div style="flex:1;min-width:0"><strong>' + esc(t.ign) + '</strong><small style="display:block;color:var(--mute)">' + Number(t.total).toLocaleString("th-TH") + " ชิ้น · " + t.days + " วัน</small></div><small style='white-space:nowrap'>" + (r > 0 ? "🎁 +" + r : t.member_id ? "ไม่แจก" : "ยังไม่ผูกบัญชี") + "</small></div>";
+  }).join("") : '<p class="cnt">เดือน' + esc(MO.last_label) + " ไม่มีข้อมูลการส่งของ</p>";
+  $("moRun").disabled = MO.last_done || !list.length;
+  $("moRun").textContent = MO.last_done ? "✅ เดือน" + MO.last_label + " แจกรางวัลแล้ว" : "🏆 โพสต์ + แจกรางวัลเดือน" + MO.last_label + " ตอนนี้";
+  const hist = (MO.wraps || []).filter(w => (w.top || []).length);
+  $("moHist").innerHTML = hist.length ? '<p class="cnt" style="margin:14px 0 6px">ประวัติการแจก</p>' + hist.map(w => '<div class="rres"><b>' + esc(w.label) + "</b> · " + (w.top || []).map((t, i) => md[i] + " " + esc(t.ign) + (t.reward ? " +" + t.reward : "")).join(" ") + " · <small>" + (w.by === "auto" ? "อัตโนมัติ" : "โดย " + esc(w.by)) + "</small></div>").join("") : "";
+}
+$("moOn").onchange = async () => { try { await pcall("admin_monthly_save", { p: { enabled: $("moOn").checked ? "on" : "off" } }); mom($("moOn").checked ? "เปิดสรุปอัตโนมัติแล้ว ✓" : "ปิดสรุปอัตโนมัติแล้ว", true); } catch (e) { mom(e.message); } moLoad(); };
+$("moSave").onclick = async () => {
+  try { await pcall("admin_monthly_save", { p: { r1: $("moR1").value.trim() || "0", r2: $("moR2").value.trim() || "0", r3: $("moR3").value.trim() || "0", webhook: $("moHook").value.trim() } }); mom("บันทึกแล้ว ✓", true); } catch (e) { mom(e.message); }
+  document.activeElement.blur(); moLoad();
+};
+$("moRun").onclick = async () => {
+  if (!MO || !confirm("โพสต์สรุปเดือน" + MO.last_label + " ลง Discord และแจกแต้มให้ Top 3 เลยไหม? (ทำได้ครั้งเดียวต่อเดือน)")) return;
+  $("moRun").disabled = true;
+  try { const r = await pcall("admin_monthly_run", { p_month: MO.last }); mom("แจกรางวัลเดือน" + r.label + " แล้ว ✓" + (r.posted ? " โพสต์ลง Discord แล้ว" : " (ยังไม่ได้ตั้งห้อง Discord เลยไม่ได้โพสต์)"), true); } catch (e) { mom(e.message); }
+  moLoad();
+};
+$("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "sum") moLoad(); });
 new MutationObserver(() => { if (!$("panel").hidden) dcLoad(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
 const _lvSave = $("lvSave"); _lvSave.addEventListener("click", () => setTimeout(dcLoad, 1200));
 
