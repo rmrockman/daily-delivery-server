@@ -278,6 +278,7 @@ body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-v
 .shopGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .si{border:1px solid var(--line);border-radius:14px;padding:12px;background:#0e0d0c;display:flex;flex-direction:column;gap:6px}
 .si .em{font-size:1.8rem;line-height:1}
+.si .pic{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:#1a1712;cursor:zoom-in}
 .si b{font-size:.98rem}
 .si .ds{color:var(--mute);font-size:.8rem;flex:1}
 .si .ct{color:var(--gold-hi);font-weight:800}
@@ -1175,7 +1176,7 @@ $("send").addEventListener("click", async () => {
       h = head("เข้าสู่ระบบแล้ว") + '<div class="today" style="display:block">⏳ รอแอดมินอนุมัติบัญชี · ชื่อในเกม <b>' + esc(member.ign) + '</b></div><button class="sm" id="aOut">ออกจากระบบ</button>';
       lock(true);
     } else { // approved
-      h = head("ชื่อในเกม: <b>" + esc(member.ign) + "</b> · อนุมัติแล้ว ✅") + '<div id="aStats" style="margin-top:6px"></div><button class="sm" id="aOut">ออกจากระบบ</button><div style="color:var(--mute);font-size:.7rem;margin-top:6px;opacity:.6">เวอร์ชัน P3</div>';
+      h = head("ชื่อในเกม: <b>" + esc(member.ign) + "</b> · อนุมัติแล้ว ✅") + '<div id="aStats" style="margin-top:6px"></div><button class="sm" id="aOut">ออกจากระบบ</button><div style="color:var(--mute);font-size:.7rem;margin-top:6px;opacity:.6">เวอร์ชัน P3.1</div>';
       lock(false);
       $("ign").value = member.ign; $("ign").readOnly = true;
       try { localStorage.setItem("rm_names", JSON.stringify({ ign: member.ign })); } catch (e) {}
@@ -1259,7 +1260,7 @@ $("send").addEventListener("click", async () => {
       var meta = [];
       if (it.stock != null) meta.push("เหลือ " + nf(it.stock));
       if (it.per_user_limit != null) meta.push("จำกัด " + it.per_user_limit + " ครั้ง" + (PER[it.limit_period] || "") + " (ใช้ไป " + it.used + ")");
-      return '<div class="si"><span class="em">' + esc(it.emoji || "🎁") + "</span><b>" + esc(it.name) + '</b><span class="ds">' + esc(it.description || "") + '</span><span class="ct">⭐ ' + nf(it.cost) + "</span>" + (meta.length ? '<span class="lm">' + esc(meta.join(" · ")) + "</span>" : "") + '<button type="button" data-id="' + it.id + '" data-n="' + esc(it.name) + '" data-c="' + it.cost + '"' + (out || lim || poor ? " disabled" : "") + ">" + why + "</button></div>";
+      return '<div class="si">' + (it.image_url ? '<img class="pic" loading="lazy" alt="" src="' + esc(it.image_url) + '">' : '<span class="em">' + esc(it.emoji || "🎁") + "</span>") + "<b>" + esc(it.name) + '</b><span class="ds">' + esc(it.description || "") + '</span><span class="ct">⭐ ' + nf(it.cost) + "</span>" + (meta.length ? '<span class="lm">' + esc(meta.join(" · ")) + "</span>" : "") + '<button type="button" data-id="' + it.id + '" data-n="' + esc(it.name) + '" data-c="' + it.cost + '"' + (out || lim || poor ? " disabled" : "") + ">" + why + "</button></div>";
     }).join("") : '<p style="color:var(--mute);grid-column:1/-1;margin:0">ยังไม่มีสินค้าในร้าน</p>';
     var mine = r.mine || [];
     $("shopMine").innerHTML = mine.length ? mine.map(function (x) {
@@ -1278,6 +1279,7 @@ $("send").addEventListener("click", async () => {
     } catch (er) { smsg("แลกไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่"); }
     busy = false; await loadShop();
   });
+  $("shopGrid").addEventListener("click", function (e) { var im = e.target.closest("img.pic"); if (im) window.open(im.src, "_blank", "noopener"); });
   $("nav").addEventListener("click", function (e) { var b = e.target.closest("button[data-v]"); if (b && b.dataset.v === "shop") { smsg(""); loadShop(); } });
   document.addEventListener("visibilitychange", function () { if (!document.hidden && document.querySelector("main").dataset.v === "shop") loadShop(); });
 })();
