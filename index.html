@@ -376,6 +376,15 @@ button{border-radius:0!important}
 .nav button.on svg{filter:drop-shadow(0 0 6px var(--gold))}
 .snd{border-radius:0!important;border-color:var(--line)!important;background:#07101f!important;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
 .ft{letter-spacing:.2em;color:var(--mute)!important}
+#ptsQuote{position:relative;margin:4px 0 14px;padding:12px 14px;border:1px solid var(--line);background:linear-gradient(90deg,rgba(0,229,255,.08),rgba(255,61,242,.06));clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+#ptsQuote .qh{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#ptsQuote .ql{font-size:.78rem;color:var(--mute);letter-spacing:.04em}
+#ptsQuote .qv{font-family:"Chakra Petch",sans-serif;font-size:1.5rem;font-weight:700;color:var(--gold-hi);text-shadow:0 0 12px rgba(0,229,255,.55);font-variant-numeric:tabular-nums;transition:transform .15s}
+#ptsQuote .qv.bump{transform:scale(1.12)}
+#ptsQuote .qx{display:inline-block;margin-left:6px;padding:1px 7px;font-size:.72rem;font-weight:700;color:#fff;background:var(--pink);box-shadow:0 0 10px var(--pink);vertical-align:middle}
+#ptsQuote .qd{margin-top:6px;font-size:.74rem;color:var(--mute);line-height:1.6}
+#ptsQuote .qd b{color:var(--ink);font-weight:600}
+#ptsQuote .qa{margin-top:4px;font-size:.74rem;color:#9ff7ff}
 .tabs,.board .tabs{border-radius:0!important;border-color:var(--line)!important;background:rgba(0,229,255,.03)!important;box-shadow:none!important}
 .share,.hist .more{border-radius:0!important;border:1px solid var(--line)!important;background:#07101f!important;color:var(--gold-hi)!important;box-shadow:none!important}
 .mine,.rows li,.hist li{border-radius:0!important;border-color:var(--line)!important;background:rgba(7,16,31,.85)!important}
@@ -432,6 +441,7 @@ button{border-radius:0!important}
       </label>
       <div class="thumbs" id="locThumbs"></div>
     </div>
+    <div id="ptsQuote" hidden></div>
     <button id="send" type="button">ส่งให้แอดมินอนุมัติ</button>
     <div id="msg" role="status"></div>
     <button type="button" id="forget" class="link" hidden style="display:none"></button>
@@ -1259,7 +1269,7 @@ $("send").addEventListener("click", async () => {
       h = head("เข้าสู่ระบบแล้ว") + '<div class="today" style="display:block">⏳ รอแอดมินอนุมัติบัญชี · ชื่อในเกม <b>' + esc(member.ign) + '</b></div><button class="sm" id="aOut">ออกจากระบบ</button>';
       lock(true);
     } else { // approved
-      h = '<div class="who hud">' + (meta().av ? '<img class="av" alt="" src="' + esc(meta().av) + '">' : "") + '<div><div class="lvtag" id="hudLv">LV.-</div><b>' + esc(member.ign) + '</b><div class="dcn">' + esc(meta().name) + '</div></div></div><div id="aStats"></div><div class="hudft"><button class="sm" id="aOut">ออกจากระบบ</button><span>เวอร์ชัน P7</span></div>';
+      h = '<div class="who hud">' + (meta().av ? '<img class="av" alt="" src="' + esc(meta().av) + '">' : "") + '<div><div class="lvtag" id="hudLv">LV.-</div><b>' + esc(member.ign) + '</b><div class="dcn">' + esc(meta().name) + '</div></div></div><div id="aStats"></div><div class="hudft"><button class="sm" id="aOut">ออกจากระบบ</button><span>เวอร์ชัน P9</span></div>';
       lock(false);
       $("ign").value = member.ign; $("ign").readOnly = true;
       try { localStorage.setItem("rm_names", JSON.stringify({ ign: member.ign })); } catch (e) {}
@@ -1397,6 +1407,46 @@ $("send").addEventListener("click", async () => {
   async function load() { try { EVS = (await rpc("active_events")) || []; } catch (e) { EVS = []; } paint(); }
   load(); setInterval(paint, 1000); setInterval(load, 60000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
+})();
+</script>
+
+<script>
+// ===== แต้มที่จะได้ (เฟส 9) =====
+(function () {
+  var box = document.getElementById("ptsQuote"), last = "", timer = null, seq = 0, shown = null;
+  var nf = function (n) { return Number(n || 0).toLocaleString("en-US"); };
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  function items() {
+    var out = [], t = document.getElementById("type"), q = document.getElementById("qty");
+    var n = parseInt(q && q.value, 10); if (t && t.value && n > 0) out.push({ type: t.value, qty: n });
+    try { (window.getExtraItems ? window.getExtraItems() : []).forEach(function (x) { if (x && x.type && x.qty > 0) out.push({ type: x.type, qty: x.qty }); }); } catch (e) {}
+    return out;
+  }
+  function bal() { var el = document.querySelector("#aStats .hstat b"); var m = el && el.textContent.replace(/[^0-9]/g, ""); return m ? Number(m) : null; }
+  async function quote(list) {
+    var my = ++seq, r;
+    try { r = await rpc("points_quote", { p_items: list }); } catch (e) { if (my === seq) box.hidden = true; return; }
+    if (my !== seq || !r) return;
+    var lines = (r.lines || []).filter(function (l) { return l.qty > 0; });
+    if (!lines.length) { box.hidden = true; return; }
+    var b = bal(), mx = Number(r.mult) > 1;
+    box.innerHTML = '<div class="qh"><span class="ql">⭐ แต้มที่จะได้หลังอนุมัติ</span><span class="qv">+' + nf(r.points) + (mx ? '<span class="qx">🔥 x' + Number(r.mult) + "</span>" : "") + "</span></div>"
+      + '<div class="qd">' + lines.map(function (l) {
+          return l.norate ? esc(l.type) + " " + nf(l.qty) + " ชิ้น → <b>ไม่มีแต้ม</b>"
+            : esc(l.type) + " " + nf(l.qty) + " ชิ้น → <b>+" + nf(l.points) + "</b> <span style=\"opacity:.7\">(ทุก " + nf(l.per_qty) + " ชิ้น = " + nf(l.rate) + " แต้ม" + (Number(l.mult) > 1 ? " · x" + Number(l.mult) : "") + ")</span>";
+        }).join("<br>") + "</div>"
+      + (b != null && r.points > 0 ? '<div class="qa">💰 ' + nf(b) + " + " + nf(r.points) + " = <b>" + nf(b + r.points) + "</b> แต้ม</div>" : "");
+    box.hidden = false;
+    if (shown !== r.points) { var v = box.querySelector(".qv"); v.classList.add("bump"); setTimeout(function () { v.classList.remove("bump"); }, 160); shown = r.points; }
+  }
+  setInterval(function () {
+    var list = items(), key = JSON.stringify(list);
+    if (key === last) return; last = key;
+    clearTimeout(timer);
+    if (!list.length) { seq++; box.hidden = true; shown = null; return; }
+    timer = setTimeout(function () { quote(list); }, 300);
+  }, 400);
+  setInterval(function () { last = ""; }, 60000); // อีเวนต์เริ่ม/จบระหว่างกรอก
 })();
 </script>
 </body>

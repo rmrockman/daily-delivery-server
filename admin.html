@@ -181,6 +181,8 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
 .evi button{width:auto;padding:6px 10px;font-size:.76rem;flex:none}
 .est{display:inline-block;font-size:.66rem;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:4px}
 .est.live{background:#ff6a26;color:#fff}.est.soon{background:#2a2316;color:var(--hi)}.est.ended{background:#1f1f1f;color:var(--mute)}
+.ptsPrev{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:rgba(242,180,43,.08);border:1px solid rgba(242,180,43,.3);font-size:.86rem;color:var(--hi)}
+.ptsPrev b{color:#fff}.ptsPrev.none{background:none;border-style:dashed;color:var(--mute)}
 </style>
 </head>
 <body>
@@ -499,6 +501,13 @@ function buildEmbeds(r) {
   else { items.forEach(x => fields.push({ name: STY(x.type).icon + " " + x.type, value: "**" + Number(x.qty).toLocaleString("th-TH") + "** ชิ้น", inline: true })); fields.push({ name: "📊 รวม", value: "**" + total.toLocaleString("th-TH") + "** ชิ้น", inline: true }); }
   if (!same) fields.push({ name: "💬 Discord", value: dc, inline: true });
   if (loc) fields.push({ name: "📍 ตำแหน่ง", value: loc, inline: true });
+  const P = r._pts;
+  if (P && P.linked && P.points > 0) {
+    const nf = n => Number(n || 0).toLocaleString("en-US"), mx = Number(P.mult) > 1 ? " 🔥 x" + Number(P.mult) : "";
+    fields.push({ name: "⭐ แต้มที่ได้", value: "**+" + nf(P.points) + "**" + mx, inline: true },
+                { name: "💰 แต้มสะสม", value: nf(P.before) + " + " + nf(P.points) + " = **" + nf(P.after) + "**", inline: true });
+    if (P.level) fields.push({ name: "🎖️ เลเวล", value: "Lv." + P.level + " · " + P.level_name, inline: true });
+  }
   const gal = urls.length > 1 ? "https://discord.com" : undefined; // embed ที่ url เดียวกันจะรวมเป็นแกลเลอรี
   const e0 = { title: (big ? "🔥 " : "") + sty.icon + " ส่งของรายวัน" + (big ? " · ยอดใหญ่!" : ""), color: sty.color, url: gal, fields, timestamp: new Date(r.created_at || Date.now()).toISOString(), footer: { text: "Rockman · ส่งของรายวัน · อนุมัติแล้ว ✅" } };
   if (urls[0]) e0.image = { url: urls[0] };
@@ -533,6 +542,7 @@ function pcard(r) {
     const im = el("img"); im.src = su; im.loading = "lazy"; im.alt = "รูปที่ " + (i + 1); a.appendChild(im); th.appendChild(a);
   });
   if (th.children.length) c.appendChild(th);
+  if (r.status === "pending") { const pp = el("p", "ptsPrev", "⭐ กำลังคำนวณแต้ม..."); pp.dataset.id = r.id; c.appendChild(pp); }
   const act = el("div", "pact");
   if (r.status === "approved") {
     c.appendChild(el("p", "pn", "อนุมัติและนับยอดแล้ว แต่ยังส่งเข้า Discord ไม่สำเร็จ"));
@@ -631,11 +641,14 @@ async function approvePend(r) {
   try {
     const before = await topNow();
     if (!approved) { const x = await pcall("admin_approve", { p_id: r.id }); row = x.row; approved = true; }
+    let pts = null;
+    try { pts = await rpc("admin_delivery_points", { p_pass: PASS, p_id: r.id }); row = Object.assign({}, row, { _pts: pts }); } catch (e) {}
     pm("กำลังส่งเข้า Discord...");
     await pcall("admin_notify_discord", { p_payload: { username: "ส่งของรายวัน", allowed_mentions: { parse: [] }, embeds: buildEmbeds(row) } });
     await pcall("admin_mark_posted", { p_id: r.id });
     announceTop(before, r.ign);
-    pm("อนุมัติ " + r.ign + " แล้ว ✅ นับยอดและลง Discord เรียบร้อย", "ok");
+    const ptxt = pts && pts.linked ? (pts.points > 0 ? " · ⭐ +" + Number(pts.points).toLocaleString("en-US") + " แต้ม (" + Number(pts.before).toLocaleString("en-US") + " → " + Number(pts.after).toLocaleString("en-US") + ")" + (Number(pts.mult) > 1 ? " 🔥 x" + Number(pts.mult) : "") : " · ไม่ได้แต้ม (หมวดนี้ไม่มีอัตราแต้ม)") : "";
+    pm("อนุมัติ " + r.ign + " แล้ว ✅ นับยอดและลง Discord เรียบร้อย" + ptxt, "ok");
   } catch (e) {
     pm(approved ? "อนุมัติและนับยอดแล้ว แต่ส่งเข้า Discord ไม่สำเร็จ — กด “ส่งเข้า Discord อีกครั้ง” ที่รายการ" : (e.user ? e.message : "อนุมัติไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่"), "err");
   }
@@ -1014,6 +1027,28 @@ const _lvSave = $("lvSave"); _lvSave.addEventListener("click", () => setTimeout(
   $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "tools") loadEv(); });
   new MutationObserver(() => { if (!$("panel").hidden) loadEv(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
   setInterval(() => { if (PASS && !$("panel").hidden && $("panel").dataset.t === "tools") loadEv(); }, 60000);
+})();
+
+// ===== แต้มคาดการณ์ในคิวรออนุมัติ (เฟส 8) =====
+(function () {
+  let busy = false;
+  async function fill() {
+    if (busy || !PASS) return;
+    const els = [...document.querySelectorAll("#pendList .ptsPrev:not([data-done])")]; if (!els.length) return;
+    busy = true;
+    try {
+      const map = await rpc("admin_points_preview", { p_pass: PASS, p_ids: els.map(e => Number(e.dataset.id)) }) || {};
+      els.forEach(e => {
+        const v = map[e.dataset.id]; e.dataset.done = "1";
+        if (!v) { e.remove(); return; }
+        if (!v.linked) { e.className = "ptsPrev none"; e.textContent = "⭐ ส่งจากระบบเก่า (ไม่ได้ล็อกอิน) — ไม่ได้แต้ม"; return; }
+        if (!(v.points > 0)) { e.className = "ptsPrev none"; e.textContent = "⭐ หมวดนี้ยังไม่มีอัตราแต้ม — อนุมัติแล้วได้ 0 แต้ม"; return; }
+        e.innerHTML = "⭐ อนุมัติแล้วสมาชิกได้ <b>+" + Number(v.points).toLocaleString("en-US") + " แต้ม</b>" + (Number(v.mult) > 1 ? " 🔥 อีเวนต์ x" + Number(v.mult) : "");
+      });
+    } catch (e) { els.forEach(x => x.remove()); }
+    busy = false;
+  }
+  new MutationObserver(() => setTimeout(fill, 50)).observe($("pendList"), { childList: true, subtree: true });
 })();
 </script>
 </body>
