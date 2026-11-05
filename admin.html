@@ -983,6 +983,7 @@ function renderItems() { $("itemList").innerHTML = SHOP.items.length ? '<p class
 function openItem(it) {
   const ed = $("itemEdit");
   ed.innerHTML = '<button class="sec f-back" type="button" style="width:auto;padding:8px 14px;margin:10px 0">← กลับไปรายการสินค้า</button><p class="cnt" style="margin:0 0 8px">' + (it.id ? "✏️ แก้ไขสินค้า" : "➕ เพิ่มสินค้าใหม่") + "</p>" + itemForm(it);
+  if (it.id) { ed.insertAdjacentHTML("beforeend", '<div class="pc" id="limBox" style="margin-bottom:12px"><strong>🔄 สิทธิ์จำกัดต่อคน</strong><div id="limList"><p class="cnt">กำลังโหลด…</p></div></div>'); limLoad(it.id); }
   clearDirty(ed); ed.hidden = false; $("itemList").hidden = true; $("itemAdd").hidden = true;
   $("itemCard").scrollIntoView({ block: "start", behavior: "smooth" });
 }
@@ -1315,6 +1316,28 @@ $("siteSave").onclick = async () => {
 };
 $("subnav").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (b && b.dataset.s === "site") siteLoad(true); });
 new MutationObserver(() => { if (!$("panel").hidden) siteLoad(false); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
+
+// ===== รีเซ็ตสิทธิ์จำกัดต่อคน (เฟส 20) =====
+const PER_TH = { total: "ตลอด", week: "ต่อสัปดาห์", month: "ต่อเดือน" };
+async function limLoad(id) {
+  const box = $("limList"); if (!box) return;
+  let r; try { r = await pcall("admin_shop_limit_users", { p_item: Number(id) }); } catch (e) { box.innerHTML = '<p class="cnt">ยังไม่ได้รัน phase20.sql ใน Supabase</p>'; return; }
+  if (!$("limList")) return;
+  if (r.limit == null) { box.innerHTML = '<p class="cnt" style="margin:6px 0 0">สินค้านี้ไม่ได้จำกัดต่อคน แลกได้ไม่จำกัด</p>'; return; }
+  const u = r.users || [];
+  box.innerHTML = '<p class="cnt" style="margin:6px 0 8px">จำกัด ' + r.limit + " ครั้ง " + (PER_TH[r.period] || "") + " · รีเซ็ตแล้วสมาชิกแลกได้ใหม่ (ประวัติยังอยู่ แต้มไม่คืน)</p>"
+    + (u.length ? u.map(x => '<div class="kv" style="justify-content:space-between"><span style="margin:0">' + esc(x.ign) + ' <small style="color:var(--mute)">ใช้ ' + x.used + "/" + r.limit + (x.used >= r.limit ? " · ครบแล้ว" : "") + '</small></span><button class="sec lim-one" type="button" data-m="' + esc(x.member_id) + '" data-n="' + esc(x.ign) + '">🔄 รี</button></div>').join("")
+      + '<button class="sec lim-all" type="button" style="width:auto;padding:8px 14px;margin-top:6px">🔄 รีเซ็ตทุกคน (' + u.length + " คน)</button>"
+      : '<p class="cnt" style="margin:0">ยังไม่มีใครใช้สิทธิ์ในรอบนี้</p>');
+}
+$("itemEdit").addEventListener("click", async e => {
+  const one = e.target.closest(".lim-one"), all = e.target.closest(".lim-all"); if (!one && !all) return;
+  const f = $("itemEdit").querySelector(".it"), id = f && f.dataset.id, nm = f ? f.querySelector(".f-name").value : "";
+  if (!id || !confirm(one ? "รีเซ็ตสิทธิ์ “" + nm + "” ของ " + one.dataset.n + " ให้แลกได้ใหม่?" : "รีเซ็ตสิทธิ์ “" + nm + "” ของทุกคน ให้แลกได้ใหม่?")) return;
+  (one || all).disabled = true;
+  try { const r = await pcall("admin_shop_limit_reset", { p_item: Number(id), p_member: one ? one.dataset.m : null }); smA("รีเซ็ตสิทธิ์ให้ " + r.who + " แล้ว ✓", true); } catch (er) { smA(er.message); }
+  limLoad(id);
+});
 
 // ===== แจ้ง DM (เฟส 16) =====
 const dmm = (t, ok) => { $("dmMsg").textContent = t || ""; $("dmMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
