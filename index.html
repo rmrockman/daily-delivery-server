@@ -235,7 +235,7 @@ p.sub{line-height:1.5}
 
 /* ===== v4: แยกหน้า + เมนูลอยด้านล่าง ===== */
 body{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
-main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-view=rank]),main[data-v=hist] .view:not([data-view=hist]),main[data-v=shop] .view:not([data-view=shop]){display:none}
+main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-view=rank]),main[data-v=hist] .view:not([data-view=hist]),main[data-v=shop] .view:not([data-view=shop]),main[data-v=inv] .view:not([data-view=inv]){display:none}
 .view{animation:up .4s ease-out both}
 .view>.card+.card{margin-top:20px}
 .nav{position:fixed;z-index:50;left:0;right:0;bottom:0;display:flex;align-items:stretch;padding:12px max(8px,calc((100% - 480px)/2)) max(16px,env(safe-area-inset-bottom,0px));background:#15130f;border-top:1px solid rgba(242,180,43,.28);box-shadow:0 -8px 28px rgba(0,0,0,.55)}
@@ -284,7 +284,7 @@ main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-
 #evBanner .cd i{display:block;font-style:normal;font-size:.62rem;font-weight:600;color:#ffcf9a}
 #authCard .bar{height:8px;border-radius:99px;background:#26221a;overflow:hidden;margin:8px 0 4px}
 #authCard .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));transition:width .6s}
-body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-view="hist"],body.rm-lock .view[data-view="shop"]{display:none!important}
+body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-view="hist"],body.rm-lock .view[data-view="shop"],body.rm-lock .view[data-view="inv"],body.rm-lock #invNeed{display:none!important}
 .shopTop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
 .shopBal{font-size:1.25rem;font-weight:800;color:var(--gold-hi)}
 .shopGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -389,6 +389,22 @@ button{border-radius:0!important}
 .shov{background:rgba(2,4,10,.86)!important}
 .shbox,.shbox img{border-radius:0!important;border-color:rgba(0,229,255,.6)!important;box-shadow:0 0 30px rgba(0,229,255,.35)!important}
 .shact button.ghost{background:#07101f!important;color:var(--gold-hi)!important;border:1px solid var(--line)!important}
+#invNeed{margin:0 0 14px;padding:10px 12px;border:1px solid rgba(255,61,242,.45);background:linear-gradient(90deg,rgba(255,61,242,.1),rgba(7,16,31,.9));clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+#invNeed b{display:block;font-size:.8rem;color:#ff9cf8;letter-spacing:.05em;margin-bottom:6px}
+#invNeed .ch{display:inline-flex;align-items:center;gap:4px;margin:0 6px 6px 0;padding:4px 10px;font-size:.8rem;border:1px solid var(--line);background:#07101f;color:var(--ink);cursor:pointer;width:auto;font-weight:600}
+#invNeed .ch.out{border-color:rgba(255,92,138,.6);color:#ffb3c6}
+#invNeed small{display:block;font-size:.7rem;color:var(--mute)}
+.invSum{margin:-4px 0 12px;font-size:.82rem;color:var(--mute)}
+.invList{list-style:none;margin:0;padding:0}
+.invList li{display:flex;align-items:center;gap:12px;padding:11px 12px;margin-bottom:8px;border:1px solid var(--line);background:rgba(7,16,31,.85)}
+.invList li.low{border-color:rgba(255,200,60,.55)}.invList li.out{border-color:rgba(255,92,138,.6);background:linear-gradient(90deg,rgba(255,92,138,.12),rgba(7,16,31,.85))}
+.invList .ie{width:40px;height:40px;flex:none;display:grid;place-items:center;font-size:1.2rem;font-weight:700;color:var(--gold-hi);background:#0a1830;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.invList .in{flex:1;min-width:0}.invList .in b{display:block;font-size:.98rem}
+.invList .in small{font-size:.72rem;color:var(--mute)}
+.invList .iq{text-align:right;font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:1.2rem;color:var(--gold-hi);font-variant-numeric:tabular-nums}
+.invList .st{display:inline-block;margin-top:2px;padding:1px 7px;font-size:.66rem;font-weight:700}
+.st.ok{background:rgba(61,255,176,.12);color:var(--ok)}.st.low{background:rgba(255,200,60,.15);color:#ffd36b}.st.out{background:rgba(255,92,138,.18);color:#ff9ab4}
+#wMsg{margin-top:12px;min-height:1.3em;font-size:.92rem}#wMsg.err{color:var(--err)}#wMsg.ok{color:var(--ok)}
 #ptsQuote{position:relative;margin:4px 0 14px;padding:12px 14px;border:1px solid var(--line);background:linear-gradient(90deg,rgba(0,229,255,.08),rgba(255,61,242,.06));clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
 #ptsQuote .qh{display:flex;align-items:center;justify-content:space-between;gap:10px}
 #ptsQuote .ql{font-size:.78rem;color:var(--mute);letter-spacing:.04em}
@@ -419,6 +435,7 @@ button{border-radius:0!important}
   <div class="view" data-view="send">
   <div id="evBanner" hidden></div>
   <div class="card" id="authCard"><p style="margin:0">กำลังตรวจสอบบัญชี...</p></div>
+  <div id="invNeed" hidden></div>
   <div class="today" id="today" hidden></div>
   <div class="card">
     <div class="prog" aria-hidden="true"><i id="progBar"></i></div>
@@ -513,6 +530,26 @@ button{border-radius:0!important}
     <p style="color:var(--mute);font-size:.8rem;margin:10px 0 0">แลกแล้วรอแอดมินมอบของให้ในเกม ถ้าแอดมินยกเลิก แต้มจะคืนให้อัตโนมัติ</p>
   </section>
   </div>
+  <div class="view" data-view="inv">
+  <section class="card" id="invCard">
+    <h2>📦 คลังกลาง</h2>
+    <p class="invSum" id="invSum"></p>
+    <ul class="invList" id="invList"></ul>
+  </section>
+  <section class="card" style="margin-top:20px">
+    <h2>📤 ขอเบิกของ</h2>
+    <div class="field"><label for="wItem">ของที่ต้องการเบิก</label><select id="wItem"></select></div>
+    <div class="field"><label for="wQty">จำนวน</label><input type="number" id="wQty" min="1" step="1" inputmode="numeric" placeholder="เช่น 100"><div class="chips" id="wChips"><button type="button" data-a="10">+10</button><button type="button" data-a="100">+100</button><button type="button" data-a="1000">+1,000</button><button type="button" data-a="max">ทั้งหมด</button><button type="button" class="x" data-a="0">ล้าง</button></div></div>
+    <div class="field"><label for="wNote">เหตุผล / ใช้ทำอะไร (บังคับ)</label><input type="text" id="wNote" maxlength="200" placeholder="เช่น ทำ C4 ไปเรดวันเสาร์"></div>
+    <button id="wSend" type="button">ส่งคำขอเบิก</button>
+    <div id="wMsg" role="status"></div>
+  </section>
+  <section class="card" style="margin-top:20px">
+    <h2>📋 คำขอเบิกของฉัน</h2>
+    <ul class="myr" id="wMine"></ul>
+    <p style="color:var(--mute);font-size:.8rem;margin:10px 0 0">แอดมินอนุมัติแล้วระบบตัดของในคลังให้อัตโนมัติ และแจ้งเข้า Discord</p>
+  </section>
+  </div>
   <p class="ft">Rockman · ส่งของรายวัน</p>
 </main>
 <nav class="nav" id="nav" aria-label="เมนูหลัก">
@@ -520,6 +557,7 @@ button{border-radius:0!important}
   <button type="button" data-v="rank" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4 4 5-7 5 7 4-4-2 12H5z"/></svg></span><span class="nl">อันดับ</span></button>
   <button type="button" data-v="hist" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></span><span class="nl">ประวัติ</span></button>
   <button type="button" data-v="shop" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v7h14v-7"/></svg></span><span>ร้านค้า</span></button>
+  <button type="button" data-v="inv" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-5 9 5v12"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg></span><span>คลัง</span></button>
 </nav>
 <script>document.write('<script src="config.js?t='+Date.now()+'"><\/script>')</script>
 <script>
@@ -1313,7 +1351,7 @@ $("send").addEventListener("click", async () => {
       lock(true);
     } else { // approved
       var pic = member.photo || meta().av;
-      h = '<div class="who hud"><label class="avwrap" title="เปลี่ยนรูปโปรไฟล์">' + (pic ? '<img class="av" alt="" src="' + esc(pic) + '">' : '<span class="av ini">' + esc(String(member.ign || "?").charAt(0).toUpperCase()) + "</span>") + '<span class="avcam">📷</span><input type="file" id="avFile" accept="image/*" hidden></label><div><div class="lvtag" id="hudLv">LV.-</div><b>' + esc(member.ign) + '</b><div class="dcn">' + esc(meta().name) + (member.custom ? ' · <a href="#" id="avReset">ใช้รูป Discord</a>' : "") + '</div></div></div><div id="avMsg"></div><div id="aStats"></div><div class="hudft"><button class="sm" id="aOut">ออกจากระบบ</button><span>เวอร์ชัน P11.1</span></div>';
+      h = '<div class="who hud"><label class="avwrap" title="เปลี่ยนรูปโปรไฟล์">' + (pic ? '<img class="av" alt="" src="' + esc(pic) + '">' : '<span class="av ini">' + esc(String(member.ign || "?").charAt(0).toUpperCase()) + "</span>") + '<span class="avcam">📷</span><input type="file" id="avFile" accept="image/*" hidden></label><div><div class="lvtag" id="hudLv">LV.-</div><b>' + esc(member.ign) + '</b><div class="dcn">' + esc(meta().name) + (member.custom ? ' · <a href="#" id="avReset">ใช้รูป Discord</a>' : "") + '</div></div></div><div id="avMsg"></div><div id="aStats"></div><div class="hudft"><button class="sm" id="aOut">ออกจากระบบ</button><span>เวอร์ชัน P12</span></div>';
       lock(false);
       $("ign").value = member.ign; $("ign").readOnly = true;
       try { localStorage.setItem("rm_names", JSON.stringify({ ign: member.ign })); } catch (e) {}
@@ -1508,6 +1546,85 @@ $("send").addEventListener("click", async () => {
     timer = setTimeout(function () { quote(list); }, 300);
   }, 400);
   setInterval(function () { last = ""; }, 60000); // อีเวนต์เริ่ม/จบระหว่างกรอก
+})();
+</script>
+
+<script>
+// ===== คลังกลาง + ขอเบิก (เฟส 12) =====
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var nf = function (n) { return Number(n || 0).toLocaleString("en-US"); };
+  var ITEMS = [], busy = false;
+  var ST = { pending: ["⏳ รออนุมัติ", "var(--gold-hi)"], approved: ["✅ อนุมัติแล้ว", "var(--ok)"], rejected: ["❌ ไม่อนุมัติ", "var(--err)"], cancelled: ["↩️ ยกเลิกแล้ว", "var(--mute)"] };
+  function state(it) { return it.qty <= 0 ? "out" : it.qty <= it.low_at ? "low" : "ok"; }
+  function wmsg(t, c) { $("wMsg").textContent = t || ""; $("wMsg").className = c || ""; }
+  function renderNeed() {
+    var need = ITEMS.filter(function (i) { return state(i) !== "ok"; }).sort(function (a, b) { return a.qty - b.qty; });
+    var box = $("invNeed");
+    if (!need.length) { box.hidden = true; return; }
+    box.innerHTML = "<b>📦 คลังต้องการของเหล่านี้ · แตะเพื่อเลือกส่ง</b>" + need.slice(0, 6).map(function (i) {
+      return '<button type="button" class="ch ' + state(i) + '" data-n="' + esc(i.name) + '">' + (state(i) === "out" ? "🔴 " : "🟡 ") + esc(i.name) + " · " + (i.qty <= 0 ? "หมด" : "เหลือ " + nf(i.qty)) + "</button>";
+    }).join("") + "<small>ส่งของที่คลังขาดก่อน ช่วยทีมได้มากที่สุด</small>";
+    box.hidden = false;
+  }
+  function render(r) {
+    ITEMS = r.items || [];
+    var low = ITEMS.filter(function (i) { return state(i) === "low"; }).length, out = ITEMS.filter(function (i) { return state(i) === "out"; }).length;
+    $("invSum").textContent = ITEMS.length ? "ทั้งหมด " + ITEMS.length + " รายการ" + (out ? " · หมด " + out : "") + (low ? " · ใกล้หมด " + low : "") + (!out && !low ? " · ของพอทุกอย่าง ✅" : "") : "";
+    $("invList").innerHTML = ITEMS.length ? ITEMS.slice().sort(function (a, b) { var o = { out: 0, low: 1, ok: 2 }; return o[state(a)] - o[state(b)] || 0; }).map(function (i) {
+      var s = state(i);
+      return '<li class="' + s + '"><span class="ie">' + esc(i.emoji || String(i.name).charAt(0)) + '</span><span class="in"><b>' + esc(i.name) + "</b><small>" + (i.low_at > 0 ? "ใกล้หมดเมื่อเหลือ ≤ " + nf(i.low_at) : "") + (i.pending_out > 0 ? (i.low_at > 0 ? " · " : "") + "รอเบิก " + nf(i.pending_out) : "") + '</small></span><span class="iq">' + nf(i.qty) + '<br><span class="st ' + s + '">' + (s === "out" ? "หมด" : s === "low" ? "ใกล้หมด" : "พอ") + "</span></span></li>";
+    }).join("") : '<li style="justify-content:center;color:var(--mute)">ยังไม่มีของในคลัง</li>';
+    var cur = $("wItem").value;
+    $("wItem").innerHTML = ITEMS.filter(function (i) { return i.qty > 0; }).map(function (i) { return '<option value="' + i.id + '">' + esc(i.name) + " (เหลือ " + nf(i.qty) + ")</option>"; }).join("") || '<option value="">— ไม่มีของให้เบิก —</option>';
+    if (cur) $("wItem").value = cur;
+    var mine = r.mine || [];
+    $("wMine").innerHTML = mine.length ? mine.map(function (x) {
+      var st = ST[x.status] || [x.status, "var(--mute)"];
+      return "<li><span>" + esc(x.item_name) + " ×" + nf(x.qty) + '<br><small style="color:var(--mute)">' + esc(x.note) + " · " + new Date(x.created_at).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + (x.reason ? "<br>💬 " + esc(x.reason) : "") + '</small></span><span class="st" style="color:' + st[1] + ';text-align:right">' + st[0] + (x.status === "pending" ? '<br><button type="button" class="link" data-c="' + x.id + '" style="margin:4px 0 0;padding:0;font-size:.75rem">ยกเลิก</button>' : "") + "</span></li>";
+    }).join("") : '<li style="color:var(--mute)">ยังไม่เคยขอเบิก</li>';
+    renderNeed();
+  }
+  async function load() {
+    if (!(window.__tok && window.__tok())) return;
+    try { var r = await rpc("inv_public"); if (r && r.ok) render(r); } catch (e) {}
+  }
+  window.loadInv = load;
+  $("wChips").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-a]"); if (!b) return;
+    var q = $("wQty"), it = ITEMS.find(function (i) { return String(i.id) === $("wItem").value; });
+    if (b.dataset.a === "0") q.value = ""; else if (b.dataset.a === "max") q.value = it ? it.qty : ""; else q.value = (parseInt(q.value, 10) || 0) + Number(b.dataset.a);
+  });
+  $("wSend").addEventListener("click", async function () {
+    if (busy) return;
+    var id = Number($("wItem").value), q = parseInt($("wQty").value, 10), n = $("wNote").value.trim();
+    if (!id) return wmsg("ไม่มีของให้เบิก", "err");
+    if (!(q >= 1)) return wmsg("กรอกจำนวนที่ต้องการเบิก", "err");
+    if (!n) return wmsg("ใส่เหตุผลก่อนขอเบิก", "err");
+    busy = true; $("wSend").disabled = true; wmsg("กำลังส่งคำขอ...");
+    try {
+      var r = await rpc("inv_request", { p_item: id, p_qty: q, p_note: n });
+      if (!r || !r.ok) wmsg((r && r.error) || "ส่งคำขอไม่สำเร็จ", "err");
+      else { wmsg("ส่งคำขอแล้ว ⏳ รอแอดมินอนุมัติ", "ok"); $("wQty").value = ""; $("wNote").value = ""; }
+    } catch (e) { wmsg("ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้ง", "err"); }
+    busy = false; $("wSend").disabled = false; load();
+  });
+  $("wMine").addEventListener("click", async function (e) {
+    var b = e.target.closest("button[data-c]"); if (!b || !confirm("ยกเลิกคำขอเบิกนี้?")) return;
+    try { await rpc("inv_cancel", { p_id: Number(b.dataset.c) }); } catch (er) {}
+    load();
+  });
+  $("invNeed").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-n]"); if (!b) return;
+    var t = $("type"); if (!t) return;
+    if (![].some.call(t.options, function (o) { return o.value === b.dataset.n; })) { wmsg(""); alert("หมวด “" + b.dataset.n + "” ยังไม่มีในฟอร์มส่งของ"); return; }
+    t.value = b.dataset.n; t.dispatchEvent(new Event("change", { bubbles: true })); $("qty").focus();
+  });
+  $("nav").addEventListener("click", function (e) { var b = e.target.closest("button[data-v]"); if (b && b.dataset.v === "inv") { wmsg(""); load(); } });
+  var tries = 0, t0 = setInterval(function () { if (window.__tok && window.__tok()) { load(); clearInterval(t0); } else if (++tries > 40) clearInterval(t0); }, 1500);
+  setInterval(function () { if (!document.hidden) load(); }, 120000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
 })();
 </script>
 </body>
