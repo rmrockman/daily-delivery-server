@@ -779,8 +779,10 @@ function mergeAliases(data) {
   });
   return [...out.values()].sort((x, y) => y.total - x.total);
 }
+let BOARD_SEQ = 0;
 async function loadBoard() {
   if (!BOARD_ON) return;
+  const mySeq = ++BOARD_SEQ;
   $("boardCard").hidden = false;
   const mo = bkkMonth(boardOffset), rows = $("rows");
   $("boardMonth").textContent = mo.label;
@@ -793,6 +795,8 @@ async function loadBoard() {
     await Promise.all([loadStreaks(), loadAvatars()]);
     try { window.loadTypeBoard && window.loadTypeBoard(mo.key, mo.label); } catch (e) {}
     const data = mergeAliases(await rpc("leaderboard", { p_month: mo.key }));
+    if (mySeq !== BOARD_SEQ) return; // มีการโหลดอันดับรอบใหม่แล้ว ไม่วาดซ้อน
+    rows.innerHTML = ""; $("pod").innerHTML = "";
     const byD = rankMode === "d", dayOf = x => Number(x.days) || 0;
     if (byD) data.sort((x, y) => dayOf(y) - dayOf(x) || y.total - x.total);
     const kOf = x => String(x.ign).toLowerCase(), rP = {}, rD = {};
@@ -1309,7 +1313,7 @@ $("send").addEventListener("click", async () => {
       lock(true);
     } else { // approved
       var pic = member.photo || meta().av;
-      h = '<div class="who hud"><label class="avwrap" title="เปลี่ยนรูปโปรไฟล์">' + (pic ? '<img class="av" alt="" src="' + esc(pic) + '">' : '<span class="av ini">' + esc(String(member.ign || "?").charAt(0).toUpperCase()) + "</span>") + '<span class="avcam">📷</span><input type="file" id="avFile" accept="image/*" hidden></label><div><div class="lvtag" id="hudLv">LV.-</div><b>' + esc(member.ign) + '</b><div class="dcn">' + esc(meta().name) + (member.custom ? ' · <a href="#" id="avReset">ใช้รูป Discord</a>' : "") + '</div></div></div><div id="avMsg"></div><div id="aStats"></div><div class="hudft"><button class="sm" id="aOut">ออกจากระบบ</button><span>เวอร์ชัน P11</span></div>';
+      h = '<div class="who hud"><label class="avwrap" title="เปลี่ยนรูปโปรไฟล์">' + (pic ? '<img class="av" alt="" src="' + esc(pic) + '">' : '<span class="av ini">' + esc(String(member.ign || "?").charAt(0).toUpperCase()) + "</span>") + '<span class="avcam">📷</span><input type="file" id="avFile" accept="image/*" hidden></label><div><div class="lvtag" id="hudLv">LV.-</div><b>' + esc(member.ign) + '</b><div class="dcn">' + esc(meta().name) + (member.custom ? ' · <a href="#" id="avReset">ใช้รูป Discord</a>' : "") + '</div></div></div><div id="avMsg"></div><div id="aStats"></div><div class="hudft"><button class="sm" id="aOut">ออกจากระบบ</button><span>เวอร์ชัน P11.1</span></div>';
       lock(false);
       $("ign").value = member.ign; $("ign").readOnly = true;
       try { localStorage.setItem("rm_names", JSON.stringify({ ign: member.ign })); } catch (e) {}
