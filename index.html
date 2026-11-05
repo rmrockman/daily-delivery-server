@@ -593,12 +593,14 @@ button{border-radius:0!important}
 const CFG = window.APP_CONFIG || {};
 const SUPABASE_URL = CFG.supabaseUrl || "PASTE_YOUR_SUPABASE_URL_HERE";
 const SUPABASE_KEY = CFG.supabaseKey || "PASTE_YOUR_SUPABASE_KEY_HERE";
-const ITEM_TYPES = CFG.itemTypes || ["แร่", "กำมะถัน"];
+// ประเภทของ / จุดส่ง ตั้งในหน้าแอดมิน (จัดการ › ⚙️ ตั้งค่าเว็บ) · จำค่าล่าสุดไว้ในเครื่อง ใช้ config.js เป็นค่าสำรอง
+const SITE_CACHE = (() => { try { return JSON.parse(localStorage.getItem("siteCfg") || "null"); } catch (e) { return null; } })();
+const ITEM_TYPES = (SITE_CACHE && SITE_CACHE.item_types && SITE_CACHE.item_types.length && SITE_CACHE.item_types) || CFG.itemTypes || ["แร่", "กำมะถัน"];
 const STORAGE_BUCKET = "delivery-photos"; // เก็บรูปแนบ ก่อนส่งลิงก์เข้า Discord (ไม่ใช่ webhook URL แล้ว)
 
 const $ = id => document.getElementById(id);
 ITEM_TYPES.forEach(t => { const o = document.createElement("option"); o.value = o.textContent = t; $("type").appendChild(o); });
-const LOCATIONS = CFG.locations || ["จุดที่ 1", "จุดที่ 2"]; // แก้/เพิ่มชื่อตำแหน่งจริงได้ใน config.js (key: locations)
+const LOCATIONS = (SITE_CACHE && SITE_CACHE.locations && SITE_CACHE.locations.length && SITE_CACHE.locations) || CFG.locations || ["จุดส่งของ"];
 LOCATIONS.forEach(t => { const o = document.createElement("option"); o.value = o.textContent = t; $("loc").appendChild(o); });
 
 // กันส่งซ้ำ: 1 ชื่อในเกม ส่งได้ 1 ครั้งต่อวัน (จำไว้ในเบราว์เซอร์)
@@ -1695,6 +1697,27 @@ $("send").addEventListener("click", async () => {
   document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
 })();
 
+</script>
+<script>
+// ===== โหลดประเภทของ / จุดส่ง ล่าสุดจากฐานข้อมูล (เฟส 19) =====
+(async function () {
+  var j; try { j = await rpc("site_config", {}); } catch (e) { return; }
+  if (!j || !Array.isArray(j.item_types) || !j.item_types.length) return;
+  try { localStorage.setItem("siteCfg", JSON.stringify(j)); } catch (e) {}
+  function apply(sel, list) {
+    if (!sel || !Array.isArray(list) || !list.length) return;
+    var first = sel.options[0] && sel.options[0].value === "" ? sel.options[0] : null;
+    var now = [].filter.call(sel.options, function (o) { return o.value !== ""; }).map(function (o) { return o.value; });
+    if (now.join("\n") === list.join("\n")) return;
+    var cur = sel.value; sel.innerHTML = ""; if (first) sel.appendChild(first);
+    list.forEach(function (t) { var o = document.createElement("option"); o.value = o.textContent = t; sel.appendChild(o); });
+    if ([].some.call(sel.options, function (o) { return o.value === cur; })) sel.value = cur;
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  apply(document.getElementById("type"), j.item_types);
+  document.querySelectorAll('select[id^="xt"]').forEach(function (s) { apply(s, j.item_types); });
+  apply(document.getElementById("loc"), j.locations);
+})();
 </script>
 </body>
 

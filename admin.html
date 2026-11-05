@@ -339,6 +339,22 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <div id="hookList"><p class="cnt">กำลังโหลด…</p></div>
       <p class="pmsg" id="hookMsg" role="status"></p>
     </section>
+    <section class="card" data-sub="site" data-label="⚙️ ตั้งค่าเว็บ" id="siteCard" data-tab="tools">
+      <h2>⚙️ ตั้งค่าเว็บ</h2>
+      <p class="cnt">ย้ายมาจาก config.js · แก้แล้วหน้าส่งของเปลี่ยนตามทันที (สมาชิกรีเฟรชหน้า)</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">📦 ประเภทของ</h3>
+      <p class="cnt" style="margin:0 0 6px">เปลี่ยนชื่อแล้ว ประวัติเก่ายังเป็นชื่อเดิม · เพิ่มประเภทใหม่แล้ว อย่าลืมตั้งแต้มที่ ⭐ เลเวล</p>
+      <div id="siteTypes"></div>
+      <button class="sec" id="siteTypeAdd" type="button" style="width:auto;padding:8px 14px">+ เพิ่มประเภท</button>
+      <h3 style="margin:18px 0 6px;font-size:1rem">📍 จุดส่งของ</h3>
+      <div id="siteLocs"></div>
+      <button class="sec" id="siteLocAdd" type="button" style="width:auto;padding:8px 14px">+ เพิ่มจุดส่ง</button>
+      <h3 style="margin:18px 0 6px;font-size:1rem">🛡️ Role ID ยศแอดมิน</h3>
+      <p class="cnt" style="margin:0 0 6px">ใช้แท็กแอดมินตอนมีรายการรออนุมัติค้าง · Discord → ตั้งค่าเซิร์ฟเวอร์ → บทบาท → กดค้างที่ยศ → คัดลอก ID</p>
+      <input id="siteRole" inputmode="numeric" placeholder="เว้นว่าง = ไม่แท็ก" autocomplete="off">
+      <button class="sec" id="siteSave" type="button" style="margin-top:12px">💾 บันทึกการตั้งค่า</button>
+      <p class="pmsg" id="siteMsg" role="status"></p>
+    </section>
     <section class="card" data-sub="pts" data-label="⭐ เลเวล" id="ptsCard" data-tab="tools">
       <h2>⭐ แต้มและเลเวล</h2>
       <p class="cnt">อัตราแต้มต่อหมวด: ทุก (กี่ชิ้น) ได้ (กี่แต้ม) · หมวดที่ไม่อยู่ในรายการจะไม่ได้แต้ม</p>
@@ -1270,6 +1286,35 @@ $("clrList").addEventListener("click", async e => {
   clrLoad();
 });
 $("subnav").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (b && b.dataset.s === "clr") clrLoad(); });
+
+// ===== ตั้งค่าเว็บ (เฟส 19): ประเภทของ / จุดส่ง / ยศแอดมิน =====
+const stm = (t, ok) => { $("siteMsg").textContent = t || ""; $("siteMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+const siteRow = v => '<div class="kv sr"><input style="font-size:.95rem" value="' + esc(v) + '" maxlength="50" autocomplete="off"><button class="sec sr-x" type="button" aria-label="ลบ">✕</button></div>';
+function siteRender(c) {
+  $("siteTypes").innerHTML = (c.item_types || []).map(siteRow).join("");
+  $("siteLocs").innerHTML = (c.locations || []).map(siteRow).join("");
+  $("siteRole").value = c.admin_role_id || "";
+}
+async function siteLoad(render) {
+  let c; try { c = await rpc("admin_site_config", { p_pass: PASS }); } catch (e) { if (render) stm("ยังไม่ได้รัน phase19.sql ใน Supabase"); return; }
+  if (!c) return;
+  if (c.item_types && c.item_types.length) CFG.itemTypes = c.item_types;
+  if (c.locations && c.locations.length) CFG.locations = c.locations;
+  CFG.adminRoleId = c.admin_role_id || "";
+  if (render && !$("siteCard").dataset.dirty) siteRender(c);
+}
+const siteVals = id => [...$(id).querySelectorAll("input")].map(i => i.value.trim()).filter(Boolean);
+$("siteCard").addEventListener("input", () => { $("siteCard").dataset.dirty = "1"; });
+$("siteCard").addEventListener("click", e => { const x = e.target.closest(".sr-x"); if (x) { x.closest(".sr").remove(); $("siteCard").dataset.dirty = "1"; } });
+$("siteTypeAdd").onclick = () => { $("siteTypes").insertAdjacentHTML("beforeend", siteRow("")); $("siteTypes").lastElementChild.querySelector("input").focus(); };
+$("siteLocAdd").onclick = () => { $("siteLocs").insertAdjacentHTML("beforeend", siteRow("")); $("siteLocs").lastElementChild.querySelector("input").focus(); };
+$("siteSave").onclick = async () => {
+  try { await pcall("admin_site_config_save", { p: { item_types: siteVals("siteTypes"), locations: siteVals("siteLocs"), admin_role_id: $("siteRole").value.trim() } }); delete $("siteCard").dataset.dirty; stm("บันทึกแล้ว ✓ หน้าส่งของจะใช้ค่าใหม่เมื่อสมาชิกรีเฟรช", true); }
+  catch (er) { stm(er.message); }
+  siteLoad(true);
+};
+$("subnav").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (b && b.dataset.s === "site") siteLoad(true); });
+new MutationObserver(() => { if (!$("panel").hidden) siteLoad(false); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
 
 // ===== แจ้ง DM (เฟส 16) =====
 const dmm = (t, ok) => { $("dmMsg").textContent = t || ""; $("dmMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
