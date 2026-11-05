@@ -95,16 +95,52 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
 #tabs .tbd{position:absolute;top:-5px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--bad);color:#1b0b07;font-style:normal;font-size:.7rem;font-weight:700;line-height:18px;text-align:center;box-shadow:0 0 0 2px #15130f}
 </style>
 <script>document.write('<script src="config.js?t='+Date.now()+'"><\/script>')</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+<style>
+#login{background:radial-gradient(circle at 50% 0,rgba(242,180,43,.16),transparent 55%),linear-gradient(180deg,var(--card1),var(--card2))}
+#gate{position:relative;text-align:center;padding:22px 6px 6px}
+#gate .shield{position:relative;width:86px;height:86px;margin:0 auto 14px;display:grid;place-items:center;border-radius:26px;background:linear-gradient(160deg,#2a2114,#0c0b09);border:1px solid var(--line);box-shadow:0 0 0 6px rgba(242,180,43,.05),0 0 40px rgba(242,180,43,.25)}
+#gate .shield svg{width:46px;height:46px;color:var(--gold);filter:drop-shadow(0 0 10px rgba(242,180,43,.55))}
+#gate h2{justify-content:center;margin:0 0 6px;font-size:1.2rem}
+#gate .lead{color:var(--mute);font-size:.88rem;margin:0 auto 20px;max-width:300px;line-height:1.6}
+.dcbtn{display:flex;align-items:center;justify-content:center;gap:10px;background:#5865f2;color:#fff;box-shadow:0 8px 24px rgba(88,101,242,.35)}
+.dcbtn:hover{background:#4752c4}
+.dcbtn svg{width:22px;height:22px}
+.who{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#0d0c0a;text-align:left;margin:0 0 14px}
+.who img{width:46px;height:46px;border-radius:50%;border:2px solid var(--gold)}
+.who b{display:block}.who small{color:var(--mute)}
+.gmsg{min-height:1.3em;margin:12px 0 0;font-size:.88rem;font-weight:600;color:var(--bad)}
+.gate-ft{margin:18px 0 0;font-size:.72rem;color:var(--mute);display:flex;align-items:center;justify-content:center;gap:6px}
+.gate-ft i{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+#meBar{display:flex;align-items:center;gap:10px;margin:-6px 0 16px;padding:8px 10px 8px 8px;border:1px solid var(--line);border-radius:999px;background:#0d0c0a}
+#meBar img{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold)}
+#meBar .nm{flex:1;min-width:0;line-height:1.2}
+#meBar .nm b{display:block;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rb{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.68rem;font-weight:800;letter-spacing:.02em}
+.rb.owner{background:linear-gradient(180deg,var(--hi),var(--gold));color:#1b1205}
+.rb.admin{background:#1d2a45;color:#9fb6ff}
+#meBar button{width:auto;padding:7px 12px;font-size:.78rem}
+.tm{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.tm img,.tm .av0{width:38px;height:38px;border-radius:50%;flex:none;background:#1a1712;display:grid;place-items:center}
+.tm .nm{flex:1;min-width:0}.tm .nm small{color:var(--mute)}
+.tm button{width:auto;padding:6px 10px;font-size:.78rem}
+.lg{list-style:none;margin:0;padding:0;position:relative}
+.lg li{display:block;position:relative;padding:0 0 14px 22px;font-size:.86rem;border:0;margin:0;background:none}
+.lg li::before{content:"";position:absolute;left:5px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(242,180,43,.15)}
+.lg li::after{content:"";position:absolute;left:8.5px;top:16px;bottom:0;width:1px;background:var(--line)}
+.lg li:last-child::after{display:none}
+.lg b{color:var(--hi)}.lg small{display:block;color:var(--mute);font-size:.75rem}
+</style>
 </head>
 <body>
 <main>
   <h1>🛠️ แอดมิน · ส่งของรายวัน</h1>
   <p id="msg"></p>
 
+  <div id="meBar" hidden></div>
   <section class="card" id="login">
-    <h2>🔑 เข้าสู่ระบบ</h2>
-    <input id="pass" type="password" placeholder="รหัสแอดมิน" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
-    <button id="go">เข้าสู่ระบบ</button>
+    <input id="pass" type="hidden" value="discord"><button id="go" type="button" hidden></button>
+    <div id="gate"><p class="lead" style="margin:0">กำลังตรวจสอบสิทธิ์...</p></div>
   </section>
 
   <div id="panel" data-t="pend" hidden>
@@ -163,6 +199,20 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
       <button class="sec" id="sum">โพสต์สรุปเข้า Discord</button>
     </section>
 
+    <section class="card" id="teamCard" data-tab="tools">
+      <h2>🛡️ ทีมแอดมิน</h2>
+      <p class="cnt">เข้าหน้าแอดมินได้เฉพาะบัญชี Discord ในรายชื่อนี้ · เจ้าของเท่านั้นที่เพิ่ม/ถอดแอดมินได้</p>
+      <div id="teamList"></div>
+      <div id="teamAdd" hidden style="margin-top:12px">
+        <select id="teamPick"></select>
+        <div style="display:flex;gap:8px;margin-top:8px"><button class="sec" id="teamAddBtn" type="button">+ เพิ่มเป็นแอดมิน</button><button class="sec" id="teamOwnBtn" type="button" style="width:auto;padding:8px 14px;white-space:nowrap">👑 เจ้าของร่วม</button></div>
+        <p class="cnt" style="margin-top:6px">ต้องเป็นสมาชิกที่ล็อกอิน Discord และอนุมัติบัญชีแล้ว</p>
+      </div>
+      <p class="pmsg" id="teamMsg" role="status"></p>
+      <h2 style="margin-top:20px;font-size:1rem">📝 บันทึกการกระทำ</h2>
+      <p class="cnt">ทุกการอนุมัติ ปรับแต้ม แก้ไข หรือลบ ถูกบันทึกพร้อมชื่อแอดมิน แก้หรือลบบันทึกไม่ได้</p>
+      <ul class="lg" id="teamLog"></ul>
+    </section>
     <section class="card" id="ptsCard" data-tab="tools">
       <h2>⭐ แต้มและเลเวล</h2>
       <p class="cnt">อัตราแต้มต่อหมวด: ทุก (กี่ชิ้น) ได้ (กี่แต้ม) · หมวดที่ไม่อยู่ในรายการจะไม่ได้แต้ม</p>
@@ -218,6 +268,7 @@ const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&am
 async function rpc(name, args) {
   const h = { "Content-Type": "application/json", apikey: KEY };
   if (!KEY.startsWith("sb_")) h.Authorization = "Bearer " + KEY;
+  if (window.__tok && window.__tok()) h.Authorization = "Bearer " + window.__tok();
   const r = await fetch(URL_ + "/rest/v1/rpc/" + name, { method: "POST", headers: h, body: JSON.stringify(args || {}) });
   if (!r.ok) throw new Error("db " + r.status);
   const t = await r.text(); return t ? JSON.parse(t) : null;
@@ -507,7 +558,7 @@ $("tabs").addEventListener("click", e => {
   if (b.dataset.t === "hist") loadHistory();
   scrollTo({ top: 0 });
 });
-const saved = sessionStorage.getItem("adm"); if (saved) { $("pass").value = saved; enter(true); }
+try { sessionStorage.removeItem("adm"); } catch (e) {}
 
 // ===== บัญชีสมาชิก (ล็อกอิน Discord) =====
 let MEMS = [], memAll = false;
@@ -639,7 +690,7 @@ async function shopUpload(file) {
   c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
   const blob = await new Promise(res => c.toBlob(res, "image/jpeg", .85)); if (!blob) throw new Error("แปลงรูปไม่ได้");
   const path = "shop-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + ".jpg";
-  const h = { apikey: KEY, "Content-Type": "image/jpeg" }; if (!KEY.startsWith("sb_")) h.Authorization = "Bearer " + KEY;
+  const h = { apikey: KEY, "Content-Type": "image/jpeg" }; if (!KEY.startsWith("sb_")) h.Authorization = "Bearer " + KEY; if (window.__tok && window.__tok()) h.Authorization = "Bearer " + window.__tok();
   const r = await fetch(URL_ + "/storage/v1/object/delivery-photos/" + path, { method: "POST", headers: h, body: blob });
   if (!r.ok) throw new Error("อัปโหลดรูปไม่สำเร็จ (" + r.status + ")");
   return URL_ + "/storage/v1/object/public/delivery-photos/" + path;
@@ -662,6 +713,91 @@ $("itemList").addEventListener("click", e => {
 $("shopHookSave").addEventListener("click", async () => { try { await pcall("admin_shop_webhook", { p_url: $("shopHook").value.trim() }); smA("บันทึก Webhook ร้านค้าแล้ว ✓", true); } catch (er) { smA(er.message); } });
 new MutationObserver(() => { if (!$("panel").hidden) loadShopA(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
 setInterval(() => { if (PASS && !$("panel").hidden) loadShopA(); }, 30000);
+
+// ===== แอดมินล็อกอินด้วย Discord (เฟส 4) =====
+(function () {
+  const CFG2 = window.APP_CONFIG || {};
+  const DCI = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 4.4A19.6 19.6 0 0 0 15.4 3l-.6 1.3a18.2 18.2 0 0 0-5.6 0L8.6 3a19.6 19.6 0 0 0-4.9 1.4C.6 9 0 13.6.3 18.1a19.8 19.8 0 0 0 6 3l1.3-2.1a12.8 12.8 0 0 1-2-1l.5-.4a14.1 14.1 0 0 0 11.8 0l.5.4c-.6.4-1.3.7-2 1l1.3 2.1a19.7 19.7 0 0 0 6-3c.5-5.2-.8-9.7-3.4-13.7ZM8.5 15.4c-1.2 0-2.1-1-2.1-2.3s.9-2.3 2.1-2.3 2.2 1 2.1 2.3c0 1.3-.9 2.3-2.1 2.3Zm7 0c-1.2 0-2.1-1-2.1-2.3s.9-2.3 2.1-2.3 2.2 1 2.1 2.3c0 1.3-.9 2.3-2.1 2.3Z"/></svg>';
+  const SBA = window.supabase && window.supabase.createClient(CFG2.supabaseUrl, CFG2.supabaseKey, { auth: { flowType: "pkce", persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+  let session = null, ME = null, entered = false;
+  window.__tok = () => session && session.access_token;
+  const gate = $("gate");
+  const whoHtml = (name, av, sub) => '<div class="who">' + (av ? '<img alt="" src="' + esc(av) + '">' : "") + "<div><b>" + esc(name || "Discord") + "</b><small>" + sub + "</small></div></div>";
+  const ft = '<p class="gate-ft"><i></i>เชื่อมต่อแบบปลอดภัยผ่าน Discord · ทุกการกระทำถูกบันทึก</p>';
+  function showGate(st) {
+    $("login").hidden = false; $("panel").hidden = true; $("tabs").hidden = true; $("meBar").hidden = true;
+    let h = '<div class="shield"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>';
+    if (st === "out") h += '<h2>เข้าสู่ระบบแอดมิน</h2><p class="lead">เฉพาะทีมแอดมินที่ได้รับสิทธิ์ ใช้บัญชี Discord ของคุณยืนยันตัวตน ไม่ต้องจำรหัสอีกต่อไป</p><button class="dcbtn" id="gLogin" type="button">' + DCI + 'เข้าสู่ระบบด้วย Discord</button>';
+    else if (st === "claim") h += '<h2>ตั้งค่าเจ้าของระบบ</h2>' + whoHtml(ME.name, ME.avatar, "ยังไม่มีเจ้าของระบบ") + '<p class="lead">ใส่รหัสแอดมินเดิมครั้งสุดท้าย เพื่อยืนยันว่าบัญชีนี้เป็น <b>เจ้าของระบบ</b> หลังจากนี้รหัสเดิมจะใช้ไม่ได้อีก</p><input id="gPass" type="password" placeholder="รหัสแอดมินเดิม" autocomplete="off" style="width:100%;margin-bottom:10px"><button id="gClaim" type="button">👑 ยืนยันเป็นเจ้าของ</button><button class="sec" id="gOut" type="button" style="margin-top:8px">ใช้บัญชีอื่น</button>';
+    else if (st === "deny") h += '<h2>ไม่มีสิทธิ์เข้าหน้านี้</h2>' + whoHtml(ME.name, ME.avatar, "ไม่ได้อยู่ในทีมแอดมิน") + '<p class="lead">ถ้าคุณเป็นแอดมิน ให้เจ้าของระบบเพิ่มบัญชีนี้ในแท็บ จัดการ → ทีมแอดมิน</p><button class="sec" id="gOut" type="button">ใช้บัญชีอื่น</button>';
+    else if (st === "err") h += '<h2>เชื่อมต่อไม่ได้</h2><p class="lead">ตรวจว่ารัน phase4.sql ในโปรเจกต์ RM CLAN แล้ว</p><button class="sec" id="gRetry" type="button">ลองใหม่</button>';
+    else h += '<p class="lead">กำลังตรวจสอบสิทธิ์...</p>';
+    gate.innerHTML = h + '<p class="gmsg" id="gMsg"></p>' + ft;
+  }
+  function showMe() {
+    const role = ME.role === "owner" ? '<span class="rb owner">👑 เจ้าของ</span>' : '<span class="rb admin">🛡️ แอดมิน</span>';
+    $("meBar").innerHTML = (ME.avatar ? '<img alt="" src="' + esc(ME.avatar) + '">' : "") + '<div class="nm"><b>' + esc(ME.name) + "</b>" + role + '</div><button class="sec" id="meOut" type="button">ออกจากระบบ</button>';
+    $("meBar").hidden = false;
+  }
+  async function check() {
+    if (!SBA) { showGate("err"); return; }
+    if (!session) { entered = false; showGate("out"); return; }
+    try { ME = await rpc("admin_whoami"); } catch (e) { showGate("err"); return; }
+    if (!ME || !ME.logged_in) { showGate("out"); return; }
+    if (ME.is_admin) {
+      showMe();
+      if (!entered) { entered = true; $("pass").value = "discord"; await enter(); if (!$("panel").hidden) loadTeam(); }
+      return;
+    }
+    entered = false; showGate(ME.can_claim ? "claim" : "deny");
+  }
+  gate.addEventListener("click", async e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const m = $("gMsg");
+    if (b.id === "gLogin") { b.disabled = true; const r = await SBA.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: location.origin + location.pathname } }); if (r.error) { b.disabled = false; m.textContent = r.error.message; } }
+    else if (b.id === "gOut") await SBA.auth.signOut();
+    else if (b.id === "gRetry") check();
+    else if (b.id === "gClaim") {
+      const p = $("gPass").value.trim(); if (!p) { m.textContent = "กรุณาใส่รหัสแอดมินเดิม"; return; }
+      b.disabled = true;
+      try { const r = await rpc("admin_claim_owner", { p_pass: p }); if (!r || !r.ok) { m.textContent = (r && r.error) || "ไม่สำเร็จ"; b.disabled = false; return; } await check(); }
+      catch (er) { m.textContent = "ไม่สำเร็จ ลองใหม่อีกครั้ง"; b.disabled = false; }
+    }
+  });
+  $("meBar").addEventListener("click", async e => { if (e.target.closest("#meOut")) { await SBA.auth.signOut(); location.reload(); } });
+
+  // ทีมแอดมิน + บันทึก
+  let TEAM = null;
+  const tmsg = (t, ok) => { $("teamMsg").textContent = t || ""; $("teamMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+  const ago = t => { const s = (Date.now() - new Date(t)) / 1000; return s < 60 ? "เมื่อสักครู่" : s < 3600 ? Math.floor(s / 60) + " นาทีที่แล้ว" : s < 86400 ? Math.floor(s / 3600) + " ชม.ที่แล้ว" : new Date(t).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); };
+  async function loadTeam() {
+    try { TEAM = await rpc("admin_team", { p_pass: "discord" }); } catch (e) { $("teamList").innerHTML = '<p class="cnt">โหลดทีมแอดมินไม่ได้</p>'; return; }
+    const owner = TEAM.my_role === "owner";
+    $("teamList").innerHTML = TEAM.admins.map(a => '<div class="tm" data-u="' + esc(a.user_id) + '">' + (a.avatar_url ? '<img alt="" src="' + esc(a.avatar_url) + '">' : '<span class="av0">🛡️</span>') + '<div class="nm"><b>' + esc(a.discord_name || "-") + "</b> " + (a.role === "owner" ? '<span class="rb owner">👑 เจ้าของ</span>' : '<span class="rb admin">🛡️ แอดมิน</span>') + "<br><small>" + (a.ign ? "ชื่อในเกม " + esc(a.ign) + " · " : "") + "ตั้งแต่ " + new Date(a.created_at).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" }) + (a.user_id === TEAM.me ? " · คุณ" : "") + "</small></div>" + (owner && a.user_id !== TEAM.me ? '<button class="sec" data-rm="1" type="button">ถอดสิทธิ์</button>' : "") + "</div>").join("");
+    $("teamAdd").hidden = !owner;
+    $("teamPick").innerHTML = TEAM.candidates.length ? TEAM.candidates.map(c => '<option value="' + esc(c.user_id) + '">' + esc(c.ign) + (c.discord_name && c.discord_name !== c.ign ? " (" + esc(c.discord_name) + ")" : "") + "</option>").join("") : '<option value="">— ไม่มีสมาชิกที่เพิ่มได้ —</option>';
+    $("teamLog").innerHTML = TEAM.log.length ? TEAM.log.map(l => "<li><b>" + esc(l.actor_name || "-") + "</b> " + esc(l.action) + (l.target ? " · " + esc(l.target) : "") + "<small>" + (l.detail ? esc(l.detail) + " · " : "") + ago(l.created_at) + "</small></li>").join("") : '<li style="color:var(--mute)">ยังไม่มีบันทึก</li>';
+  }
+  async function addTeam(role) {
+    const u = $("teamPick").value; if (!u) return;
+    if (!confirm(role === "owner" ? "ให้สิทธิ์เจ้าของร่วม? (เพิ่ม/ถอดแอดมินได้ และอนุมัติของตัวเองได้)" : "เพิ่มเป็นแอดมิน?")) return;
+    try { await pcall("admin_team_add", { p_user: u, p_role: role }); tmsg("เพิ่มแล้ว ✓", true); } catch (er) { tmsg(er.message); }
+    loadTeam();
+  }
+  $("teamAddBtn").addEventListener("click", () => addTeam("admin"));
+  $("teamOwnBtn").addEventListener("click", () => addTeam("owner"));
+  $("teamList").addEventListener("click", async e => {
+    if (!e.target.closest("button[data-rm]")) return;
+    const u = e.target.closest(".tm").dataset.u; if (!confirm("ถอดสิทธิ์แอดมินคนนี้?")) return;
+    try { await pcall("admin_team_remove", { p_user: u }); tmsg("ถอดสิทธิ์แล้ว", true); } catch (er) { tmsg(er.message); }
+    loadTeam();
+  });
+  $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "tools") loadTeam(); });
+
+  showGate("load");
+  if (SBA) SBA.auth.onAuthStateChange((ev, s) => { session = s; setTimeout(check, 0); });
+  else showGate("err");
+})();
 </script>
 </body>
 </html>
