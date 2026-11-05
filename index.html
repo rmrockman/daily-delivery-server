@@ -291,7 +291,9 @@ body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-v
 .si b{font-size:.98rem}
 .si .ds{color:var(--mute);font-size:.8rem;flex:1}
 .si .ct{color:var(--gold-hi);font-weight:800}
-.si .lm{color:var(--mute);font-size:.72rem}
+.si .lm{display:flex;flex-wrap:wrap;gap:4px;color:var(--mute);font-size:.72rem}
+.si .lm i{font-style:normal;white-space:nowrap;padding:2px 7px;border:1px solid var(--line);background:rgba(0,229,255,.06)}
+.si .lm i.w{color:var(--gold-hi);border-color:rgba(255,200,80,.5)}.si .lm i.x{color:#ff6b8a;border-color:rgba(255,92,138,.5)}
 .si button{padding:9px;font-size:.9rem}
 .si button:disabled{opacity:.45;filter:grayscale(1)}
 .myr{list-style:none;padding:0;margin:0}
@@ -1441,9 +1443,9 @@ $("send").addEventListener("click", async () => {
       var out = it.stock != null && it.stock < 1, lim = it.per_user_limit != null && it.used >= it.per_user_limit, poor = BAL < it.cost;
       var why = out ? "หมดแล้ว" : lim ? "แลกครบแล้ว" : poor ? "แต้มไม่พอ" : "แลกเลย";
       var meta = [];
-      if (it.stock != null) meta.push("เหลือ " + nf(it.stock));
-      if (it.per_user_limit != null) meta.push("จำกัด " + it.per_user_limit + " ครั้ง" + (PER[it.limit_period] || "") + " (ใช้ไป " + it.used + ")");
-      return '<div class="si">' + (it.image_url ? '<img class="pic" loading="lazy" alt="" src="' + esc(it.image_url) + '">' : '<span class="em">' + esc(it.emoji || "🎁") + "</span>") + "<b>" + esc(it.name) + '</b><span class="ds">' + esc(it.description || "") + '</span><span class="ct">⭐ ' + nf(it.cost) + "</span>" + (meta.length ? '<span class="lm">' + esc(meta.join(" · ")) + "</span>" : "") + '<button type="button" data-id="' + it.id + '" data-n="' + esc(it.name) + '" data-c="' + it.cost + '"' + (out || lim || poor ? " disabled" : "") + ">" + why + "</button></div>";
+      if (it.stock != null) meta.push('<i class="' + (it.stock < 1 ? "x" : it.stock <= 5 ? "w" : "") + '">📦 ' + (it.stock < 1 ? "หมด" : "เหลือ " + nf(it.stock)) + "</i>");
+      if (it.per_user_limit != null) meta.push('<i class="' + (lim ? "x" : "") + '">👤 ' + it.used + "/" + it.per_user_limit + " ครั้ง" + (PER[it.limit_period] || "") + "</i>");
+      return '<div class="si">' + (it.image_url ? '<img class="pic" loading="lazy" alt="" src="' + esc(it.image_url) + '">' : '<span class="em">' + esc(it.emoji || "🎁") + "</span>") + "<b>" + esc(it.name) + '</b><span class="ds">' + esc(it.description || "") + '</span><span class="ct">⭐ ' + nf(it.cost) + "</span>" + (meta.length ? '<span class="lm">' + meta.join("") + "</span>" : "") + '<button type="button" data-id="' + it.id + '" data-n="' + esc(it.name) + '" data-c="' + it.cost + '"' + (out || lim || poor ? " disabled" : "") + ">" + why + "</button></div>";
     }).join("") : '<p style="color:var(--mute);grid-column:1/-1;margin:0">ยังไม่มีสินค้าในร้าน</p>';
     var mine = r.mine || [];
     $("shopMine").innerHTML = mine.length ? mine.map(function (x) {

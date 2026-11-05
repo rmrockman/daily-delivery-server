@@ -162,6 +162,25 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
 .subnav button.on{background:linear-gradient(180deg,var(--hi),var(--gold) 55%,var(--lo));color:#1b1205;border-color:transparent;box-shadow:0 0 14px rgba(242,180,43,.3)}
 .subnav .sb{display:inline-block;min-width:18px;height:18px;margin-left:6px;padding:0 5px;border-radius:999px;background:var(--bad);color:#1b0b07;font-size:.7rem;line-height:18px;text-align:center}
 #panel .card.subhide{display:none!important}
+/* เฟส 22: เมนูจัดการแบบรายการ + ภาพรวม */
+.hubg{margin:0 0 18px}.hubg:last-child{margin:0}
+.hubg h3{margin:0 0 8px;font-size:.8rem;letter-spacing:.06em;color:var(--mute);font-weight:700}
+.hubr{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px!important;margin:0 0 6px;background:#07101f!important;border:1px solid var(--line)!important;border-radius:0!important;box-shadow:none!important;color:var(--txt,#e8f6ff)!important;font-weight:600}
+.hubr .hi{font-size:1.35rem;flex:none;width:28px;text-align:center}
+.hubr .ht{flex:1;min-width:0}.hubr .ht b{display:block;font-size:.95rem}.hubr .ht small{display:block;color:var(--mute);font-weight:400;font-size:.76rem;margin-top:2px;line-height:1.4}
+.hubr .ha{color:var(--mute);font-size:1.3rem;flex:none}
+.hubr:active{border-color:var(--gold)!important}
+.subnav .sback{flex:none!important}.subnav .stitle{align-self:center;font-weight:800;font-size:.95rem;color:var(--gold)}
+#ovCard .ovg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ovt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:12px!important;text-align:left;background:#07101f!important;border:1px solid var(--line)!important;border-radius:0!important;box-shadow:none!important;color:var(--mute)!important;font-weight:600;font-size:.78rem}
+.ovt b{font-size:1.5rem;line-height:1.1;color:var(--txt,#e8f6ff)}
+.ovt.hot{border-color:var(--pink)!important}.ovt.hot b{color:var(--pink)}
+.ovt.ok b{color:var(--ok)}
+.ovt.wide{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between}
+#ovCard .ovall{margin:10px 0 0;font-size:.82rem;color:var(--ok)}
+.wz.wzc>li[data-c]{display:none}
+.wzsum{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;border:1px solid rgba(61,255,176,.4);background:rgba(61,255,176,.06);font-size:.85rem}
+.wzsum span{flex:1;min-width:160px}.wzsum button{width:auto;padding:6px 12px;font-size:.8rem}
 .evf label:not(.sw){display:block;font-size:.78rem;color:var(--mute);margin-bottom:10px}
 .evf label:not(.sw) input,.evf label select{width:100%;margin-top:4px}
 .evf .sw{margin:4px 0 14px}
@@ -332,6 +351,10 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <p class="pmsg" id="itemMsgA" role="status"></p>
       <button class="sec hookJump" type="button" style="margin-top:14px">🔗 ตั้งห้อง Discord ที่เมนู จัดการ › Webhook</button>
     </section>
+    <section class="card" id="toolsHub" data-tab="tools">
+      <h2>⚙️ จัดการ</h2>
+      <div id="hubList"></div>
+    </section>
     <section class="card" data-sub="hook" data-label="🔗 Webhook" id="hookCard" data-tab="tools">
       <h2>🔗 Webhook: ห้อง Discord ทั้งหมด</h2>
       <p class="cnt">ตั้งลิงก์ห้องแจ้งเตือนทุกห้องที่นี่ที่เดียว ไม่ต้องเข้า Supabase<br>วิธีเอาลิงก์: ห้องใน Discord → ⚙️ แก้ไขห้อง → การเชื่อมต่อ → Webhooks → สร้าง Webhook → คัดลอก URL<br>📨 DM หาสมาชิกส่งผ่านบอท ไม่ต้องใช้ Webhook</p>
@@ -419,23 +442,24 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
     <section class="card" data-sub="dc" data-label="🎖️ Discord" id="dcCard" data-tab="tools">
       <h2>🎖️ Discord: ประกาศเลเวลอัพ + ยศอัตโนมัติ</h2>
       <p class="cnt">ทำทีละขั้นจากบนลงล่าง ขั้นที่เสร็จแล้วจะมีเครื่องหมาย ✅</p>
+      <div class="wzsum" id="wzSum" hidden><span>✅ ตั้งค่าครบแล้ว · ประกาศเลเวลอัพ + แจกยศอัตโนมัติทำงานอยู่</span><button class="sec wzT" type="button" data-w="wz">แสดงขั้นตอนตั้งค่า</button></div>
       <ol class="wz" id="wz">
-        <li data-s="1"><b>ห้องประกาศเลเวลอัพ</b><span>ใส่ลิงก์ห้อง “🎉 ห้องประกาศ” ในเมนู 🔗 Webhook</span>
+        <li data-s="1" data-c><b>ห้องประกาศเลเวลอัพ</b><span>ใส่ลิงก์ห้อง “🎉 ห้องประกาศ” ในเมนู 🔗 Webhook</span>
           <div class="wr"><button class="sec hookJump" type="button">🔗 ไปที่เมนู Webhook</button></div></li>
-        <li data-s="2"><b>เชิญบอทเข้าเซิร์ฟเวอร์</b><span>Developer Portal → แอปของคุณ → General Information → คัดลอก Application ID</span>
+        <li data-s="2" data-c><b>เชิญบอทเข้าเซิร์ฟเวอร์</b><span>Developer Portal → แอปของคุณ → General Information → คัดลอก Application ID</span>
           <input id="dcApp" inputmode="numeric" placeholder="Application ID" autocomplete="off">
           <div class="wr"><button class="sec" id="dcAppSave" type="button">💾 บันทึก</button><a class="sec wbtn" id="dcInvite" target="_blank" rel="noopener">🤖 เชิญบอท (สิทธิ์จัดการยศ)</a></div>
           <span>หลังเชิญ: ตั้งค่าเซิร์ฟเวอร์ → บทบาท → ลากยศของบอทให้อยู่ <b>เหนือ</b> ยศเลเวลทุกอัน</span></li>
-        <li data-s="3"><b>Server ID</b><span>Discord → ตั้งค่าผู้ใช้ → ขั้นสูง → เปิด โหมดนักพัฒนา → กดค้างที่ชื่อเซิร์ฟเวอร์ → คัดลอก ID เซิร์ฟเวอร์</span>
+        <li data-s="3" data-c><b>Server ID</b><span>Discord → ตั้งค่าผู้ใช้ → ขั้นสูง → เปิด โหมดนักพัฒนา → กดค้างที่ชื่อเซิร์ฟเวอร์ → คัดลอก ID เซิร์ฟเวอร์</span>
           <input id="dcGuild" inputmode="numeric" placeholder="Server ID" autocomplete="off">
           <div class="wr"><button class="sec" id="dcGuildSave" type="button">💾 บันทึก</button></div></li>
-        <li data-s="4"><b>ฟังก์ชันแจกยศ (ทำครั้งเดียว)</b><span>Supabase (RM CLAN) → Edge Functions → Deploy new function → Via Editor → ตั้งชื่อ <code>discord-roles</code> → วางโค้ด discord-roles.ts → Deploy → แท็บ Settings ปิด Verify JWT → Secrets เพิ่ม 2 ตัวนี้</span>
+        <li data-s="4" data-c><b>ฟังก์ชันแจกยศ (ทำครั้งเดียว)</b><span>Supabase (RM CLAN) → Edge Functions → Deploy new function → Via Editor → ตั้งชื่อ <code>discord-roles</code> → วางโค้ด discord-roles.ts → Deploy → แท็บ Settings ปิด Verify JWT → Secrets เพิ่ม 2 ตัวนี้</span>
           <div class="kv"><code>ROLE_KEY</code><input id="dcKey" readonly><button class="sec" id="dcKeyCopy" type="button">คัดลอก</button></div>
           <div class="kv"><code>DISCORD_BOT_TOKEN</code><span style="margin:0">Token ของบอท (Developer Portal → Bot)</span></div>
           <span>ลิงก์ฟังก์ชัน (แก้ถ้า Supabase ตั้งชื่อให้ต่างจากนี้)</span>
           <input id="dcUrl" autocomplete="off">
           <div class="wr"><button class="sec" id="dcUrlSave" type="button">💾 บันทึก</button></div></li>
-        <li data-s="5"><b>ใส่ Role ID ให้แต่ละเลเวล</b><span>กดเมนู <b>⭐ แต้ม &amp; เลเวล</b> ด้านบน: Discord → ตั้งค่าเซิร์ฟเวอร์ → บทบาท → กดค้างที่ยศ → คัดลอก ID แล้ววางในช่อง 🎖️ ของเลเวลนั้น → บันทึกเลเวล</span></li>
+        <li data-s="5" data-c><b>ใส่ Role ID ให้แต่ละเลเวล</b><span>กดเมนู <b>⭐ แต้ม &amp; เลเวล</b> ด้านบน: Discord → ตั้งค่าเซิร์ฟเวอร์ → บทบาท → กดค้างที่ยศ → คัดลอก ID แล้ววางในช่อง 🎖️ ของเลเวลนั้น → บันทึกเลเวล</span></li>
         <li data-s="6"><b>เปิดใช้งาน</b>
           <label class="sw"><input id="dcOn" type="checkbox"><i></i>แจกยศตามเลเวลอัตโนมัติ</label>
           <div class="wr"><button class="sec" id="dcSync" type="button">🔄 ซิงก์ยศทุกคนตอนนี้</button><button class="sec" id="dcCheck" type="button">🔍 ตรวจผล</button></div>
@@ -446,8 +470,9 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
     <section class="card" data-sub="dm" data-label="📨 แจ้ง DM" id="dmCard" data-tab="tools">
       <h2>📨 แจ้งเตือนสมาชิกทาง DM</h2>
       <p class="cnt">บอทจะส่งข้อความส่วนตัวหาสมาชิกเมื่อ: อนุมัติ/ปฏิเสธการส่งของ (บอกแต้มที่ได้) · อนุมัติบัญชี · มอบของรางวัล/ยกเลิกการแลก · อนุมัติ/ปฏิเสธคำขอเบิกของ · ได้อันดับประจำเดือน</p>
+      <div class="wzsum" id="dmWzSum" hidden><span>✅ เปิดแจ้ง DM อยู่ · บอทส่งข้อความหาสมาชิกอัตโนมัติ</span><button class="sec wzT" type="button" data-w="dmWz">แสดงวิธีติดตั้ง</button></div>
       <ol class="wz" id="dmWz">
-        <li data-s="1"><b>อัปเดตโค้ดบอท (ทำครั้งเดียว)</b><span>Supabase (RM CLAN) → Edge Functions → กดฟังก์ชัน <code>discord-roles</code> → แท็บ Code → ลบโค้ดเก่าทั้งหมด → วางโค้ด discord-roles.ts ตัวใหม่ → Deploy</span>
+        <li data-s="1" data-c><b>อัปเดตโค้ดบอท (ทำครั้งเดียว)</b><span>Supabase (RM CLAN) → Edge Functions → กดฟังก์ชัน <code>discord-roles</code> → แท็บ Code → ลบโค้ดเก่าทั้งหมด → วางโค้ด discord-roles.ts ตัวใหม่ → Deploy</span>
           <div class="wr"><a class="sec wbtn" href="https://supabase.com/dashboard/project/kjnnjkhneeagjjcsgxus/functions" target="_blank" rel="noopener">เปิดหน้า Edge Functions</a></div></li>
         <li data-s="2"><b>ทดสอบส่ง DM หาตัวเอง</b><span>กดส่ง รอ 5 วินาที แล้วกดตรวจผล ควรได้ DM จากบอทใน Discord</span>
           <div class="wr"><button class="sec" id="dmTest" type="button">📨 ส่ง DM ทดสอบ</button><button class="sec" id="dmCheck" type="button">🔍 ตรวจผล</button></div>
@@ -492,6 +517,11 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <div id="memList"></div>
       <button class="sec" id="memAll" type="button">แสดงสมาชิกทั้งหมด</button>
     </section>
+    <section class="card" id="ovCard" data-tab="pend">
+      <h2>📋 ภาพรวมวันนี้</h2>
+      <div class="ovg" id="ovGrid"><p class="cnt">กำลังโหลด…</p></div>
+      <p class="ovall" id="ovAll" hidden>✨ ไม่มีงานค้าง เรียบร้อยทุกอย่าง</p>
+    </section>
     <section class="card" id="pendCard" data-tab="pend">
       <h2>📥 รออนุมัติ<span class="pbadge" id="pendBadge" hidden>0</span></h2>
       <p class="cnt" id="pendSum"></p>
@@ -507,12 +537,12 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <p class="pmsg" id="histMsg" role="status"></p>
       <button class="sec" id="histRef" type="button">🔄 รีเฟรชประวัติ</button>
     </section>
-    <section class="card" data-tab="sum">
+    <section class="card" data-tab="hist" data-sub="sum" data-label="📊 สรุป">
       <h2>📊 สรุปยอดรวม</h2>
       <select id="sumMonth"><option value="0">เดือนนี้</option><option value="-1">เดือนที่แล้ว</option></select>
       <div id="sumBox"><p class="empty">กำลังโหลด…</p></div>
     </section>
-    <section class="card" data-tab="sum" id="moCard">
+    <section class="card" data-tab="hist" data-sub="sum" data-label="📊 สรุป" id="moCard">
       <h2>🏆 สรุปประจำเดือนอัตโนมัติ</h2>
       <p class="cnt" id="moState">กำลังโหลด…</p>
       <label class="sw"><input id="moOn" type="checkbox"><i></i>โพสต์สรุป + แจกแต้ม Top 3 อัตโนมัติ</label>
@@ -550,7 +580,6 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
   <button type="button" data-t="inv" aria-current="false"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-5 9 5v12"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg><i class="tbd" id="invTabBadge" hidden>0</i></span><span>คลัง</span></button>
   <button type="button" data-t="mem" aria-current="false"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14a6 6 0 0 1 3.5 6"/></svg><i class="tbd" id="memTabBadge" hidden>0</i></span><span>สมาชิก</span></button>
   <button type="button" data-t="shop" aria-current="false"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v7h14v-7"/></svg><i class="tbd" id="shopTabBadge" hidden>0</i></span><span>ร้านค้า</span></button>
-  <button type="button" data-t="sum" aria-current="false"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></span><span>สรุป</span></button>
   <button type="button" data-t="tools" aria-current="false"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></span><span>จัดการ</span></button>
   <button type="button" data-t="hist" aria-current="false"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span>ประวัติ</span></button>
 </nav>
@@ -1128,6 +1157,7 @@ function dcRender() {
   const hasRole = (PCFG.levels || []).some(l => /^\d{15,22}$/.test(l.discord_role_id || ""));
   const done = { 1: !!DCC.levelup_webhook, 2: !!DCC.app_id, 3: !!DCC.guild_id, 4: !!window.__rolesOk, 5: hasRole, 6: DCC.roles_enabled === "on" };
   document.querySelectorAll("#wz>li").forEach(li => li.classList.toggle("done", !!done[li.dataset.s]));
+  wzFold("wz", "wzSum", done[1] && done[2] && done[3] && done[5] && done[6]);
 }
 async function dcLoad() { try { DCC = await rpc("admin_discord_config", { p_pass: PASS }) || {}; dcRender(); } catch (e) { dmsg("โหลดไม่ได้ (ยังไม่ได้รัน phase5.sql ใน Supabase?)"); } }
 async function dcSave(p, okMsg) { try { await pcall("admin_discord_save", { p: p }); dmsg(okMsg || "บันทึกแล้ว ✓", true); await dcLoad(); } catch (e) { dmsg(e.message); } }
@@ -1232,11 +1262,7 @@ $("hookList").addEventListener("click", async e => {
     say2("ส่งแล้ว ลองดูในห้อง Discord", true);
   }
 });
-document.addEventListener("click", e => {
-  if (!e.target.closest(".hookJump")) return;
-  const tb = document.querySelector('#tabs button[data-t="tools"]'); if (tb) tb.click();
-  setTimeout(() => { const sb = document.querySelector('#subnav button[data-s="hook"]'); if (sb) sb.click(); window.scrollTo({ top: 0, behavior: "smooth" }); }, 60);
-});
+document.addEventListener("click", e => { if (e.target.closest(".hookJump")) goSub("tools", "hook"); });
 $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "tools") hookLoad(); });
 new MutationObserver(() => { if (!$("panel").hidden) hookLoad(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
 
@@ -1266,7 +1292,6 @@ $("clrList").addEventListener("click", async e => {
   try { const r = await pcall("admin_history_clear", { p_what: c.k, p_days: Number($("clrDays").value) }); clm("ล้าง" + r.label + "แล้ว " + r.deleted + " รายการ ✓", true); } catch (er) { clm(er.message); }
   clrLoad();
 });
-$("subnav").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (b && b.dataset.s === "clr") clrLoad(); });
 
 // ===== ตั้งค่าเว็บ (เฟส 19): ประเภทของ / จุดส่ง / ยศแอดมิน =====
 const stm = (t, ok) => { $("siteMsg").textContent = t || ""; $("siteMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
@@ -1294,7 +1319,6 @@ $("siteSave").onclick = async () => {
   catch (er) { stm(er.message); }
   siteLoad(true);
 };
-$("subnav").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (b && b.dataset.s === "site") siteLoad(true); });
 new MutationObserver(() => { if (!$("panel").hidden) siteLoad(false); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
 
 // ===== รีเซ็ตสิทธิ์จำกัดต่อคน (เฟส 20) =====
@@ -1319,12 +1343,48 @@ $("itemEdit").addEventListener("click", async e => {
   limLoad(id);
 });
 
+// ===== ภาพรวมวันนี้ (เฟส 22) =====
+let OVB = false;
+async function ovLoad() {
+  if (OVB || !PASS || $("panel").hidden) return; OVB = true;
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date());
+  const [mem, inv, shop, pend] = await Promise.all([
+    rpc("admin_members", { p_pass: PASS }).catch(() => null), rpc("admin_inv", { p_pass: PASS }).catch(() => null),
+    rpc("admin_shop", { p_pass: PASS }).catch(() => null), pcall("admin_pending_list").then(r => r.rows || []).catch(() => null)]);
+  OVB = false;
+  const nPend = (pend || PEND || []).filter(r => r.status === "pending").length;
+  const nMem = (mem || []).filter(m => m.status === "pending").length;
+  const nReq = ((inv && inv.requests) || []).filter(r => r.status === "pending").length;
+  const low = ((inv && inv.items) || []).filter(i => i.active !== false && Number(i.qty) <= Number(i.low_at || 0));
+  const nRed = ((shop && shop.requests) || []).filter(r => r.status === "pending").length;
+  const today = (ROWS || []).filter(r => String(r.day).slice(0, 10) === day);
+  const ppl = new Set(today.map(r => r.ign_key || String(r.ign).toLowerCase())).size, pcs = today.reduce((t, r) => t + (Number(r.qty) || 0), 0);
+  const T = (go, ic, lab, n, extra) => '<button type="button" class="ovt' + (n > 0 ? " hot" : "") + (extra || "") + '" data-go="' + go + '"><span>' + ic + " " + lab + "</span><b>" + n.toLocaleString("th-TH") + "</b></button>";
+  $("ovGrid").innerHTML =
+    T("pend:", "📥", "ส่งของรออนุมัติ", nPend) + T("mem:", "👤", "บัญชีรออนุมัติ", nMem) +
+    T("inv:ireq", "🙋", "คำขอเบิกของ", nReq) + T("shop:red", "🛒", "แลกของรอมอบ", nRed) +
+    T("inv:iitems", "⚠️", "ของใกล้หมด", low.length) +
+    '<button type="button" class="ovt ok" data-go="hist:list"><span>✅ ส่งแล้ววันนี้</span><b>' + ppl + ' คน</b><span>' + pcs.toLocaleString("th-TH") + " ชิ้น</span></button>";
+  $("ovAll").hidden = !!(nPend || nMem || nReq || nRed || low.length);
+}
+$("ovGrid").addEventListener("click", e => {
+  const b = e.target.closest("[data-go]"); if (!b) return;
+  const [t, sb] = b.dataset.go.split(":");
+  if (t === "pend") { $("pendCard").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  goSub(t, sb || "");
+});
+new MutationObserver(() => { if (!$("panel").hidden) setTimeout(ovLoad, 800); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
+$("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "pend") ovLoad(); });
+$("pendRef").addEventListener("click", () => setTimeout(ovLoad, 300));
+setInterval(() => { if (!document.hidden && $("panel").dataset.t === "pend") ovLoad(); }, 60000);
+
 // ===== แจ้ง DM (เฟส 16) =====
 const dmm = (t, ok) => { $("dmMsg").textContent = t || ""; $("dmMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
 function dmRender() {
   $("dmOn").checked = DCC.dm_enabled === "on";
   const done = { 1: !!window.__dmOk, 2: !!window.__dmOk, 3: DCC.dm_enabled === "on" };
   document.querySelectorAll("#dmWz>li").forEach(li => li.classList.toggle("done", !!done[li.dataset.s]));
+  wzFold("dmWz", "dmWzSum", DCC.dm_enabled === "on");
 }
 const _dcRender = dcRender; dcRender = function () { _dcRender(); dmRender(); };
 $("dmOn").onchange = async () => { try { await pcall("admin_discord_save", { p: { dm_enabled: $("dmOn").checked ? "on" : "off" } }); dmm($("dmOn").checked ? "เปิดแจ้ง DM แล้ว ✓" : "ปิดแจ้ง DM แล้ว", true); await dcLoad(); } catch (e) { dmm(e.message); } };
@@ -1380,36 +1440,91 @@ $("moRun").onclick = async () => {
   try { const r = await pcall("admin_monthly_run", { p_month: MO.last }); mom("แจกรางวัลเดือน" + r.label + " แล้ว ✓" + (r.posted ? " โพสต์ลง Discord แล้ว" : " (ยังไม่ได้ตั้งห้อง Discord เลยไม่ได้โพสต์)"), true); } catch (e) { mom(e.message); }
   moLoad();
 };
-$("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "sum") moLoad(); });
+
 new MutationObserver(() => { if (!$("panel").hidden) dcLoad(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
 const _lvSave = $("lvSave"); _lvSave.addEventListener("click", () => setTimeout(dcLoad, 1200));
+
+// ===== พับขั้นตอนตั้งค่าที่เสร็จแล้ว (เฟส 22) =====
+const WZ_OPEN = {};
+function wzFold(ol, sum, done) {
+  const o = $(ol), sm = $(sum); if (!o || !sm) return;
+  const fold = !!done && !WZ_OPEN[ol];
+  o.classList.toggle("wzc", fold); sm.hidden = !done;
+  const b = sm.querySelector(".wzT"); if (b) b.textContent = fold ? (ol === "wz" ? "แสดงขั้นตอนตั้งค่า" : "แสดงวิธีติดตั้ง") : "ซ่อนขั้นตอน";
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest(".wzT"); if (!b) return;
+  const ol = b.dataset.w; WZ_OPEN[ol] = !WZ_OPEN[ol];
+  wzFold(ol, ol === "wz" ? "wzSum" : "dmWzSum", true);
+});
+
+// ===== ไปยังแท็บ/เมนูย่อย จากที่ไหนก็ได้ (เฟส 22) =====
+window.goSub = function (tab, sub) {
+  const tb = document.querySelector('#tabs button[data-t="' + tab + '"]'); if (tb) tb.click();
+  if (sub && window.__pickSub) window.__pickSub(tab, sub);
+  scrollTo({ top: 0, behavior: "smooth" });
+};
+const SUB_LOAD = { hook: () => hookLoad(), site: () => siteLoad(true), clr: () => clrLoad(), dc: () => dcLoad(), dm: () => dcLoad(), sum: () => { moLoad(); loadSummary(); } };
 
 // ===== เมนูย่อยในแท็บ (จัดหมวดการ์ดให้หาง่าย) =====
 (function () {
   const nav = $("subnav"), panel = $("panel"), pick = {};
   try { Object.assign(pick, JSON.parse(sessionStorage.getItem("rm_sub") || "{}")); } catch (e) {}
   const badgeOf = { red: "shopTabBadge", ireq: "invTabBadge" };
+  const HUB = [
+    { g: "🎮 แต้ม & กิจกรรม", items: [["pts", "อัตราแต้มต่อชิ้น · ระดับเลเวล · ปรับแต้มสมาชิก"], ["msn", "เป้าหมายแคลน · ภารกิจรายสัปดาห์"], ["ev", "แต้มคูณพิเศษตามช่วงเวลา"]] },
+    { g: "💬 Discord", items: [["hook", "ห้องแจ้งเตือนทุกห้อง · ทดสอบส่ง"], ["dc", "ประกาศเลเวลอัพ · แจกยศอัตโนมัติ"], ["dm", "ส่งข้อความส่วนตัวหาสมาชิก"]] },
+    { g: "⚙️ ระบบ", items: [["site", "ประเภทของ · จุดส่ง · ยศแอดมิน"], ["team", "เพิ่ม / ลบแอดมิน"], ["log", "ใครทำอะไร เมื่อไร"], ["clr", "ลบประวัติเก่า (เฉพาะเจ้าของ)"]] }
+  ];
+  const hub = $("toolsHub");
+  let lastShown = "";
   function build() {
     const t = panel.dataset.t, cards = [...panel.querySelectorAll('.card[data-tab="' + t + '"][data-sub]')];
     panel.querySelectorAll(".card[data-sub]").forEach(c => c.classList.remove("subhide"));
-    if (cards.length < 2) { nav.hidden = true; return; }
-    const cur = cards.some(c => c.dataset.sub === pick[t]) ? pick[t] : cards[0].dataset.sub;
-    nav.innerHTML = cards.map(c => {
-      const bid = badgeOf[c.dataset.sub], bel = bid && $(bid), n = bel && !bel.hidden ? bel.textContent : "";
-      return '<button type="button" data-s="' + c.dataset.sub + '" class="' + (c.dataset.sub === cur ? "on" : "") + '">' + esc(c.dataset.label) + (n ? '<span class="sb">' + esc(n) + "</span>" : "") + "</button>";
+    if (hub) hub.classList.toggle("subhide", t !== "tools");
+    const subs = [...new Set(cards.map(c => c.dataset.sub))];
+    if (subs.length < 2) { nav.hidden = true; return; }
+    if (t === "tools") {
+      const cur = subs.includes(pick.tools) ? pick.tools : "";
+      cards.forEach(c => c.classList.toggle("subhide", c.dataset.sub !== cur));
+      if (!cur) {
+        nav.hidden = true; hub.classList.remove("subhide");
+        const lab = k => { const c = cards.find(x => x.dataset.sub === k); return c ? c.dataset.label : k; };
+        $("hubList").innerHTML = HUB.map(g => '<div class="hubg"><h3>' + g.g + "</h3>" + g.items.filter(it => subs.includes(it[0])).map(it => {
+          const l = lab(it[0]), sp = l.indexOf(" "), ic = sp > 0 ? l.slice(0, sp) : "•", nm = sp > 0 ? l.slice(sp + 1) : l;
+          return '<button type="button" class="hubr" data-go="' + it[0] + '"><span class="hi">' + ic + '</span><span class="ht"><b>' + esc(nm) + "</b><small>" + esc(it[1]) + '</small></span><span class="ha">›</span></button>';
+        }).join("") + "</div>").join("");
+        lastShown = ""; return;
+      }
+      hub.classList.add("subhide");
+      const lb = (cards.find(c => c.dataset.sub === cur) || {}).dataset.label || "";
+      nav.innerHTML = '<button type="button" class="sback" data-back="1">← เมนูจัดการ</button><span class="stitle">' + esc(lb) + "</span>";
+      nav.hidden = false;
+      if (lastShown !== cur) { lastShown = cur; try { SUB_LOAD[cur] && SUB_LOAD[cur](); } catch (e) {} }
+      return;
+    }
+    const cur = subs.includes(pick[t]) ? pick[t] : subs[0];
+    nav.innerHTML = subs.map(sb => {
+      const c = cards.find(x => x.dataset.sub === sb), bid = badgeOf[sb], bel = bid && $(bid), n = bel && !bel.hidden ? bel.textContent : "";
+      return '<button type="button" data-s="' + sb + '" class="' + (sb === cur ? "on" : "") + '">' + esc(c.dataset.label) + (n ? '<span class="sb">' + esc(n) + "</span>" : "") + "</button>";
     }).join("");
     cards.forEach(c => c.classList.toggle("subhide", c.dataset.sub !== cur));
     nav.hidden = false;
+    if (lastShown !== t + ":" + cur) { lastShown = t + ":" + cur; try { SUB_LOAD[cur] && SUB_LOAD[cur](); } catch (e) {} }
   }
+  function choose(t, sb) { pick[t] = sb; try { sessionStorage.setItem("rm_sub", JSON.stringify(pick)); } catch (er) {} build(); }
+  window.__pickSub = (t, sb) => choose(t, sb);
   nav.addEventListener("click", e => {
+    if (e.target.closest("[data-back]")) { choose("tools", ""); scrollTo({ top: 0 }); return; }
     const b = e.target.closest("button[data-s]"); if (!b) return;
-    pick[panel.dataset.t] = b.dataset.s; try { sessionStorage.setItem("rm_sub", JSON.stringify(pick)); } catch (er) {}
-    build(); scrollTo({ top: 0 });
+    choose(panel.dataset.t, b.dataset.s); scrollTo({ top: 0 });
   });
+  if (hub) hub.addEventListener("click", e => { const b = e.target.closest("[data-go]"); if (b) { choose("tools", b.dataset.go); scrollTo({ top: 0 }); } });
+  $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "tools" && pick.tools) { pick.tools = ""; build(); } }, true);
   new MutationObserver(build).observe(panel, { attributes: true, attributeFilter: ["data-t", "hidden"] });
   ["invTabBadge"].forEach(id => { const e = $(id); if (e) new MutationObserver(build).observe(e, { attributes: true, childList: true, characterData: true, subtree: true }); });
   const sb = $("shopTabBadge"); if (sb) new MutationObserver(build).observe(sb, { attributes: true, childList: true, characterData: true, subtree: true });
-  const lr = $("logRef"); if (lr) lr.addEventListener("click", () => { const tb = document.querySelector('#tabs button[data-t="tools"]'); if (tb) tb.click(); });
+
   build();
 })();
 
