@@ -459,6 +459,15 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <ul class="lg" id="teamLog"></ul>
       <button class="sec" id="logRef" type="button" style="margin-top:6px">🔄 รีเฟรช</button>
     </section>
+    <section class="card" data-sub="clr" data-label="🧹 ล้างประวัติ" id="clrCard" data-tab="tools">
+      <h2>🧹 ล้างประวัติ</h2>
+      <p class="cnt">เฉพาะเจ้าของ (👑) · ลบแล้วกู้คืนไม่ได้ · ระบบจะลบเฉพาะส่วนที่ไม่ทำให้แต้ม อันดับ ภารกิจ หรือของในคลังเปลี่ยน</p>
+      <label style="font-size:.8rem;color:var(--mute)">ลบรายการที่
+        <select id="clrDays"><option value="0">ทั้งหมด</option><option value="7">เก่ากว่า 7 วัน</option><option value="30" selected>เก่ากว่า 30 วัน</option><option value="90">เก่ากว่า 90 วัน</option></select></label>
+      <div id="clrList" style="margin-top:12px"><p class="cnt">กำลังโหลด…</p></div>
+      <p class="cnt" style="margin-top:10px">ยอดส่งรายวันลบทีละรายการได้ที่ ประวัติ › 📋 ยอดส่ง (ยอดในอันดับจะลดตาม)</p>
+      <p class="pmsg" id="clrMsg" role="status"></p>
+    </section>
     
     
     <section class="card" id="memCard" data-tab="mem">
@@ -1233,6 +1242,34 @@ document.addEventListener("click", e => {
 });
 $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "tools") hookLoad(); });
 new MutationObserver(() => { if (!$("panel").hidden) hookLoad(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
+
+// ===== ล้างประวัติ (เฟส 18) =====
+const CLR = [
+  { k: "audit", icon: "📝", name: "บันทึกแอดมิน", del: "ใครกดอนุมัติ ปรับแต้ม ตั้งค่าอะไร", keep: "ระบบจะเพิ่มบันทึกว่าใครล้าง ไว้ 1 บรรทัด" },
+  { k: "inv", icon: "📜", name: "ประวัติคลัง", del: "รายการเข้า-ออกคลัง + คำขอเบิกที่จบแล้ว", keep: "จำนวนของในคลังเท่าเดิม · เก็บคำขอที่รออนุมัติ และรายการเก็บเข้าจากการส่งของ 7 วันล่าสุด" },
+  { k: "shop", icon: "🛒", name: "ประวัติแลกของ", del: "รายการแลกที่มอบแล้ว / ยกเลิกแล้ว", keep: "แต้มไม่คืน · เก็บคำขอที่รอมอบ และรายการที่ยังนับสิทธิ์ “จำกัดต่อคน” อยู่" },
+  { k: "reject", icon: "❌", name: "ส่งของที่ถูกปฏิเสธ", del: "รายการส่งของที่แอดมินปฏิเสธ", keep: "รายการที่อนุมัติแล้วไม่ถูกลบ (เป็นที่มาของแต้มและอันดับ)" }
+];
+let CLRD = null;
+const clm = (t, ok) => { $("clrMsg").textContent = t || ""; $("clrMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+async function clrLoad() {
+  try { CLRD = await rpc("admin_history", { p_pass: PASS, p_days: Number($("clrDays").value) }); } catch (e) { $("clrList").innerHTML = '<p class="cnt">ยังไม่ได้รัน phase18.sql ใน Supabase</p>'; return; }
+  $("clrList").innerHTML = (CLRD.owner ? "" : '<div class="rres" style="border-color:var(--bad);margin-bottom:10px">🔒 เฉพาะเจ้าของ (👑) เท่านั้นที่ล้างประวัติได้</div>') + CLR.map(c => {
+    const n = Number(CLRD[c.k]) || 0;
+    return '<div class="pc" data-k="' + c.k + '" style="margin-bottom:10px"><strong>' + c.icon + " " + c.name + '</strong><p class="cnt" style="margin:4px 0 2px">🗑️ ลบ: ' + c.del + '</p><p class="cnt" style="margin:0 0 8px">🛡️ ' + c.keep + '</p><button class="sec clr-go" type="button" style="width:auto;padding:8px 14px"' + (n && CLRD.owner ? "" : " disabled") + ">" + (n ? "🧹 ล้าง " + n.toLocaleString("th-TH") + " รายการ" : "ไม่มีรายการให้ล้าง") + "</button></div>";
+  }).join("");
+}
+$("clrDays").onchange = clrLoad;
+$("clrList").addEventListener("click", async e => {
+  const b = e.target.closest(".clr-go"); if (!b) return;
+  const c = CLR.find(x => x.k === b.closest("[data-k]").dataset.k), n = Number(CLRD[c.k]) || 0, d = $("clrDays").selectedOptions[0].textContent;
+  const w = prompt("ล้าง" + c.name + " " + n + " รายการ (" + d + ")\nลบแล้วกู้คืนไม่ได้\n\nพิมพ์คำว่า ลบ เพื่อยืนยัน");
+  if (w === null) return; if (w.trim() !== "ลบ") { clm("ยกเลิก: ต้องพิมพ์คำว่า ลบ"); return; }
+  b.disabled = true;
+  try { const r = await pcall("admin_history_clear", { p_what: c.k, p_days: Number($("clrDays").value) }); clm("ล้าง" + r.label + "แล้ว " + r.deleted + " รายการ ✓", true); } catch (er) { clm(er.message); }
+  clrLoad();
+});
+$("subnav").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (b && b.dataset.s === "clr") clrLoad(); });
 
 // ===== แจ้ง DM (เฟส 16) =====
 const dmm = (t, ok) => { $("dmMsg").textContent = t || ""; $("dmMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
