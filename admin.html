@@ -156,6 +156,12 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
 .sw input:checked+i::after{left:23px;background:#fff}
 .rres{font-size:.8rem;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:6px;background:#0d0c0a}
 .rres b{color:var(--hi)}
+.subnav{position:sticky;top:0;z-index:4;display:flex;flex-wrap:wrap;gap:8px;scrollbar-width:none;margin:0 -4px 14px;padding:8px 4px;background:linear-gradient(180deg,var(--bg) 70%,transparent)}
+.subnav::-webkit-scrollbar{display:none}
+.subnav button{flex:1 1 auto;width:auto;padding:8px 12px;border-radius:999px;font-size:.84rem;font-weight:700;background:#0d0c0a;color:var(--mute);border:1px solid var(--line);box-shadow:none;white-space:nowrap;position:relative}
+.subnav button.on{background:linear-gradient(180deg,var(--hi),var(--gold) 55%,var(--lo));color:#1b1205;border-color:transparent;box-shadow:0 0 14px rgba(242,180,43,.3)}
+.subnav .sb{display:inline-block;min-width:18px;height:18px;margin-left:6px;padding:0 5px;border-radius:999px;background:var(--bad);color:#1b0b07;font-size:.7rem;line-height:18px;text-align:center}
+#panel .card.subhide{display:none!important}
 </style>
 </head>
 <body>
@@ -170,14 +176,15 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
   </section>
 
   <div id="panel" data-t="pend" hidden>
-    <section class="card" id="redCard" data-tab="shop">
+    <div id="subnav" class="subnav" hidden></div>
+    <section class="card" data-sub="red" data-label="🛒 คำขอแลก" id="redCard" data-tab="shop">
       <h2>🛒 คำขอแลกของ</h2>
       <p class="cnt" id="redSum"></p>
       <div id="redList"></div>
       <button class="sec" id="redAll" type="button">แสดงทั้งหมด</button>
       <p class="pmsg" id="shopMsgA" role="status"></p>
     </section>
-    <section class="card" id="itemCard" data-tab="shop">
+    <section class="card" data-sub="item" data-label="🎁 สินค้า" id="itemCard" data-tab="shop">
       <h2>🎁 สินค้าในร้าน</h2>
       <p class="cnt">สต็อก / จำกัดต่อคน เว้นว่าง = ไม่จำกัด · ปิดขายชั่วคราวได้โดยไม่ต้องลบ</p>
       <div id="itemList"></div>
@@ -186,6 +193,71 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
       <input id="shopHook" placeholder="https://discord.com/api/webhooks/..." autocomplete="off">
       <button class="sec" id="shopHookSave" type="button" style="margin-top:8px">บันทึก Webhook ร้านค้า</button>
     </section>
+    <section class="card" data-sub="pts" data-label="⭐ เลเวล" id="ptsCard" data-tab="tools">
+      <h2>⭐ แต้มและเลเวล</h2>
+      <p class="cnt">อัตราแต้มต่อหมวด: ทุก (กี่ชิ้น) ได้ (กี่แต้ม) · หมวดที่ไม่อยู่ในรายการจะไม่ได้แต้ม</p>
+      <div id="rateList"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="sec" id="rateAdd" type="button" style="width:auto;padding:8px 14px">+ เพิ่มหมวด</button>
+        <button class="sec" id="rateSave" type="button" style="width:auto;padding:8px 14px">💾 บันทึกอัตราแต้ม</button>
+      </div>
+      <p class="cnt" style="margin-top:18px">เลเวล (คิดจากแต้มสะสม ไม่ลดตอนสมาชิกแลกของ)</p>
+      <div id="lvList"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="sec" id="lvAdd" type="button" style="width:auto;padding:8px 14px">+ เพิ่มเลเวล</button>
+        <button class="sec" id="lvSave" type="button" style="width:auto;padding:8px 14px">💾 บันทึกเลเวล</button>
+      </div>
+      <p class="cnt" style="margin-top:18px">ของที่ส่งก่อนเริ่มระบบแต้มจะไม่มีแต้ม กดปุ่มนี้เพื่อนับย้อนหลังจากประวัติเดิมให้สมาชิกที่อนุมัติแล้ว (ชื่อในเกมต้องตรงกับประวัติ กดซ้ำได้ ไม่นับซ้ำ)</p>
+      <button class="sec" id="ptsBackfill" type="button">📥 นับแต้มย้อนหลังจากประวัติเดิม</button>
+      <p class="pmsg" id="ptsMsg" role="status"></p>
+    </section>
+    <section class="card" data-sub="dc" data-label="🎖️ Discord" id="dcCard" data-tab="tools">
+      <h2>🎖️ Discord: ประกาศเลเวลอัพ + ยศอัตโนมัติ</h2>
+      <p class="cnt">ทำทีละขั้นจากบนลงล่าง ขั้นที่เสร็จแล้วจะมีเครื่องหมาย ✅</p>
+      <ol class="wz" id="wz">
+        <li data-s="1"><b>ห้องประกาศเลเวลอัพ</b><span>ห้องใน Discord → ⚙️ แก้ไขห้อง → การเชื่อมต่อ → Webhooks → สร้าง → คัดลอก URL</span>
+          <input id="dcHook" placeholder="https://discord.com/api/webhooks/..." autocomplete="off">
+          <div class="wr"><button class="sec" id="dcHookSave" type="button">💾 บันทึก</button><button class="sec" id="dcTest" type="button">📣 ทดสอบประกาศ</button></div></li>
+        <li data-s="2"><b>เชิญบอทเข้าเซิร์ฟเวอร์</b><span>Developer Portal → แอปของคุณ → General Information → คัดลอก Application ID</span>
+          <input id="dcApp" inputmode="numeric" placeholder="Application ID" autocomplete="off">
+          <div class="wr"><button class="sec" id="dcAppSave" type="button">💾 บันทึก</button><a class="sec wbtn" id="dcInvite" target="_blank" rel="noopener">🤖 เชิญบอท (สิทธิ์จัดการยศ)</a></div>
+          <span>หลังเชิญ: ตั้งค่าเซิร์ฟเวอร์ → บทบาท → ลากยศของบอทให้อยู่ <b>เหนือ</b> ยศเลเวลทุกอัน</span></li>
+        <li data-s="3"><b>Server ID</b><span>Discord → ตั้งค่าผู้ใช้ → ขั้นสูง → เปิด โหมดนักพัฒนา → กดค้างที่ชื่อเซิร์ฟเวอร์ → คัดลอก ID เซิร์ฟเวอร์</span>
+          <input id="dcGuild" inputmode="numeric" placeholder="Server ID" autocomplete="off">
+          <div class="wr"><button class="sec" id="dcGuildSave" type="button">💾 บันทึก</button></div></li>
+        <li data-s="4"><b>ฟังก์ชันแจกยศ (ทำครั้งเดียว)</b><span>Supabase (RM CLAN) → Edge Functions → Deploy new function → Via Editor → ตั้งชื่อ <code>discord-roles</code> → วางโค้ด discord-roles.ts → Deploy → แท็บ Settings ปิด Verify JWT → Secrets เพิ่ม 2 ตัวนี้</span>
+          <div class="kv"><code>ROLE_KEY</code><input id="dcKey" readonly><button class="sec" id="dcKeyCopy" type="button">คัดลอก</button></div>
+          <div class="kv"><code>DISCORD_BOT_TOKEN</code><span style="margin:0">Token ของบอท (Developer Portal → Bot)</span></div>
+          <span>ลิงก์ฟังก์ชัน (แก้ถ้า Supabase ตั้งชื่อให้ต่างจากนี้)</span>
+          <input id="dcUrl" autocomplete="off">
+          <div class="wr"><button class="sec" id="dcUrlSave" type="button">💾 บันทึก</button></div></li>
+        <li data-s="5"><b>ใส่ Role ID ให้แต่ละเลเวล</b><span>กดเมนู <b>⭐ แต้ม &amp; เลเวล</b> ด้านบน: Discord → ตั้งค่าเซิร์ฟเวอร์ → บทบาท → กดค้างที่ยศ → คัดลอก ID แล้ววางในช่อง 🎖️ ของเลเวลนั้น → บันทึกเลเวล</span></li>
+        <li data-s="6"><b>เปิดใช้งาน</b>
+          <label class="sw"><input id="dcOn" type="checkbox"><i></i>แจกยศตามเลเวลอัตโนมัติ</label>
+          <div class="wr"><button class="sec" id="dcSync" type="button">🔄 ซิงก์ยศทุกคนตอนนี้</button><button class="sec" id="dcCheck" type="button">🔍 ตรวจผล</button></div>
+          <div id="dcRes"></div></li>
+      </ol>
+      <p class="pmsg" id="dcMsg" role="status"></p>
+    </section>
+    <section class="card" data-sub="team" data-label="🛡️ ทีม" id="teamCard" data-tab="tools">
+      <h2>🛡️ ทีมแอดมิน</h2>
+      <p class="cnt">เข้าหน้าแอดมินได้เฉพาะบัญชี Discord ในรายชื่อนี้ · เจ้าของเท่านั้นที่เพิ่ม/ถอดแอดมินได้</p>
+      <div id="teamList"></div>
+      <div id="teamAdd" hidden style="margin-top:12px">
+        <select id="teamPick"></select>
+        <div style="display:flex;gap:8px;margin-top:8px"><button class="sec" id="teamAddBtn" type="button">+ เพิ่มเป็นแอดมิน</button><button class="sec" id="teamOwnBtn" type="button" style="width:auto;padding:8px 14px;white-space:nowrap">👑 เจ้าของร่วม</button></div>
+        <p class="cnt" style="margin-top:6px">ต้องเป็นสมาชิกที่ล็อกอิน Discord และอนุมัติบัญชีแล้ว</p>
+      </div>
+      <p class="pmsg" id="teamMsg" role="status"></p>
+    </section>
+    <section class="card" data-sub="log" data-label="📝 บันทึก" id="logCard" data-tab="tools">
+      <h2>📝 บันทึกการกระทำ</h2>
+      <p class="cnt">ทุกการอนุมัติ ปรับแต้ม แก้ไข หรือลบ ถูกบันทึกพร้อมชื่อแอดมิน แก้หรือลบบันทึกไม่ได้</p>
+      <ul class="lg" id="teamLog"></ul>
+      <button class="sec" id="logRef" type="button" style="margin-top:6px">🔄 รีเฟรช</button>
+    </section>
+    
+    
     <section class="card" id="memCard" data-tab="mem">
       <h2>👥 บัญชีสมาชิก<span class="pbadge" id="memBadge" hidden>0</span></h2>
       <p class="cnt" id="memSum"></p>
@@ -212,79 +284,17 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
       <select id="sumMonth"><option value="0">เดือนนี้</option><option value="-1">เดือนที่แล้ว</option></select>
       <div id="sumBox"><p class="empty">กำลังโหลด…</p></div>
     </section>
-
-    <section class="card" data-tab="tools">
-      <h2>🔀 รวมชื่อที่พิมพ์ผิด</h2>
-      <input id="from" type="text" placeholder="ชื่อที่ผิด (เช่น Rockman 49)" autocomplete="off">
-      <input id="to" type="text" placeholder="ชื่อที่ถูก (เช่น RM Rockman)" autocomplete="off">
-      <button id="ren">รวมชื่อ</button>
-    </section>
-
-    <section class="card" data-tab="tools">
+    <section class="card" data-tab="sum">
       <h2>📣 ประกาศสรุปเดือนที่แล้วอีกครั้ง</h2>
       <button class="sec" id="sum">โพสต์สรุปเข้า Discord</button>
     </section>
 
-    <section class="card" id="teamCard" data-tab="tools">
-      <h2>🛡️ ทีมแอดมิน</h2>
-      <p class="cnt">เข้าหน้าแอดมินได้เฉพาะบัญชี Discord ในรายชื่อนี้ · เจ้าของเท่านั้นที่เพิ่ม/ถอดแอดมินได้</p>
-      <div id="teamList"></div>
-      <div id="teamAdd" hidden style="margin-top:12px">
-        <select id="teamPick"></select>
-        <div style="display:flex;gap:8px;margin-top:8px"><button class="sec" id="teamAddBtn" type="button">+ เพิ่มเป็นแอดมิน</button><button class="sec" id="teamOwnBtn" type="button" style="width:auto;padding:8px 14px;white-space:nowrap">👑 เจ้าของร่วม</button></div>
-        <p class="cnt" style="margin-top:6px">ต้องเป็นสมาชิกที่ล็อกอิน Discord และอนุมัติบัญชีแล้ว</p>
-      </div>
-      <p class="pmsg" id="teamMsg" role="status"></p>
-      <h2 style="margin-top:20px;font-size:1rem">📝 บันทึกการกระทำ</h2>
-      <p class="cnt">ทุกการอนุมัติ ปรับแต้ม แก้ไข หรือลบ ถูกบันทึกพร้อมชื่อแอดมิน แก้หรือลบบันทึกไม่ได้</p>
-      <ul class="lg" id="teamLog"></ul>
-    </section>
-    <section class="card" id="dcCard" data-tab="tools">
-      <h2>🎖️ Discord: ประกาศเลเวลอัพ + ยศอัตโนมัติ</h2>
-      <p class="cnt">ทำทีละขั้นจากบนลงล่าง ขั้นที่เสร็จแล้วจะมีเครื่องหมาย ✅</p>
-      <ol class="wz" id="wz">
-        <li data-s="1"><b>ห้องประกาศเลเวลอัพ</b><span>ห้องใน Discord → ⚙️ แก้ไขห้อง → การเชื่อมต่อ → Webhooks → สร้าง → คัดลอก URL</span>
-          <input id="dcHook" placeholder="https://discord.com/api/webhooks/..." autocomplete="off">
-          <div class="wr"><button class="sec" id="dcHookSave" type="button">💾 บันทึก</button><button class="sec" id="dcTest" type="button">📣 ทดสอบประกาศ</button></div></li>
-        <li data-s="2"><b>เชิญบอทเข้าเซิร์ฟเวอร์</b><span>Developer Portal → แอปของคุณ → General Information → คัดลอก Application ID</span>
-          <input id="dcApp" inputmode="numeric" placeholder="Application ID" autocomplete="off">
-          <div class="wr"><button class="sec" id="dcAppSave" type="button">💾 บันทึก</button><a class="sec wbtn" id="dcInvite" target="_blank" rel="noopener">🤖 เชิญบอท (สิทธิ์จัดการยศ)</a></div>
-          <span>หลังเชิญ: ตั้งค่าเซิร์ฟเวอร์ → บทบาท → ลากยศของบอทให้อยู่ <b>เหนือ</b> ยศเลเวลทุกอัน</span></li>
-        <li data-s="3"><b>Server ID</b><span>Discord → ตั้งค่าผู้ใช้ → ขั้นสูง → เปิด โหมดนักพัฒนา → กดค้างที่ชื่อเซิร์ฟเวอร์ → คัดลอก ID เซิร์ฟเวอร์</span>
-          <input id="dcGuild" inputmode="numeric" placeholder="Server ID" autocomplete="off">
-          <div class="wr"><button class="sec" id="dcGuildSave" type="button">💾 บันทึก</button></div></li>
-        <li data-s="4"><b>ฟังก์ชันแจกยศ (ทำครั้งเดียว)</b><span>Supabase (RM CLAN) → Edge Functions → Deploy new function → Via Editor → ตั้งชื่อ <code>discord-roles</code> → วางโค้ด discord-roles.ts → Deploy → แท็บ Settings ปิด Verify JWT → Secrets เพิ่ม 2 ตัวนี้</span>
-          <div class="kv"><code>ROLE_KEY</code><input id="dcKey" readonly><button class="sec" id="dcKeyCopy" type="button">คัดลอก</button></div>
-          <div class="kv"><code>DISCORD_BOT_TOKEN</code><span style="margin:0">Token ของบอท (Developer Portal → Bot)</span></div>
-          <span>ลิงก์ฟังก์ชัน (แก้ถ้า Supabase ตั้งชื่อให้ต่างจากนี้)</span>
-          <input id="dcUrl" autocomplete="off">
-          <div class="wr"><button class="sec" id="dcUrlSave" type="button">💾 บันทึก</button></div></li>
-        <li data-s="5"><b>ใส่ Role ID ให้แต่ละเลเวล</b><span>ในการ์ด ⭐ แต้มและเลเวล ด้านล่าง: Discord → ตั้งค่าเซิร์ฟเวอร์ → บทบาท → กดค้างที่ยศ → คัดลอก ID แล้ววางในช่อง 🎖️ ของเลเวลนั้น → บันทึกเลเวล</span></li>
-        <li data-s="6"><b>เปิดใช้งาน</b>
-          <label class="sw"><input id="dcOn" type="checkbox"><i></i>แจกยศตามเลเวลอัตโนมัติ</label>
-          <div class="wr"><button class="sec" id="dcSync" type="button">🔄 ซิงก์ยศทุกคนตอนนี้</button><button class="sec" id="dcCheck" type="button">🔍 ตรวจผล</button></div>
-          <div id="dcRes"></div></li>
-      </ol>
-      <p class="pmsg" id="dcMsg" role="status"></p>
-    </section>
-    <section class="card" id="ptsCard" data-tab="tools">
-      <h2>⭐ แต้มและเลเวล</h2>
-      <p class="cnt">อัตราแต้มต่อหมวด: ทุก (กี่ชิ้น) ได้ (กี่แต้ม) · หมวดที่ไม่อยู่ในรายการจะไม่ได้แต้ม</p>
-      <div id="rateList"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="sec" id="rateAdd" type="button" style="width:auto;padding:8px 14px">+ เพิ่มหมวด</button>
-        <button class="sec" id="rateSave" type="button" style="width:auto;padding:8px 14px">💾 บันทึกอัตราแต้ม</button>
-      </div>
-      <p class="cnt" style="margin-top:18px">เลเวล (คิดจากแต้มสะสม ไม่ลดตอนสมาชิกแลกของ)</p>
-      <div id="lvList"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="sec" id="lvAdd" type="button" style="width:auto;padding:8px 14px">+ เพิ่มเลเวล</button>
-        <button class="sec" id="lvSave" type="button" style="width:auto;padding:8px 14px">💾 บันทึกเลเวล</button>
-      </div>
-      <p class="cnt" style="margin-top:18px">ของที่ส่งก่อนเริ่มระบบแต้มจะไม่มีแต้ม กดปุ่มนี้เพื่อนับย้อนหลังจากประวัติเดิมให้สมาชิกที่อนุมัติแล้ว (ชื่อในเกมต้องตรงกับประวัติ กดซ้ำได้ ไม่นับซ้ำ)</p>
-      <button class="sec" id="ptsBackfill" type="button">📥 นับแต้มย้อนหลังจากประวัติเดิม</button>
-      <p class="pmsg" id="ptsMsg" role="status"></p>
-    </section>
+    
+
+    
+    
+    
+    
     <section class="card" data-tab="list">
       <h2>📋 รายการล่าสุด</h2>
       <input id="q" type="search" placeholder="ค้นหา ชื่อ / Discord / หมวด / วันที่ / #เลข" autocomplete="off">
@@ -401,11 +411,6 @@ $("editSave").onclick = async () => {
     $("editBox").hidden = true;
     say(e.message === "db 409" ? "แก้ไม่ได้: คนนี้มีรายการหมวดนี้ในวันเดียวกันอยู่แล้ว" : e.message === "db 404" ? "ไม่พบฟังก์ชัน admin_update_row ใน Supabase (ยังไม่ได้รัน SQL)" : "แก้ไม่สำเร็จ (" + e.message + ")", "err");
   }
-};
-$("ren").onclick = async () => {
-  const f = $("from").value.trim(), t = $("to").value.trim(); if (!f || !t) return say("กรอกให้ครบทั้งสองช่อง", "err");
-  if (!confirm("รวมชื่อ “" + f + "” เป็น “" + t + "” ?")) return;
-  try { const n = await rpc("admin_rename", { p_pass: PASS, p_from: f, p_to: t }); say("รวมชื่อแล้ว " + n + " รายการ", "ok"); $("from").value = $("to").value = ""; await load(); } catch (e) { say("รวมชื่อไม่สำเร็จ", "err"); }
 };
 $("sum").onclick = async () => {
   const p = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit" }).formatToParts(new Date());
@@ -876,7 +881,8 @@ $("dcOn").onchange = () => dcSave({ roles_enabled: $("dcOn").checked ? "on" : "o
 $("dcKeyCopy").onclick = async () => { try { await navigator.clipboard.writeText($("dcKey").value); dmsg("คัดลอก ROLE_KEY แล้ว ✓", true); } catch (e) { $("dcKey").select(); dmsg("กดค้างที่ช่องแล้วเลือกคัดลอก"); } };
 $("dcTest").onclick = async () => { try { await pcall("admin_levelup_test"); dmsg("ส่งประกาศทดสอบแล้ว ดูในห้อง Discord ✓", true); } catch (e) { dmsg(e.message); } };
 $("dcSync").onclick = async () => { try { const r = await pcall("admin_roles_sync_all"); dmsg("ส่งคำสั่งซิงก์ยศ " + r.count + " คนแล้ว รอ 5–10 วินาทีแล้วกด 🔍 ตรวจผล", true); } catch (e) { dmsg(e.message); } };
-const RHINT = { 401: "ROLE_KEY ใน Secrets ไม่ตรงกับในขั้นที่ 4 หรือยังไม่ได้ปิด Verify JWT", 403: "บอทไม่มีสิทธิ์จัดการยศ หรือยศบอทอยู่ต่ำกว่ายศเลเวล", 404: "หาไม่เจอ: ลิงก์ฟังก์ชันผิด หรือสมาชิกไม่อยู่ในเซิร์ฟเวอร์ หรือ Role ID ผิด", 500: "ยังไม่ได้ใส่ DISCORD_BOT_TOKEN ใน Secrets" };
+const RHINT = { 401: "ROLE_KEY ใน Secrets ไม่ตรงกับในขั้นที่ 4 หรือยังไม่ได้ปิด Verify JWT", 404: "ลิงก์ฟังก์ชันในขั้นที่ 4 ไม่ตรงกับชื่อฟังก์ชันจริง", 500: "ยังไม่ได้ใส่ DISCORD_BOT_TOKEN ใน Secrets" };
+const DHINT = { 401: "Discord ไม่รับ Token บอท: DISCORD_BOT_TOKEN ผิด (ต้องเป็น Token จากหน้า Bot ของแอปเดียวกับที่เชิญเข้าเซิร์ฟเวอร์)", 403: "บอทไม่มีสิทธิ์จัดการยศ หรือยศบอทอยู่ต่ำกว่ายศเลเวล ลากยศบอทขึ้นไปบนสุด", 404: "สมาชิกคนนี้ไม่อยู่ในเซิร์ฟเวอร์ หรือ Role ID / Server ID ผิด" };
 $("dcCheck").onclick = async () => {
   let rows; try { rows = await rpc("admin_roles_check", { p_pass: PASS }) || []; } catch (e) { dmsg("ตรวจไม่ได้"); return; }
   if (!rows.length) { $("dcRes").innerHTML = '<div class="rres">ยังไม่มีคำสั่งแจกยศ กด 🔄 ซิงก์ยศทุกคน ก่อน</div>'; return; }
@@ -887,13 +893,41 @@ $("dcCheck").onclick = async () => {
     const code = st && st >= 300 ? st : bad ? bad.status : null;
     const ok = st && st < 300 && !bad;
     if (ok) window.__rolesOk = true;
-    return '<div class="rres"><b>' + esc(r.ign) + "</b> · " + (st == null ? "⏳ กำลังส่ง..." : ok ? "✅ สำเร็จ" : "❌ ผิดพลาด " + code + " — " + esc(RHINT[code] || (bad && bad.error) || r.body)) + "</div>";
+    return '<div class="rres"><b>' + esc(r.ign) + "</b> · " + (st == null ? "⏳ กำลังส่ง..." : ok ? "✅ สำเร็จ" : "❌ ผิดพลาด " + code + " — " + esc((bad ? DHINT[code] : RHINT[code]) || (bad && bad.error) || r.body)) + "</div>";
   }).join("");
   dcRender();
 };
 $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "tools") dcLoad(); });
 new MutationObserver(() => { if (!$("panel").hidden) dcLoad(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
 const _lvSave = $("lvSave"); _lvSave.addEventListener("click", () => setTimeout(dcLoad, 1200));
+
+// ===== เมนูย่อยในแท็บ (จัดหมวดการ์ดให้หาง่าย) =====
+(function () {
+  const nav = $("subnav"), panel = $("panel"), pick = {};
+  try { Object.assign(pick, JSON.parse(sessionStorage.getItem("rm_sub") || "{}")); } catch (e) {}
+  const badgeOf = { red: "shopTabBadge" };
+  function build() {
+    const t = panel.dataset.t, cards = [...panel.querySelectorAll('.card[data-tab="' + t + '"][data-sub]')];
+    panel.querySelectorAll(".card[data-sub]").forEach(c => c.classList.remove("subhide"));
+    if (cards.length < 2) { nav.hidden = true; return; }
+    const cur = cards.some(c => c.dataset.sub === pick[t]) ? pick[t] : cards[0].dataset.sub;
+    nav.innerHTML = cards.map(c => {
+      const bid = badgeOf[c.dataset.sub], bel = bid && $(bid), n = bel && !bel.hidden ? bel.textContent : "";
+      return '<button type="button" data-s="' + c.dataset.sub + '" class="' + (c.dataset.sub === cur ? "on" : "") + '">' + esc(c.dataset.label) + (n ? '<span class="sb">' + esc(n) + "</span>" : "") + "</button>";
+    }).join("");
+    cards.forEach(c => c.classList.toggle("subhide", c.dataset.sub !== cur));
+    nav.hidden = false;
+  }
+  nav.addEventListener("click", e => {
+    const b = e.target.closest("button[data-s]"); if (!b) return;
+    pick[panel.dataset.t] = b.dataset.s; try { sessionStorage.setItem("rm_sub", JSON.stringify(pick)); } catch (er) {}
+    build(); scrollTo({ top: 0 });
+  });
+  new MutationObserver(build).observe(panel, { attributes: true, attributeFilter: ["data-t", "hidden"] });
+  const sb = $("shopTabBadge"); if (sb) new MutationObserver(build).observe(sb, { attributes: true, childList: true, characterData: true, subtree: true });
+  const lr = $("logRef"); if (lr) lr.addEventListener("click", () => { const tb = document.querySelector('#tabs button[data-t="tools"]'); if (tb) tb.click(); });
+  build();
+})();
 </script>
 </body>
 </html>
