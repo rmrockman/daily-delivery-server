@@ -782,7 +782,7 @@ async function remindLate() {
   try { localStorage.setItem("lateRemind", String(Date.now())); } catch (e) {}
   const role = CFG.adminRoleId ? String(CFG.adminRoleId) : "";
   try {
-    await pcall("admin_notify_discord", { p_payload: { username: "ส่งของรายวัน", content: role ? "<@&" + role + ">" : undefined, allowed_mentions: role ? { roles: [role] } : { parse: [] }, embeds: [{ title: "⏰ มีรายการรออนุมัติค้างเกิน 5 นาที", color: 0xFF8A7A, description: late.slice(0, 10).map(r => "• **" + r.ign + "** — รอมา " + waitTxt(Date.now() - new Date(r.created_at).getTime())).join("\n") + (late.length > 10 ? "\n…และอีก " + (late.length - 10) + " รายการ" : "") + "\n\nรบกวนแอดมินเข้าไปตรวจ/อนุมัติด้วยครับ", footer: { text: "Rockman · แจ้งเตือนอัตโนมัติ" } }] } });
+    await pcall("admin_notify_discord", { p_kind: "remind", p_payload: { username: "ส่งของรายวัน", content: role ? "<@&" + role + ">" : undefined, allowed_mentions: role ? { roles: [role] } : { parse: [] }, embeds: [{ title: "⏰ มีรายการรออนุมัติค้างเกิน 5 นาที", color: 0xFF8A7A, description: late.slice(0, 10).map(r => "• **" + r.ign + "** — รอมา " + waitTxt(Date.now() - new Date(r.created_at).getTime())).join("\n") + (late.length > 10 ? "\n…และอีก " + (late.length - 10) + " รายการ" : "") + "\n\nรบกวนแอดมินเข้าไปตรวจ/อนุมัติด้วยครับ", footer: { text: "Rockman · แจ้งเตือนอัตโนมัติ" } }] } });
   } catch (e) {}
 }
 // ===== ประวัติอนุมัติ/ปฏิเสธ =====
@@ -1152,27 +1152,25 @@ $("tabs").addEventListener("click", e => { const b = e.target.closest("button[da
 
 // ===== Webhook รวมที่เดียว (เฟส 17) =====
 const HOOKS = [
-  { s: "app", k: "pending_webhook", icon: "📥", name: "ห้องรออนุมัติ (แอดมิน)", what: ["มีคนส่งของรออนุมัติ (รูป + จำนวน)", "มีคนสมัครบัญชีใหม่"], fb: [] },
+  { s: "app", k: "pending_webhook", icon: "📥", name: "ห้องรออนุมัติ (แอดมิน)", what: ["มีคนส่งของรออนุมัติ (รูป + จำนวน)", "มีคนสมัครบัญชีใหม่", "⏰ เตือนรายการรออนุมัติค้าง (แท็กยศแอดมิน)"], fb: [] },
+  { s: "app", k: "result_webhook", icon: "✅", name: "ห้องผลการส่งของ", what: ["การ์ดส่งของที่อนุมัติแล้ว (แต้มก่อน / หลัง)", "👑 เปลี่ยนเจ้าของอันดับ 1", "โพสต์สรุปเดือนซ้ำ (ปุ่มในแท็บสรุป)"], fb: [], old: true },
   { s: "bot", k: "levelup_webhook", icon: "🎉", name: "ห้องประกาศ (สมาชิกเห็น)", what: ["ประกาศเลเวลอัพ + แท็กชื่อ"], fb: [] },
   { s: "bot", k: "event_webhook", icon: "🔥", name: "อีเวนต์ & ภารกิจ", what: ["เริ่ม / จบอีเวนต์แต้ม xN", "เป้าหมายแคลนใหม่ / สำเร็จ", "ภารกิจใหม่ / มีคนทำภารกิจสำเร็จ"], fb: ["levelup_webhook"] },
   { s: "bot", k: "monthly_webhook", icon: "🏆", name: "สรุปประจำเดือน", what: ["Top 3 ประจำเดือน + แต้มรางวัล (วันที่ 1 ของเดือน)"], fb: ["levelup_webhook", "pending_webhook"] },
   { s: "app", k: "shop_webhook", icon: "🛒", name: "ร้านค้า", what: ["มีคนแลกของ (รอแอดมินมอบของ)"], fb: ["pending_webhook"] },
   { s: "bot", k: "inventory_webhook", icon: "📦", name: "คลังกลาง", what: ["มีคำขอเบิกของใหม่", "อนุมัติเบิกออก (บอกของคงเหลือ)", "แอดมินปรับจำนวนของ"], fb: ["pending_webhook"] }
 ];
-const NOTIFY_WHAT = ["การ์ดส่งของที่อนุมัติแล้ว (แต้มก่อน / หลัง)", "โพสต์สรุปเดือนซ้ำ (ปุ่มในแท็บสรุป)"];
 let HK = null;
 const hkm = (t, ok) => { $("hookMsg").textContent = t || ""; $("hookMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
 function hookRows() {
   const val = {}; (HK.app || []).forEach(r => val["app:" + r.key] = r); (HK.bot || []).forEach(r => val["bot:" + r.key] = r);
   const rows = HOOKS.map(h => Object.assign({}, h, { what: h.what.slice() })), known = new Set(rows.map(h => h.s + ":" + h.k));
-  (HK.notify_keys || []).forEach(k => {
-    const row = rows.find(h => h.s === "app" && h.k === k);
-    if (row) row.what.push(...NOTIFY_WHAT);
-    else if (val["app:" + k]) { rows.splice(1, 0, { s: "app", k: k, icon: "✅", name: "ห้องผลการส่งของ", what: NOTIFY_WHAT.slice(), fb: [] }); known.add("app:" + k); }
-  });
+  const oldKeys = (HK.notify_keys || []).filter(k => k !== "admin_url" && val["app:" + k]);
   Object.keys(val).filter(id => !known.has(id)).forEach(id => {
-    const r = val[id], used = (r.used_by || []).filter(n => !/^admin_/.test(n));
-    rows.push({ s: id.split(":")[0], k: r.key, icon: "🔧", name: "อื่น ๆ: " + r.key, what: [used.length ? "ใช้โดยระบบ: " + used.join(", ") : "ไม่พบระบบที่ใช้ค่านี้ (ปล่อยว่างได้)"], fb: [] });
+    const r = val[id], used = (r.used_by || []).filter(n => !/^admin_/.test(n) || n === "admin_notify_discord_old");
+    const isOld = oldKeys.includes(r.key);
+    rows.push({ s: id.split(":")[0], k: r.key, icon: isOld ? "🗂️" : "🔧", name: isOld ? "ห้องเดิมของระบบเก่า (" + r.key + ")" : "อื่น ๆ: " + r.key,
+      what: isOld ? ["ใช้แทน ✅ ห้องผลการส่งของ ตอนที่ห้องนั้นยังว่าง"] : [used.length ? "ใช้โดยระบบ: " + used.join(", ") : "ไม่พบระบบที่ใช้ค่านี้ (ปล่อยว่างได้)"], fb: [] });
   });
   rows.forEach(h => h.v = (val[h.s + ":" + h.k] || {}).value || "");
   return rows;
@@ -1180,14 +1178,17 @@ function hookRows() {
 function hookRender() {
   const keep = {}; document.querySelectorAll("#hookList .hk").forEach(c => { const i = c.querySelector("input"); if (c.dataset.dirty) keep[c.dataset.id] = i.value; });
   const rows = hookRows(), byKey = {}; rows.forEach(h => byKey[h.k] = h);
-  $("hookWarn").innerHTML = (HK.hardcoded || []).length ? '<div class="rres" style="border-color:var(--bad);margin-bottom:10px">⚠️ พบลิงก์ Webhook ฝังอยู่ในโค้ดฟังก์ชัน: <b>' + HK.hardcoded.map(esc).join(", ") + "</b><br>ห้องนี้แก้จากหน้านี้ไม่ได้ ส่งชื่อนี้มาให้ผู้ดูแลระบบย้ายมาไว้ที่นี่</div>" : "";
+  const hc = (HK.hardcoded || []).filter(n => n !== "admin_notify_discord_old");
+  $("hookWarn").innerHTML = hc.length ? '<div class="rres" style="border-color:var(--bad);margin-bottom:10px">⚠️ พบลิงก์ Webhook ฝังอยู่ในโค้ดฟังก์ชัน: <b>' + hc.map(esc).join(", ") + "</b><br>ห้องนี้แก้จากหน้านี้ไม่ได้ ส่งชื่อนี้มาให้ผู้ดูแลระบบย้ายมาไว้ที่นี่</div>" : "";
   $("hookList").innerHTML = rows.map(h => {
     const id = h.s + ":" + h.k, set = !!h.v, f = h.fb.map(k => byKey[k]).find(x => x && x.v);
-    const st = set ? '<span class="tag a">✅ ตั้งแล้ว</span>' : f ? '<span class="tag">↪️ ใช้ห้อง ' + f.icon + " " + esc(f.name) + "</span>" : '<span class="tag r">⚠️ ยังไม่ตั้ง · ไม่แจ้ง</span>';
+    const oldK = (HK.notify_keys || []).filter(k => k !== "admin_url"), oldName = oldK.map(k => byKey[k] ? byKey[k].icon + " " + byKey[k].name : null).filter(Boolean)[0];
+    const st = set ? '<span class="tag a">✅ ตั้งแล้ว</span>' : h.old ? '<span class="tag">↪️ ใช้ห้องเดิม' + (oldName ? " (" + esc(oldName) + ")" : "") + "</span>" : f ? '<span class="tag">↪️ ใช้ห้อง ' + f.icon + " " + esc(f.name) + "</span>" : '<span class="tag r">⚠️ ยังไม่ตั้ง · ไม่แจ้ง</span>';
     const v = id in keep ? keep[id] : h.v;
     return '<div class="pc hk" data-id="' + esc(id) + '" data-s="' + h.s + '" data-k="' + esc(h.k) + '" data-name="' + esc(h.name) + '" style="margin-bottom:12px' + (id in keep ? '" data-dirty="1' : "") + '">'
       + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px"><strong>' + h.icon + " " + esc(h.name) + "</strong>" + st + "</div>"
       + '<ul style="margin:0 0 8px;padding-left:18px;font-size:.82rem;color:var(--mute)">' + h.what.map(w => '<li style="display:list-item;border:0;background:none;padding:1px 0;margin:0">' + esc(w) + "</li>").join("") + "</ul>"
+      + (h.old ? '<p class="cnt" style="margin:0 0 6px;font-size:.75rem">เว้นว่าง = ส่งเข้าห้องเดิมแบบที่ใช้อยู่ตอนนี้' + (oldName ? " คือ " + esc(oldName) : "") + "</p>" : "")
       + (h.fb.length ? '<p class="cnt" style="margin:0 0 6px;font-size:.75rem">เว้นว่าง = ส่งเข้า ' + h.fb.map(k => byKey[k] ? byKey[k].icon + " " + byKey[k].name : k).join(" → ") + " แทน</p>" : "")
       + '<input class="hk-url" placeholder="https://discord.com/api/webhooks/..." autocomplete="off" value="' + esc(v) + '">'
       + '<div class="wr" style="margin-top:8px"><button class="sec hk-save" type="button">💾 บันทึก</button>' + (set ? '<button class="sec hk-test" type="button">📣 ทดสอบ</button>' : "") + (set ? '<button class="sec hk-clear" type="button">ล้าง</button>' : "") + "</div>"
@@ -1197,6 +1198,7 @@ function hookRender() {
 async function hookLoad() {
   try { HK = await rpc("admin_hooks", { p_pass: PASS }); } catch (e) { $("hookList").innerHTML = '<p class="cnt">ยังไม่ได้รัน phase17.sql ใน Supabase</p>'; return; }
   hookRender();
+  if (!HK.old_wrapped) $("hookWarn").insertAdjacentHTML("afterbegin", '<div class="rres" style="border-color:var(--bad);margin-bottom:10px">⚠️ ยังไม่ได้รัน <b>phase17b.sql</b> ช่อง ✅ ห้องผลการส่งของ จะยังไม่มีผล</div>');
 }
 $("hookList").addEventListener("input", e => { const c = e.target.closest(".hk"); if (c) c.dataset.dirty = "1"; });
 $("hookList").addEventListener("click", async e => {
