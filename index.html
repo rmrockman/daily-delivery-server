@@ -155,7 +155,6 @@ p.sub{line-height:1.5}
 .hist li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:.9rem}
 .hist li small{display:block;color:var(--mute);font-size:.75rem}
 .hist li b{color:var(--gold-hi);white-space:nowrap}
-.hist .clr{margin-top:10px;background:none;border:0;box-shadow:none;color:var(--mute);text-decoration:underline;font-size:.8rem;width:auto;padding:4px 0}
 
 /* กราฟยอดรายวัน */
 .bars{display:flex;align-items:flex-end;gap:3px}
@@ -174,8 +173,6 @@ p.sub{line-height:1.5}
 .dd p{margin:0;color:var(--mute);font-size:.85rem}
 .tabs{margin:0 0 10px}
 .tabs button.on{background:linear-gradient(180deg,var(--gold-hi),var(--gold));color:#1a1405;border-color:transparent}
-.addcat{width:100%;margin-top:8px;padding:10px;background:#0a0a0a;border:1px dashed #6b5428;color:var(--gold-hi);font-weight:600;font-size:.9rem;box-shadow:none;border-radius:12px}
-.addcat:hover{background:#17130b}
 .xr{display:flex;gap:8px;margin-top:8px;animation:up .3s ease-out both}
 .xr select,.xr input{width:auto;min-width:0;margin:0}
 .xr select{flex:1.3}.xr input{flex:1}
@@ -502,7 +499,6 @@ button{border-radius:0!important}
     <div id="ptsQuote" hidden></div>
     <button id="send" type="button">ส่งให้แอดมินอนุมัติ</button>
     <div id="msg" role="status"></div>
-    <button type="button" id="forget" class="link" hidden style="display:none"></button>
   </div>
   </div>
   <div class="view" data-view="rank">
@@ -603,21 +599,13 @@ ITEM_TYPES.forEach(t => { const o = document.createElement("option"); o.value = 
 const LOCATIONS = (SITE_CACHE && SITE_CACHE.locations && SITE_CACHE.locations.length && SITE_CACHE.locations) || CFG.locations || ["จุดส่งของ"];
 LOCATIONS.forEach(t => { const o = document.createElement("option"); o.value = o.textContent = t; $("loc").appendChild(o); });
 
-// กันส่งซ้ำ: 1 ชื่อในเกม ส่งได้ 1 ครั้งต่อวัน (จำไว้ในเบราว์เซอร์)
-const todayKey = ign => {
-  const d = new Date(), p = n => String(n).padStart(2, "0");
-  return "delivered:" + d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + ":" + ign.toLowerCase();
-};
-const alreadySent = k => { try { return !!localStorage.getItem(k); } catch (e) { return false; } };
-const markSent = k => { try { localStorage.setItem(k, "1"); } catch (e) {} };
 const msg = (t, c) => { $("msg").textContent = t; $("msg").className = c || ""; };
 
 // ===== จำชื่อไว้ในเครื่อง =====
 const NK = "rm_names";
 const savedNames = () => { try { return JSON.parse(localStorage.getItem(NK)) || {}; } catch (e) { return {}; } };
-function saveNames(ign) { try { localStorage.setItem(NK, JSON.stringify({ ign })); } catch (e) {} $("forget").hidden = false; }
-(function () { const n = savedNames(); if (n.ign) $("ign").value = n.ign; $("forget").hidden = !n.ign; })();
-$("forget").addEventListener("click", () => { try { localStorage.removeItem(NK); } catch (e) {} $("ign").value = ""; $("forget").hidden = true; $("today").hidden = true; loadBoard(); });
+function saveNames(ign) { try { localStorage.setItem(NK, JSON.stringify({ ign })); } catch (e) {} }
+(function () { const n = savedNames(); if (n.ign) $("ign").value = n.ign; })();
 
 // ===== เอฟเฟกต์ฉลองหลังส่งสำเร็จ =====
 function celebrate(ign, type, qty) {
@@ -652,29 +640,6 @@ function pendToast(ign, type, qty) {
   const t2 = document.createElement("div"); t2.className = "t2"; t2.textContent = type + " " + qty.toLocaleString("th-TH") + " ชิ้น · รอแอดมินอนุมัติ ยอดจะเข้าอันดับและ Discord หลังอนุมัติ";
   t.append(t1, t2); document.body.appendChild(t);
   const kill = () => t.remove(); t.addEventListener("click", kill); setTimeout(kill, 3600);
-}
-// ===== สร้างการ์ด Discord จากรายการที่แอดมินอนุมัติ =====
-function buildEmbeds(r) {
-  const items = r.items || [], multi = items.length > 1, total = items.reduce((t, x) => t + (Number(x.qty) || 0), 0);
-  const ign = r.ign, dc = r.dc || r.ign, loc = r.loc;
-  const urls = (r.photos || []).concat(r.loc_photo ? [r.loc_photo] : []).filter(u => /^https:\/\//.test(u));
-  const sty = multi ? { icon: "🧺", color: 0xF2B42B } : styleFor(items[0].type), big = total >= 10000;
-  const same = String(dc).trim().toLowerCase() === String(ign).trim().toLowerCase();
-  const fields = [{ name: "👤 ชื่อในเกม", value: "**" + ign + "**", inline: true }];
-  if (!multi) {
-    fields.push({ name: sty.icon + " ประเภท", value: items[0].type, inline: true }, { name: "📊 จำนวน", value: "**" + Number(items[0].qty).toLocaleString("th-TH") + "** ชิ้น", inline: true });
-  } else {
-    items.forEach(x => fields.push({ name: styleFor(x.type).icon + " " + x.type, value: "**" + Number(x.qty).toLocaleString("th-TH") + "** ชิ้น", inline: true }));
-    fields.push({ name: "📊 รวม", value: "**" + total.toLocaleString("th-TH") + "** ชิ้น", inline: true });
-  }
-  if (!same) fields.push({ name: "💬 Discord", value: dc, inline: true });
-  if (loc) fields.push({ name: "📍 ตำแหน่ง", value: loc, inline: true });
-  const gal = urls.length > 1 ? "https://discord.com" : undefined; // embed ที่ url เดียวกันจะรวมเป็นแกลเลอรี
-  const e0 = { title: (big ? "🔥 " : "") + sty.icon + " ส่งของรายวัน" + (big ? " · ยอดใหญ่!" : ""), color: sty.color, url: gal, fields, timestamp: new Date(r.created_at || Date.now()).toISOString(), footer: { text: "Rockman · ส่งของรายวัน · อนุมัติแล้ว ✅" } };
-  if (urls[0]) e0.image = { url: urls[0] };
-  const embeds = [e0];
-  for (let i = 1; i < urls.length; i++) embeds.push({ url: gal, image: { url: urls[i] } });
-  return embeds;
 }
 
 // ===== ตัวเลขวิ่งนับ + แถบเทียบอันดับ 1 =====
@@ -727,7 +692,7 @@ async function refreshToday() {
   const ign = (savedNames().ign || "").trim();
   if (!ign) { $("today").hidden = true; return; }
   try {
-    if (!BOARD_ON) { setToday(alreadySent(todayKey(ign)) ? "done" : "todo"); return; }
+    if (!BOARD_ON) return;
     const p = await rpc("my_pending", { p_ign: ign });
     if (p && p.status === "pending") { setToday("pending"); return; }
     const sent = !!(await rpc("already_sent", { p_ign: ign }));
@@ -825,10 +790,6 @@ function avImg(d, cls) {
   const im = document.createElement("img"); im.className = "rav " + (cls || ""); im.alt = ""; im.loading = "lazy"; im.src = u;
   im.onerror = () => im.replaceWith(mkIni());
   return im;
-}
-async function postLastMonthSummary() {
-  if (!BOARD_ON) return;
-  try { await rpc("post_last_month_summary"); } catch (e) {} // ฐานข้อมูลสร้างข้อความและโพสต์เอง เดือนละครั้ง
 }
 // สีแถบข้างและไอคอนของการ์ดใน Discord ตามประเภทของ (จับจากคำในชื่อ ใส่เพิ่มได้)
 const TYPE_STYLES = [
@@ -1008,8 +969,6 @@ $("send").addEventListener("click", async () => {
   if (extra.some(x => !(x.qty >= 1))) return msg("กรอกจำนวนของหมวดที่เพิ่มให้ครบ หรือกด ✕ ลบแถวที่ไม่ใช้", "err");
   if (new Set([type, ...extra.map(x => x.type)]).size !== extra.length + 1) return msg("เลือกหมวดซ้ำกัน แต่ละหมวดเลือกได้ครั้งเดียว", "err");
   const items = [{ type, qty }].concat(extra), multi = items.length > 1, total = items.reduce((t, x) => t + x.qty, 0);
-  const key = todayKey(ign);
-  if (!BOARD_ON && alreadySent(key)) return msg("วันนี้ส่งของในชื่อ “" + ign + "” ไปแล้ว พรุ่งนี้ส่งได้ใหม่", "err");
   if (!pics.length) return msg("กรุณาแนบรูปอย่างน้อย 1 รูป", "err");
   if (!loc) return msg("กรุณาเลือกตำแหน่งที่ส่ง", "err");
   if (!locPic) return msg("กรุณาแนบรูปตำแหน่งที่ส่ง", "err");
@@ -1195,7 +1154,6 @@ $("send").addEventListener("click", async () => {
   window.getExtraItems = () => blocks.filter(b => b.s.value).map(b => ({ type: b.s.value, qty: parseInt(b.q.value, 10) }));
   window.clearExtra = () => { blocks.forEach(b => { b.s.value = ""; b.q.value = ""; b.q.dispatchEvent(new Event("input")); }); syncX(); };
   syncX();
-  try { postLastMonthSummary(); } catch (e) {}
   // 6) ชื่อแนะนำตอนพิมพ์ (จากอันดับเดือนนี้และเดือนที่แล้ว)
   // 7) กราฟยอดส่งรายวัน 14 วัน
   const bkkDay = back => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date(Date.now() - back * 864e5));
@@ -1247,7 +1205,6 @@ $("send").addEventListener("click", async () => {
   const main = document.querySelector("main");
   // ---------- แชร์รูปอันดับ ----------
   const W = 1080, H = 1350, EMO = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
-  const rr = (c, x, y, w, h, r) => { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
   const fit = (c, t, max) => { t = String(t); if (c.measureText(t).width <= max) return t; while (t.length > 1 && c.measureText(t + "…").width > max) t = t.slice(0, -1); return t + "…"; };
   const num = n => Number(n).toLocaleString("th-TH");
   const loadImg = u => new Promise(res => { if (!u) return res(null); const im = new Image(); im.crossOrigin = "anonymous"; im.onload = () => res(im); im.onerror = () => res(null); im.src = u; setTimeout(() => res(null), 4000); });
@@ -1385,7 +1342,6 @@ $("send").addEventListener("click", async () => {
       lock(false);
       $("ign").value = member.ign; $("ign").readOnly = true;
       try { localStorage.setItem("rm_names", JSON.stringify({ ign: member.ign })); } catch (e) {}
-      var fg = $("forget"); if (fg) { fg.hidden = true; fg.style.display = "none"; }
       if (lastIgn !== member.ign) { lastIgn = member.ign; try { refreshToday(); loadBoard(); } catch (e) {} }
     }
     card.innerHTML = h;

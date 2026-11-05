@@ -526,7 +526,6 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <h3 style="margin:18px 0 8px;font-size:1rem" id="moPvT">ตัวอย่างเดือนที่แล้ว</h3>
       <div id="moPv"></div>
       <button class="sec" id="moRun" type="button" style="margin-top:8px"></button>
-      <button class="sec" id="sum" type="button" style="margin-top:8px">📣 โพสต์สรุปเดือนที่แล้วซ้ำ (ไม่แจกแต้ม)</button>
       <button class="sec hookJump" type="button" style="margin-top:14px">🔗 ตั้งห้อง Discord ที่เมนู จัดการ › Webhook</button>
       <p class="pmsg" id="moMsg" role="status"></p>
       <div id="moHist"></div>
@@ -658,18 +657,6 @@ $("editSave").onclick = async () => {
     $("editBox").hidden = true;
     say(e.message === "db 409" ? "แก้ไม่ได้: คนนี้มีรายการหมวดนี้ในวันเดียวกันอยู่แล้ว" : e.message === "db 404" ? "ไม่พบฟังก์ชัน admin_update_row ใน Supabase (ยังไม่ได้รัน SQL)" : "แก้ไม่สำเร็จ (" + e.message + ")", "err");
   }
-};
-$("sum").onclick = async () => {
-  const p = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit" }).formatToParts(new Date());
-  let y = +p.find(x => x.type === "year").value, m = +p.find(x => x.type === "month").value - 1; if (m < 1) { m = 12; y--; }
-  const key = y + "-" + String(m).padStart(2, "0"), label = new Date(Date.UTC(y, m - 1, 15)).toLocaleDateString("th-TH", { month: "long", year: "numeric", timeZone: "UTC" });
-  try {
-    const raw = await rpc("leaderboard", { p_month: key }), top = (raw || []).sort((a, b) => b.total - a.total).slice(0, 3), md = ["🥇", "🥈", "🥉"];
-    if (!top.length) return say("เดือนที่แล้วไม่มีข้อมูล", "err");
-    // ยิงเข้า Discord ผ่านฟังก์ชันในฐานข้อมูล (notify_discord) แทนการเก็บ Webhook URL ไว้ในหน้าเว็บ
-    await pcall("admin_notify_discord", { p_payload: { username: "ส่งของรายวัน", allowed_mentions: { parse: [] }, embeds: [{ title: "🏆 สรุปอันดับประจำเดือน " + label, color: 0xF2B42B, description: top.map((d, i) => md[i] + " **" + d.ign + "** — " + Number(d.total).toLocaleString("th-TH") + " ชิ้น (" + d.days + " วัน)").join("\n") + "\n\nขอบคุณทุกคนที่ส่งของ 💛" }] } });
-    say("ส่งคำสั่งโพสต์แล้ว ลองเช็กในดิสคอร์ดอีกครั้ง", "ok");
-  } catch (e) { say("โพสต์ไม่สำเร็จ", "err"); }
 };
 // ===== คิวรออนุมัติ: ตรวจรูป → อนุมัติ/ปฏิเสธ → อนุมัติแล้วถึงนับยอด + ลง Discord =====
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -1065,7 +1052,6 @@ setInterval(() => { if (PASS && !$("panel").hidden) loadShopA(); }, 30000);
     $("login").hidden = false; $("panel").hidden = true; $("tabs").hidden = true; $("meBar").hidden = true;
     let h = '<div class="shield"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>';
     if (st === "out") h += '<h2>เข้าสู่ระบบแอดมิน</h2><p class="lead">เฉพาะทีมแอดมินที่ได้รับสิทธิ์ ใช้บัญชี Discord ของคุณยืนยันตัวตน ไม่ต้องจำรหัสอีกต่อไป</p><button class="dcbtn" id="gLogin" type="button">' + DCI + 'เข้าสู่ระบบด้วย Discord</button>';
-    else if (st === "claim") h += '<h2>ตั้งค่าเจ้าของระบบ</h2>' + whoHtml(ME.name, ME.avatar, "ยังไม่มีเจ้าของระบบ") + '<p class="lead">ใส่รหัสแอดมินเดิมครั้งสุดท้าย เพื่อยืนยันว่าบัญชีนี้เป็น <b>เจ้าของระบบ</b> หลังจากนี้รหัสเดิมจะใช้ไม่ได้อีก</p><input id="gPass" type="password" placeholder="รหัสแอดมินเดิม" autocomplete="off" style="width:100%;margin-bottom:10px"><button id="gClaim" type="button">👑 ยืนยันเป็นเจ้าของ</button><button class="sec" id="gOut" type="button" style="margin-top:8px">ใช้บัญชีอื่น</button>';
     else if (st === "deny") h += '<h2>ไม่มีสิทธิ์เข้าหน้านี้</h2>' + whoHtml(ME.name, ME.avatar, "ไม่ได้อยู่ในทีมแอดมิน") + '<p class="lead">ถ้าคุณเป็นแอดมิน ให้เจ้าของระบบเพิ่มบัญชีนี้ในแท็บ จัดการ → ทีมแอดมิน</p><button class="sec" id="gOut" type="button">ใช้บัญชีอื่น</button>';
     else if (st === "err") h += '<h2>เชื่อมต่อไม่ได้</h2><p class="lead">ตรวจว่ารัน phase4.sql ในโปรเจกต์ RM CLAN แล้ว</p><button class="sec" id="gRetry" type="button">ลองใหม่</button>';
     else h += '<p class="lead">กำลังตรวจสอบสิทธิ์...</p>';
@@ -1086,7 +1072,7 @@ setInterval(() => { if (PASS && !$("panel").hidden) loadShopA(); }, 30000);
       if (!entered) { entered = true; $("pass").value = "discord"; await enter(); if (!$("panel").hidden) loadTeam(); }
       return;
     }
-    entered = false; showGate(ME.can_claim ? "claim" : "deny");
+    entered = false; showGate("deny");
   }
   gate.addEventListener("click", async e => {
     const b = e.target.closest("button"); if (!b) return;
@@ -1094,12 +1080,6 @@ setInterval(() => { if (PASS && !$("panel").hidden) loadShopA(); }, 30000);
     if (b.id === "gLogin") { b.disabled = true; const r = await SBA.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: location.origin + location.pathname } }); if (r.error) { b.disabled = false; m.textContent = r.error.message; } }
     else if (b.id === "gOut") await SBA.auth.signOut();
     else if (b.id === "gRetry") check();
-    else if (b.id === "gClaim") {
-      const p = $("gPass").value.trim(); if (!p) { m.textContent = "กรุณาใส่รหัสแอดมินเดิม"; return; }
-      b.disabled = true;
-      try { const r = await rpc("admin_claim_owner", { p_pass: p }); if (!r || !r.ok) { m.textContent = (r && r.error) || "ไม่สำเร็จ"; b.disabled = false; return; } await check(); }
-      catch (er) { m.textContent = "ไม่สำเร็จ ลองใหม่อีกครั้ง"; b.disabled = false; }
-    }
   });
   $("meBar").addEventListener("click", async e => { if (e.target.closest("#meOut")) { await SBA.auth.signOut(); location.reload(); } });
 
