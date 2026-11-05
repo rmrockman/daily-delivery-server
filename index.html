@@ -284,7 +284,7 @@ main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-
 #evBanner .cd i{display:block;font-style:normal;font-size:.62rem;font-weight:600;color:#ffcf9a}
 #authCard .bar{height:8px;border-radius:99px;background:#26221a;overflow:hidden;margin:8px 0 4px}
 #authCard .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));transition:width .6s}
-body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-view="hist"],body.rm-lock .view[data-view="shop"],body.rm-lock .view[data-view="inv"],body.rm-lock #invNeed{display:none!important}
+body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-view="hist"],body.rm-lock .view[data-view="shop"],body.rm-lock .view[data-view="inv"],body.rm-lock #invNeed,body.rm-lock #missions{display:none!important}
 .shopTop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
 .shopBal{font-size:1.25rem;font-weight:800;color:var(--gold-hi)}
 .shopGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -405,6 +405,33 @@ button{border-radius:0!important}
 .invList .st{display:inline-block;margin-top:2px;padding:1px 7px;font-size:.66rem;font-weight:700}
 .st.ok{background:rgba(61,255,176,.12);color:var(--ok)}.st.low{background:rgba(255,200,60,.15);color:#ffd36b}.st.out{background:rgba(255,92,138,.18);color:#ff9ab4}
 #wMsg{margin-top:12px;min-height:1.3em;font-size:.92rem}#wMsg.err{color:var(--err)}#wMsg.ok{color:var(--ok)}
+#missions{margin:0 0 14px}
+.msn{position:relative;padding:14px 16px;margin-bottom:12px;border:1px solid var(--line);background:linear-gradient(135deg,rgba(12,28,52,.92),rgba(6,10,22,.94));clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));box-shadow:inset 0 0 24px rgba(0,229,255,.07)}
+.msn h3{margin:0 0 10px;font-family:"Chakra Petch",sans-serif;font-size:.95rem;letter-spacing:.08em;color:var(--gold-hi);text-shadow:0 0 10px rgba(0,229,255,.45);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.msn h3 small{font-size:.7rem;letter-spacing:0;color:var(--mute);font-weight:500;text-shadow:none}
+.gl{margin-bottom:12px}.gl:last-child{margin-bottom:0}
+.gl .gt{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.gl .gt b{font-size:.98rem}.gl .gt span{font-family:"Chakra Petch",sans-serif;font-weight:700;color:var(--gold-hi);font-size:1.05rem}
+.gbar{position:relative;height:14px;margin:8px 0 6px;background:#0e2440;overflow:hidden}
+.gbar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#00e5ff,#ff3df2);box-shadow:0 0 14px rgba(0,229,255,.7);transition:width .9s}
+.gbar i::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(-45deg,rgba(255,255,255,.18) 0 6px,transparent 6px 12px);animation:gmove 1s linear infinite}
+@keyframes gmove{to{background-position:17px 0}}
+@media (prefers-reduced-motion:reduce){.gbar i::after{animation:none}}
+.gl .gm{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.74rem;color:var(--mute)}
+.gl .gm b{color:var(--ink);font-weight:600}
+.gl.done .gbar i{background:linear-gradient(90deg,#3dffb0,#00e5ff)}
+.gdone{display:inline-block;margin-top:6px;padding:2px 8px;font-size:.72rem;font-weight:700;background:rgba(61,255,176,.15);color:var(--ok)}
+.qs{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(19,224,255,.12)}
+.qs:first-of-type{border-top:0;padding-top:0}
+.qs .qc{width:30px;height:30px;flex:none;display:grid;place-items:center;font-size:.9rem;border:1px solid var(--line);background:#07101f}
+.qs.done .qc{background:var(--ok);color:#002014;border-color:transparent;box-shadow:0 0 10px rgba(61,255,176,.5)}
+.qs .qm{flex:1;min-width:0}.qs .qm b{display:block;font-size:.9rem}
+.qs .qbar{height:6px;margin:6px 0 3px;background:#0e2440;overflow:hidden}.qs .qbar i{display:block;height:100%;background:linear-gradient(90deg,#00e5ff,#7ff3ff)}
+.qs.done .qbar i{background:var(--ok)}
+.qs .qm small{font-size:.72rem;color:var(--mute)}
+.qs .qr{flex:none;text-align:right;font-family:"Chakra Petch",sans-serif;font-weight:700;color:#ffd36b;font-size:.92rem}
+.qs.done .qr{color:var(--ok)}
+
 #ptsQuote{position:relative;margin:4px 0 14px;padding:12px 14px;border:1px solid var(--line);background:linear-gradient(90deg,rgba(0,229,255,.08),rgba(255,61,242,.06));clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
 #ptsQuote .qh{display:flex;align-items:center;justify-content:space-between;gap:10px}
 #ptsQuote .ql{font-size:.78rem;color:var(--mute);letter-spacing:.04em}
@@ -435,6 +462,7 @@ button{border-radius:0!important}
   <div class="view" data-view="send">
   <div id="evBanner" hidden></div>
   <div class="card" id="authCard"><p style="margin:0">กำลังตรวจสอบบัญชี...</p></div>
+  <div id="missions" hidden></div>
   <div id="invNeed" hidden></div>
   <div class="today" id="today" hidden></div>
   <div class="card">
@@ -1351,7 +1379,7 @@ $("send").addEventListener("click", async () => {
       lock(true);
     } else { // approved
       var pic = member.photo || meta().av;
-      h = '<div class="who hud"><label class="avwrap" title="เปลี่ยนรูปโปรไฟล์">' + (pic ? '<img class="av" alt="" src="' + esc(pic) + '">' : '<span class="av ini">' + esc(String(member.ign || "?").charAt(0).toUpperCase()) + "</span>") + '<span class="avcam">📷</span><input type="file" id="avFile" accept="image/*" hidden></label><div><div class="lvtag" id="hudLv">LV.-</div><b>' + esc(member.ign) + '</b><div class="dcn">' + esc(meta().name) + (member.custom ? ' · <a href="#" id="avReset">ใช้รูป Discord</a>' : "") + '</div></div></div><div id="avMsg"></div><div id="aStats"></div><div class="hudft"><button class="sm" id="aOut">ออกจากระบบ</button><span>เวอร์ชัน P12</span></div>';
+      h = '<div class="who hud"><label class="avwrap" title="เปลี่ยนรูปโปรไฟล์">' + (pic ? '<img class="av" alt="" src="' + esc(pic) + '">' : '<span class="av ini">' + esc(String(member.ign || "?").charAt(0).toUpperCase()) + "</span>") + '<span class="avcam">📷</span><input type="file" id="avFile" accept="image/*" hidden></label><div><div class="lvtag" id="hudLv">LV.-</div><b>' + esc(member.ign) + '</b><div class="dcn">' + esc(meta().name) + (member.custom ? ' · <a href="#" id="avReset">ใช้รูป Discord</a>' : "") + '</div></div></div><div id="avMsg"></div><div id="aStats"></div><div class="hudft"><button class="sm" id="aOut">ออกจากระบบ</button><span>เวอร์ชัน P13</span></div>';
       lock(false);
       $("ign").value = member.ign; $("ign").readOnly = true;
       try { localStorage.setItem("rm_names", JSON.stringify({ ign: member.ign })); } catch (e) {}
@@ -1626,6 +1654,47 @@ $("send").addEventListener("click", async () => {
   setInterval(function () { if (!document.hidden) load(); }, 120000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
 })();
+</script>
+<script>
+// ===== เป้าหมายแคลน + ภารกิจ (เฟส 13) =====
+(function () {
+  var box = document.getElementById("missions"), DATA = null;
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var nf = function (n) { return Number(n || 0).toLocaleString("en-US"); };
+  function left(t) {
+    var ms = new Date(t).getTime() - Date.now(); if (ms <= 0) return "หมดเวลา";
+    var d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+    return d ? "เหลือ " + d + " วัน " + h + " ชม." : h ? "เหลือ " + h + " ชม. " + m + " นาที" : "เหลือ " + m + " นาที";
+  }
+  function paint() {
+    if (!DATA) { box.hidden = true; return; }
+    var g = DATA.goals || [], q = DATA.quests || [], h = "";
+    if (g.length) {
+      h += '<div class="msn"><h3>🎯 เป้าหมายแคลน</h3>' + g.map(function (x) {
+        var pct = Math.min(100, Math.round(x.progress / x.target * 100)), done = !!x.completed_at;
+        return '<div class="gl' + (done ? " done" : "") + '"><div class="gt"><b>' + esc(x.title) + "</b><span>" + pct + '%</span></div><div class="gbar"><i style="width:' + pct + '%"></i></div><div class="gm"><span><b>' + nf(x.progress) + "</b> / " + nf(x.target) + " " + esc(x.item_type || "ชิ้น (ทุกหมวด)") + "</span><span>" + (done ? "สำเร็จแล้ว 🎉" : "⏰ " + left(x.ends_at)) + '</span></div><div class="gm" style="margin-top:2px"><span>คุณร่วมส่ง <b>' + nf(x.mine) + "</b> ชิ้น</span><span>" + (x.reward > 0 ? "⭐ ครบเป้า +" + nf(x.reward) + " ให้ทุกคนที่ร่วมส่ง" : "") + "</span></div>" + (x.claimed ? '<span class="gdone">✅ คุณได้รับ +' + nf(x.reward) + " แต้มแล้ว</span>" : "") + "</div>";
+      }).join("") + "</div>";
+    }
+    if (q.length) {
+      var dn = q.filter(function (x) { return x.done; }).length;
+      h += '<div class="msn"><h3>📜 ภารกิจ <small>สำเร็จ ' + dn + "/" + q.length + " · รีเซ็ตรายสัปดาห์ " + left(DATA.week_end).replace("เหลือ ", "อีก ") + "</small></h3>" + q.map(function (x) {
+        var pct = Math.min(100, Math.round(x.progress / x.target * 100));
+        return '<div class="qs' + (x.done ? " done" : "") + '"><span class="qc">' + (x.done ? "✓" : "") + '</span><span class="qm"><b>' + esc(x.title) + '</b><div class="qbar"><i style="width:' + pct + '%"></i></div><small>' + nf(Math.min(x.progress, x.target)) + " / " + nf(x.target) + " " + esc(x.item_type || "ชิ้น (หมวดไหนก็ได้)") + (x.weekly ? " · รายสัปดาห์" : " · " + left(x.ends_at)) + '</small></span><span class="qr">' + (x.done ? "✅ +" : "⭐ +") + nf(x.reward) + "</span></div>";
+      }).join("") + "</div>";
+    }
+    box.innerHTML = h; box.hidden = !h;
+  }
+  async function load() {
+    if (!(window.__tok && window.__tok())) return;
+    try { var r = await rpc("member_missions"); DATA = r && r.ok ? r : null; } catch (e) { DATA = null; }
+    paint();
+  }
+  window.loadMissions = load;
+  var tries = 0, t0 = setInterval(function () { if (window.__tok && window.__tok()) { load(); clearInterval(t0); } else if (++tries > 40) clearInterval(t0); }, 1500);
+  setInterval(function () { if (!document.hidden) load(); }, 60000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
+})();
+
 </script>
 </body>
 

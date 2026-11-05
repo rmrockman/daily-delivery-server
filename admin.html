@@ -267,6 +267,15 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
 .irq .qbox{display:flex;align-items:center;gap:8px;margin:8px 0}.irq .qbox input{max-width:120px}
 .irq .stk{font-size:.78rem;color:var(--mute);margin:6px 0 0}.irq .stk.bad{color:var(--bad)}
 
+.mf>input{width:100%;margin-bottom:8px}
+.mf .sw{margin:2px 0 10px}
+.mi{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--line);background:#07101f}
+.mi.done{border-color:rgba(61,255,176,.5)}.mi.off{opacity:.55}
+.mi .t{flex:1;min-width:0;font-size:.86rem}.mi .t b{display:block}.mi .t small{display:block;color:var(--mute);font-size:.74rem}
+.mi .bar{height:6px;margin:6px 0 2px;background:#0e2440;overflow:hidden}.mi .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--pink))}
+.mi.done .bar i{background:var(--ok)}
+.mi button{width:auto;padding:6px 10px;font-size:.76rem;flex:none}
+
 </style>
 </head>
 <body>
@@ -343,6 +352,31 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <button class="sec" id="ptsBackfill" type="button">📥 นับแต้มย้อนหลังจากประวัติเดิม</button>
       <p class="pmsg" id="ptsMsg" role="status"></p>
     </section>
+    <section class="card" data-sub="msn" data-label="🎯 ภารกิจ" id="msnCard" data-tab="tools">
+      <h2>🎯 เป้าหมายแคลน</h2>
+      <p class="cnt">ทั้งแคลนช่วยกันส่งให้ครบเป้า ครบแล้วแจกแต้มให้ทุกคนที่ร่วมส่งอัตโนมัติ · นับเฉพาะรายการที่อนุมัติแล้ว</p>
+      <div class="mf">
+        <input id="gTitle" placeholder="ชื่อ เช่น แร่ล้านชิ้นเดือนนี้" maxlength="80">
+        <div class="row2"><label>หมวดของ<select id="gType"><option value="">ทุกหมวดรวมกัน</option></select></label><label>เป้า (ชิ้น)<input id="gTarget" type="number" min="1" inputmode="numeric" placeholder="1000000"></label></div>
+        <div class="row2"><label>แต้มรางวัล/คน<input id="gReward" type="number" min="0" value="100" inputmode="numeric"></label><label>ภายใน<select id="gDays"><option value="3">3 วัน</option><option value="7" selected>7 วัน</option><option value="14">14 วัน</option><option value="eom">ถึงสิ้นเดือน</option></select></label></div>
+        <label class="sw"><input id="gAnn" type="checkbox" checked><i></i>ประกาศใน Discord</label>
+        <button id="gGo" type="button">🎯 เริ่มเป้าหมาย</button>
+      </div>
+      <div id="gList" style="margin-top:12px"></div>
+      <h2 style="margin-top:22px">📜 ภารกิจ</h2>
+      <p class="cnt">ภารกิจรายคน ทำครบได้แต้มทันทีหลังอนุมัติ · แบบรายสัปดาห์รีเซ็ตทุกวันจันทร์ ทำซ้ำได้ทุกสัปดาห์</p>
+      <div class="mf">
+        <input id="qTitle" placeholder="ชื่อ เช่น ส่งกำมะถัน 5,000 ชิ้น" maxlength="80">
+        <div class="row2"><label>หมวดของ<select id="qType"><option value="">หมวดไหนก็ได้</option></select></label><label>จำนวน/คน<input id="qTarget" type="number" min="1" inputmode="numeric" placeholder="5000"></label></div>
+        <div class="row2"><label>แต้มรางวัล<input id="qReward" type="number" min="1" value="50" inputmode="numeric"></label><label>แบบ<select id="qMode"><option value="weekly">รายสัปดาห์ (ทำซ้ำได้)</option><option value="7">ครั้งเดียว · 7 วัน</option><option value="3">ครั้งเดียว · 3 วัน</option><option value="1">ครั้งเดียว · 1 วัน</option></select></label></div>
+        <label class="sw"><input id="qAnn" type="checkbox" checked><i></i>ประกาศใน Discord</label>
+        <button id="qGo" type="button">📜 สร้างภารกิจ</button>
+      </div>
+      <div id="qList" style="margin-top:12px"></div>
+      <label class="sw" style="margin-top:14px"><input id="qAnnDone" type="checkbox"><i></i>โพสต์ใน Discord เมื่อมีคนทำภารกิจสำเร็จ</label>
+      <p class="pmsg" id="msnMsg" role="status"></p>
+    </section>
+
     <section class="card" data-sub="ev" data-label="🔥 อีเวนต์" id="evCard" data-tab="tools">
       <h2>🔥 อีเวนต์แต้มคูณ</h2>
       <p class="cnt">ส่งของในช่วงอีเวนต์ได้แต้มคูณ นับตามเวลาที่สมาชิกกดส่ง (อนุมัติทีหลังก็ได้แต้มคูณ) · หน้าสมาชิกจะมีป้ายนับถอยหลังขึ้นเอง</p>
@@ -1235,6 +1269,54 @@ const _lvSave = $("lvSave"); _lvSave.addEventListener("click", () => setTimeout(
   $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "inv") load(); });
   new MutationObserver(() => { if (!$("panel").hidden) load(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
   setInterval(() => { if (PASS && !$("panel").hidden && !openEd) load(); }, 30000);
+})();
+
+// ===== เป้าหมายแคลน + ภารกิจ (เฟส 13) =====
+(function () {
+  let M = null;
+  const nf = n => Number(n || 0).toLocaleString("en-US");
+  const mm = (t, ok) => { $("msnMsg").textContent = t || ""; $("msnMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+  const ft = t => new Date(t).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  async function load() {
+    try { M = await rpc("admin_missions", { p_pass: PASS }); } catch (e) { $("gList").innerHTML = '<p class="cnt">โหลดไม่ได้ (ยังไม่ได้รัน phase13.sql ใน Supabase?)</p>'; return; }
+    ["gType", "qType"].forEach(id => { const el = $(id), cur = el.value, first = el.options[0].outerHTML; el.innerHTML = first + (M.types || []).map(t => '<option value="' + esc(t) + '">' + esc(t) + "</option>").join(""); el.value = cur; });
+    $("qAnnDone").checked = M.quest_announce !== "off";
+    $("gList").innerHTML = (M.goals || []).map(g => {
+      const pct = Math.min(100, Math.round(g.progress / g.target * 100)), done = !!g.completed_at, ended = !done && new Date(g.ends_at) <= new Date();
+      return '<div class="mi' + (done ? " done" : ended ? " off" : "") + '" data-g="' + g.id + '"><span class="t"><b>' + esc(g.title) + " · " + pct + "%</b>" + '<div class="bar"><i style="width:' + pct + '%"></i></div><small>' + nf(g.progress) + " / " + nf(g.target) + " " + esc(g.item_type || "ทุกหมวด") + " · รางวัล +" + nf(g.reward) + (done ? " · ✅ สำเร็จ แจก " + g.claims + " คน" : ended ? " · หมดเวลา" : " · ถึง " + ft(g.ends_at)) + "</small></span>" + (!done && !ended ? '<button class="sec del" data-ge="1" type="button">ปิด</button>' : "") + "</div>";
+    }).join("") || '<p class="cnt">ยังไม่มีเป้าหมาย</p>';
+    $("qList").innerHTML = (M.quests || []).map(q => '<div class="mi' + (q.active ? "" : " off") + '" data-q="' + q.id + '"><span class="t"><b>' + esc(q.title) + "</b><small>" + esc(q.item_type || "หมวดไหนก็ได้") + " " + nf(q.target) + " ชิ้น/คน · +" + nf(q.reward) + " แต้ม · " + (q.weekly ? "รายสัปดาห์" : "ถึง " + ft(q.ends_at)) + " · สำเร็จ" + (q.weekly ? "สัปดาห์นี้ " : " ") + q.done_now + " คน" + (q.weekly ? " (รวม " + q.done_all + ")" : "") + '</small></span><button class="sec" data-qt="' + (q.active ? "0" : "1") + '" type="button">' + (q.active ? "ปิด" : "เปิด") + '</button><button class="sec del" data-qd="1" type="button">ลบ</button></div>').join("") || '<p class="cnt">ยังไม่มีภารกิจ</p>';
+  }
+  $("gGo").addEventListener("click", async () => {
+    const d = $("gDays").value; let end;
+    if (d === "eom") { const n = new Date(), b = new Date(n.toLocaleString("en-US", { timeZone: "Asia/Bangkok" })); end = new Date(Date.UTC(b.getFullYear(), b.getMonth() + 1, 1) - 7 * 3600e3); }
+    else end = new Date(Date.now() + Number(d) * 864e5);
+    const p = { title: $("gTitle").value, item_type: $("gType").value, target: $("gTarget").value.trim(), reward: $("gReward").value.trim() || "0", ends_at: end.toISOString(), announce: $("gAnn").checked };
+    if (!p.title.trim() || !(Number(p.target) > 0)) { mm("ใส่ชื่อและจำนวนเป้าหมายก่อน"); return; }
+    try { await pcall("admin_goal_save", { p }); mm("เริ่มเป้าหมายแล้ว 🎯", true); $("gTitle").value = ""; $("gTarget").value = ""; } catch (er) { mm(er.message); }
+    load();
+  });
+  $("qGo").addEventListener("click", async () => {
+    const md = $("qMode").value, wk = md === "weekly";
+    const p = { title: $("qTitle").value, item_type: $("qType").value, target: $("qTarget").value.trim(), reward: $("qReward").value.trim(), weekly: wk, ends_at: wk ? "" : new Date(Date.now() + Number(md) * 864e5).toISOString(), announce: $("qAnn").checked };
+    if (!p.title.trim() || !(Number(p.target) > 0) || !(Number(p.reward) > 0)) { mm("ใส่ชื่อ จำนวน และแต้มรางวัลก่อน"); return; }
+    try { await pcall("admin_quest_save", { p }); mm("สร้างภารกิจแล้ว 📜", true); $("qTitle").value = ""; $("qTarget").value = ""; } catch (er) { mm(er.message); }
+    load();
+  });
+  $("gList").addEventListener("click", async e => {
+    if (!e.target.closest("button[data-ge]")) return; const id = Number(e.target.closest(".mi").dataset.g);
+    if (!confirm("ปิดเป้าหมายนี้ก่อนเวลา? (ยังไม่ครบเป้า = ไม่มีใครได้รางวัล)")) return;
+    try { await pcall("admin_goal_end", { p_id: id }); mm("ปิดแล้ว", true); } catch (er) { mm(er.message); } load();
+  });
+  $("qList").addEventListener("click", async e => {
+    const row = e.target.closest(".mi"); if (!row) return; const id = Number(row.dataset.q);
+    const t = e.target.closest("button[data-qt]"), d = e.target.closest("button[data-qd]");
+    if (t) { try { await pcall("admin_quest_save", { p: { id, active: t.dataset.qt === "1" } }); } catch (er) { mm(er.message); } load(); }
+    if (d) { if (!confirm("ลบภารกิจนี้? (แต้มที่แจกไปแล้วไม่ถูกหักคืน)")) return; try { await pcall("admin_quest_delete", { p_id: id }); mm("ลบแล้ว", true); } catch (er) { mm(er.message); } load(); }
+  });
+  $("qAnnDone").addEventListener("change", async () => { try { await pcall("admin_quest_announce", { p_on: $("qAnnDone").checked }); mm("บันทึกแล้ว ✓", true); } catch (er) { mm(er.message); } });
+  $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "tools") load(); });
+  new MutationObserver(() => { if (!$("panel").hidden) load(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
 })();
 
 </script>
