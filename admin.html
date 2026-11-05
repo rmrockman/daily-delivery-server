@@ -130,6 +130,32 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
 .lg li::after{content:"";position:absolute;left:8.5px;top:16px;bottom:0;width:1px;background:var(--line)}
 .lg li:last-child::after{display:none}
 .lg b{color:var(--hi)}.lg small{display:block;color:var(--mute);font-size:.75rem}
+.wz{list-style:none;margin:0;padding:0;counter-reset:w}
+.wz>li{display:block;position:relative;padding:0 0 18px 42px;margin:0;border:0;background:none;counter-increment:w;font-size:.9rem}
+.wr>button,.wr>a{flex:none}
+.wz .wr button{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.wz>li::before{content:counter(w);position:absolute;left:0;top:-2px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.85rem;background:#1a1712;border:1px solid var(--line);color:var(--hi)}
+.wz>li.done::before{content:"✓";background:linear-gradient(180deg,#8fe3a8,#3fae6a);color:#062010;border-color:transparent;box-shadow:0 0 12px rgba(143,227,168,.35)}
+.wz>li::after{content:"";position:absolute;left:13.5px;top:30px;bottom:4px;width:1px;background:var(--line)}
+.wz>li:last-child::after{display:none}
+.wz>li>b{display:block;margin-bottom:2px}
+.wz span{display:block;color:var(--mute);font-size:.78rem;line-height:1.55;margin:0 0 8px}
+.wz code{background:#1a1712;border:1px solid var(--line);border-radius:6px;padding:0 5px;color:var(--hi);font-size:.78rem}
+.wz input{width:100%;margin-bottom:8px}
+.wr{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.wr>button,.wr>a{width:auto;padding:8px 14px;font-size:.84rem}
+.wbtn{display:inline-block;border-radius:10px;text-decoration:none;font-weight:700;border:1px solid var(--line);background:#5865f2;color:#fff!important;padding:8px 14px}
+.wbtn[aria-disabled=true]{opacity:.4;pointer-events:none}
+.kv{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.kv code{flex:none}.kv input{margin:0;font-size:.75rem}.kv button{width:auto;padding:7px 10px;font-size:.78rem}
+.sw{display:flex;align-items:center;gap:10px;margin:4px 0 10px;cursor:pointer;font-weight:600}
+.sw input{display:none}
+.sw i{width:44px;height:24px;border-radius:99px;background:#2a2620;position:relative;transition:.2s;flex:none}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#bbb;transition:.2s}
+.sw input:checked+i{background:linear-gradient(90deg,var(--lo),var(--gold))}
+.sw input:checked+i::after{left:23px;background:#fff}
+.rres{font-size:.8rem;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:6px;background:#0d0c0a}
+.rres b{color:var(--hi)}
 </style>
 </head>
 <body>
@@ -212,6 +238,34 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
       <h2 style="margin-top:20px;font-size:1rem">📝 บันทึกการกระทำ</h2>
       <p class="cnt">ทุกการอนุมัติ ปรับแต้ม แก้ไข หรือลบ ถูกบันทึกพร้อมชื่อแอดมิน แก้หรือลบบันทึกไม่ได้</p>
       <ul class="lg" id="teamLog"></ul>
+    </section>
+    <section class="card" id="dcCard" data-tab="tools">
+      <h2>🎖️ Discord: ประกาศเลเวลอัพ + ยศอัตโนมัติ</h2>
+      <p class="cnt">ทำทีละขั้นจากบนลงล่าง ขั้นที่เสร็จแล้วจะมีเครื่องหมาย ✅</p>
+      <ol class="wz" id="wz">
+        <li data-s="1"><b>ห้องประกาศเลเวลอัพ</b><span>ห้องใน Discord → ⚙️ แก้ไขห้อง → การเชื่อมต่อ → Webhooks → สร้าง → คัดลอก URL</span>
+          <input id="dcHook" placeholder="https://discord.com/api/webhooks/..." autocomplete="off">
+          <div class="wr"><button class="sec" id="dcHookSave" type="button">💾 บันทึก</button><button class="sec" id="dcTest" type="button">📣 ทดสอบประกาศ</button></div></li>
+        <li data-s="2"><b>เชิญบอทเข้าเซิร์ฟเวอร์</b><span>Developer Portal → แอปของคุณ → General Information → คัดลอก Application ID</span>
+          <input id="dcApp" inputmode="numeric" placeholder="Application ID" autocomplete="off">
+          <div class="wr"><button class="sec" id="dcAppSave" type="button">💾 บันทึก</button><a class="sec wbtn" id="dcInvite" target="_blank" rel="noopener">🤖 เชิญบอท (สิทธิ์จัดการยศ)</a></div>
+          <span>หลังเชิญ: ตั้งค่าเซิร์ฟเวอร์ → บทบาท → ลากยศของบอทให้อยู่ <b>เหนือ</b> ยศเลเวลทุกอัน</span></li>
+        <li data-s="3"><b>Server ID</b><span>Discord → ตั้งค่าผู้ใช้ → ขั้นสูง → เปิด โหมดนักพัฒนา → กดค้างที่ชื่อเซิร์ฟเวอร์ → คัดลอก ID เซิร์ฟเวอร์</span>
+          <input id="dcGuild" inputmode="numeric" placeholder="Server ID" autocomplete="off">
+          <div class="wr"><button class="sec" id="dcGuildSave" type="button">💾 บันทึก</button></div></li>
+        <li data-s="4"><b>ฟังก์ชันแจกยศ (ทำครั้งเดียว)</b><span>Supabase (RM CLAN) → Edge Functions → Deploy new function → Via Editor → ตั้งชื่อ <code>discord-roles</code> → วางโค้ด discord-roles.ts → Deploy → แท็บ Settings ปิด Verify JWT → Secrets เพิ่ม 2 ตัวนี้</span>
+          <div class="kv"><code>ROLE_KEY</code><input id="dcKey" readonly><button class="sec" id="dcKeyCopy" type="button">คัดลอก</button></div>
+          <div class="kv"><code>DISCORD_BOT_TOKEN</code><span style="margin:0">Token ของบอท (Developer Portal → Bot)</span></div>
+          <span>ลิงก์ฟังก์ชัน (แก้ถ้า Supabase ตั้งชื่อให้ต่างจากนี้)</span>
+          <input id="dcUrl" autocomplete="off">
+          <div class="wr"><button class="sec" id="dcUrlSave" type="button">💾 บันทึก</button></div></li>
+        <li data-s="5"><b>ใส่ Role ID ให้แต่ละเลเวล</b><span>ในการ์ด ⭐ แต้มและเลเวล ด้านล่าง: Discord → ตั้งค่าเซิร์ฟเวอร์ → บทบาท → กดค้างที่ยศ → คัดลอก ID แล้ววางในช่อง 🎖️ ของเลเวลนั้น → บันทึกเลเวล</span></li>
+        <li data-s="6"><b>เปิดใช้งาน</b>
+          <label class="sw"><input id="dcOn" type="checkbox"><i></i>แจกยศตามเลเวลอัตโนมัติ</label>
+          <div class="wr"><button class="sec" id="dcSync" type="button">🔄 ซิงก์ยศทุกคนตอนนี้</button><button class="sec" id="dcCheck" type="button">🔍 ตรวจผล</button></div>
+          <div id="dcRes"></div></li>
+      </ol>
+      <p class="pmsg" id="dcMsg" role="status"></p>
     </section>
     <section class="card" id="ptsCard" data-tab="tools">
       <h2>⭐ แต้มและเลเวล</h2>
@@ -600,7 +654,7 @@ let PCFG = { rates: [], levels: [] };
 const pmsg = (t, ok) => { $("ptsMsg").textContent = t || ""; $("ptsMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
 const G = "display:grid;gap:6px;margin-bottom:6px;align-items:center;";
 const rateRow = r => '<div class="rr" style="' + G + 'grid-template-columns:1.4fr 1fr 1fr auto"><input class="rt" placeholder="หมวด" value="' + esc(r.item_type) + '"><input class="rq" type="number" min="1" placeholder="ทุกกี่ชิ้น" value="' + esc(r.per_qty) + '"><input class="rp" type="number" min="0" placeholder="ได้กี่แต้ม" value="' + esc(r.points) + '"><button class="sec rx" type="button" style="width:auto;padding:6px 10px">✕</button></div>';
-const lvRow = (r, i) => '<div class="lr" style="' + G + 'grid-template-columns:auto 1.6fr 1fr auto"><b class="ln">Lv.' + (i + 1) + '</b><input class="lnm" placeholder="ชื่อเลเวล" value="' + esc(r.name) + '"><input class="lmp" type="number" min="0" placeholder="แต้มที่ต้องใช้" value="' + esc(r.min_points) + '"><button class="sec lx" type="button" style="width:auto;padding:6px 10px">✕</button></div>';
+const lvRow = (r, i) => '<div class="lr" style="margin-bottom:10px"><div style="' + G + 'grid-template-columns:auto 1.6fr 1fr auto;margin-bottom:4px"><b class="ln">Lv.' + (i + 1) + '</b><input class="lnm" placeholder="ชื่อเลเวล" value="' + esc(r.name) + '"><input class="lmp" type="number" min="0" placeholder="แต้มที่ต้องใช้" value="' + esc(r.min_points) + '"><button class="sec lx" type="button" style="width:auto;padding:6px 10px">✕</button></div><input class="lrole" inputmode="numeric" placeholder="🎖️ Role ID ใน Discord (ไม่บังคับ)" value="' + esc(r.discord_role_id || "") + '" style="width:100%;font-size:.82rem"></div>';
 function renderPts() {
   $("rateList").innerHTML = '<div style="' + G + 'grid-template-columns:1.4fr 1fr 1fr auto;color:var(--mute);font-size:.75rem"><span>หมวด</span><span>ทุกกี่ชิ้น</span><span>ได้กี่แต้ม</span><span></span></div>' + PCFG.rates.map(rateRow).join("");
   $("lvList").innerHTML = PCFG.levels.map(lvRow).join("");
@@ -611,7 +665,7 @@ async function loadPts() {
   pmsg(""); renderPts();
 }
 const readRates = () => [...document.querySelectorAll("#rateList .rr")].map(r => ({ item_type: r.querySelector(".rt").value.trim(), per_qty: r.querySelector(".rq").value.trim(), points: r.querySelector(".rp").value.trim() }));
-const readLevels = () => [...document.querySelectorAll("#lvList .lr")].map(r => ({ name: r.querySelector(".lnm").value.trim(), min_points: r.querySelector(".lmp").value.trim() }));
+const readLevels = () => [...document.querySelectorAll("#lvList .lr")].map(r => ({ name: r.querySelector(".lnm").value.trim(), min_points: r.querySelector(".lmp").value.trim(), discord_role_id: r.querySelector(".lrole").value.trim() }));
 $("rateAdd").addEventListener("click", () => { PCFG.rates = readRates(); PCFG.rates.push({ item_type: "", per_qty: 100, points: 1 }); renderPts(); });
 $("lvAdd").addEventListener("click", () => { PCFG.levels = readLevels(); PCFG.levels.push({ name: "", min_points: "" }); renderPts(); });
 $("rateList").addEventListener("click", e => { if (!e.target.closest(".rx")) return; PCFG.rates = readRates(); const i = [...document.querySelectorAll("#rateList .rr")].indexOf(e.target.closest(".rr")); PCFG.rates.splice(i, 1); renderPts(); });
@@ -798,6 +852,48 @@ setInterval(() => { if (PASS && !$("panel").hidden) loadShopA(); }, 30000);
   if (SBA) SBA.auth.onAuthStateChange((ev, s) => { session = s; setTimeout(check, 0); });
   else showGate("err");
 })();
+
+// ===== Discord: เลเวลอัพ + ยศ (เฟส 5) =====
+let DCC = {};
+const dmsg = (t, ok) => { $("dcMsg").textContent = t || ""; $("dcMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+function dcRender() {
+  $("dcHook").value = DCC.levelup_webhook || ""; $("dcApp").value = DCC.app_id || ""; $("dcGuild").value = DCC.guild_id || "";
+  $("dcKey").value = DCC.role_key || ""; $("dcUrl").value = DCC.roles_url || ""; $("dcOn").checked = DCC.roles_enabled === "on";
+  const inv = $("dcInvite");
+  if (/^\d{15,22}$/.test(DCC.app_id || "")) { inv.href = "https://discord.com/oauth2/authorize?client_id=" + DCC.app_id + "&scope=bot&permissions=268435456" + (DCC.guild_id ? "&guild_id=" + DCC.guild_id + "&disable_guild_select=true" : ""); inv.removeAttribute("aria-disabled"); }
+  else { inv.removeAttribute("href"); inv.setAttribute("aria-disabled", "true"); }
+  const hasRole = (PCFG.levels || []).some(l => /^\d{15,22}$/.test(l.discord_role_id || ""));
+  const done = { 1: !!DCC.levelup_webhook, 2: !!DCC.app_id, 3: !!DCC.guild_id, 4: !!window.__rolesOk, 5: hasRole, 6: DCC.roles_enabled === "on" };
+  document.querySelectorAll("#wz>li").forEach(li => li.classList.toggle("done", !!done[li.dataset.s]));
+}
+async function dcLoad() { try { DCC = await rpc("admin_discord_config", { p_pass: PASS }) || {}; dcRender(); } catch (e) { dmsg("โหลดไม่ได้ (ยังไม่ได้รัน phase5.sql ใน Supabase?)"); } }
+async function dcSave(p, okMsg) { try { await pcall("admin_discord_save", { p: p }); dmsg(okMsg || "บันทึกแล้ว ✓", true); await dcLoad(); } catch (e) { dmsg(e.message); } }
+$("dcHookSave").onclick = () => dcSave({ levelup_webhook: $("dcHook").value.trim() });
+$("dcAppSave").onclick = () => dcSave({ app_id: $("dcApp").value.trim() });
+$("dcGuildSave").onclick = () => dcSave({ guild_id: $("dcGuild").value.trim() });
+$("dcUrlSave").onclick = () => dcSave({ roles_url: $("dcUrl").value.trim() });
+$("dcOn").onchange = () => dcSave({ roles_enabled: $("dcOn").checked ? "on" : "off" }, $("dcOn").checked ? "เปิดแจกยศอัตโนมัติแล้ว ✓ กดซิงก์ยศทุกคนเพื่อให้ยศคนที่มีเลเวลอยู่แล้ว" : "ปิดแจกยศอัตโนมัติแล้ว");
+$("dcKeyCopy").onclick = async () => { try { await navigator.clipboard.writeText($("dcKey").value); dmsg("คัดลอก ROLE_KEY แล้ว ✓", true); } catch (e) { $("dcKey").select(); dmsg("กดค้างที่ช่องแล้วเลือกคัดลอก"); } };
+$("dcTest").onclick = async () => { try { await pcall("admin_levelup_test"); dmsg("ส่งประกาศทดสอบแล้ว ดูในห้อง Discord ✓", true); } catch (e) { dmsg(e.message); } };
+$("dcSync").onclick = async () => { try { const r = await pcall("admin_roles_sync_all"); dmsg("ส่งคำสั่งซิงก์ยศ " + r.count + " คนแล้ว รอ 5–10 วินาทีแล้วกด 🔍 ตรวจผล", true); } catch (e) { dmsg(e.message); } };
+const RHINT = { 401: "ROLE_KEY ใน Secrets ไม่ตรงกับในขั้นที่ 4 หรือยังไม่ได้ปิด Verify JWT", 403: "บอทไม่มีสิทธิ์จัดการยศ หรือยศบอทอยู่ต่ำกว่ายศเลเวล", 404: "หาไม่เจอ: ลิงก์ฟังก์ชันผิด หรือสมาชิกไม่อยู่ในเซิร์ฟเวอร์ หรือ Role ID ผิด", 500: "ยังไม่ได้ใส่ DISCORD_BOT_TOKEN ใน Secrets" };
+$("dcCheck").onclick = async () => {
+  let rows; try { rows = await rpc("admin_roles_check", { p_pass: PASS }) || []; } catch (e) { dmsg("ตรวจไม่ได้"); return; }
+  if (!rows.length) { $("dcRes").innerHTML = '<div class="rres">ยังไม่มีคำสั่งแจกยศ กด 🔄 ซิงก์ยศทุกคน ก่อน</div>'; return; }
+  $("dcRes").innerHTML = rows.map(r => {
+    let inner = [], st = r.http;
+    try { inner = JSON.parse(r.body || "[]"); } catch (e) {}
+    const bad = Array.isArray(inner) ? inner.find(x => x.status >= 300) : null;
+    const code = st && st >= 300 ? st : bad ? bad.status : null;
+    const ok = st && st < 300 && !bad;
+    if (ok) window.__rolesOk = true;
+    return '<div class="rres"><b>' + esc(r.ign) + "</b> · " + (st == null ? "⏳ กำลังส่ง..." : ok ? "✅ สำเร็จ" : "❌ ผิดพลาด " + code + " — " + esc(RHINT[code] || (bad && bad.error) || r.body)) + "</div>";
+  }).join("");
+  dcRender();
+};
+$("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b && b.dataset.t === "tools") dcLoad(); });
+new MutationObserver(() => { if (!$("panel").hidden) dcLoad(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
+const _lvSave = $("lvSave"); _lvSave.addEventListener("click", () => setTimeout(dcLoad, 1200));
 </script>
 </body>
 </html>
