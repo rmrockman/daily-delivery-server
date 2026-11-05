@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>แอดมิน · ส่งของรายวัน</title>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&family=Kanit:ital,wght@1,700;1,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&family=Kanit:ital,wght@1,700;1,800&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#050505;--card1:#171512;--card2:#0e0d0c;--line:#3d3322;--gold:#f2b42b;--hi:#ffd978;--lo:#b9780a;--txt:#eceff1;--mute:#a7a59d;--bad:#ff8a7a;--ok:#8fe3a8;color-scheme:dark}
 *{box-sizing:border-box}
@@ -184,10 +184,81 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
 .ptsPrev{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:rgba(242,180,43,.08);border:1px solid rgba(242,180,43,.3);font-size:.86rem;color:var(--hi)}
 .ptsPrev b{color:#fff}.ptsPrev.none{background:none;border-style:dashed;color:var(--mute)}
 </style>
+<style>
+/* ===== ธีมไซเบอร์นีออน (ให้เหมือนหน้าสมาชิก) ===== */
+:root{--bg:#05070f;--card1:#0c1c34;--card2:#060a16;--line:rgba(19,224,255,.28);--gold:#00e5ff;--hi:#7ff3ff;--lo:#0094b8;--txt:#e8f4ff;--mute:#7491ad;--bad:#ff5c8a;--ok:#3dffb0;--pink:#ff3df2;color-scheme:dark}
+[hidden]{display:none!important}
+html,body{background:var(--bg)!important}
+body{font-family:"Chakra Petch","Prompt",system-ui,sans-serif!important;color:var(--txt)!important;background-image:radial-gradient(60% 35% at 50% 0,rgba(0,229,255,.14),transparent 70%),radial-gradient(50% 30% at 100% 100%,rgba(255,61,242,.1),transparent 70%),linear-gradient(rgba(0,229,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.055) 1px,transparent 1px)!important;background-size:auto,auto,26px 26px,26px 26px!important;background-attachment:fixed!important}
+body::before,body::after{display:none!important}
+.nxtop{display:flex;align-items:center;gap:12px;margin:4px 0 16px}
+.nxic{width:48px;height:48px;display:grid;place-items:center;font-size:1.5rem;background:#07101f;border:1px solid var(--line);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);box-shadow:0 0 16px rgba(0,229,255,.3)}
+.nxt b{display:block;font-size:1.1rem;letter-spacing:.18em;color:var(--hi);text-shadow:0 0 12px rgba(0,229,255,.6)}
+.nxt small{display:block;font-size:.68rem;letter-spacing:.14em;color:var(--mute)}
+.card{background:linear-gradient(135deg,rgba(12,28,52,.92),rgba(6,10,22,.94))!important;border:1px solid var(--line)!important;border-radius:0!important;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));box-shadow:inset 0 0 28px rgba(0,229,255,.08)!important}
+h2{font-family:"Chakra Petch",sans-serif!important;font-style:normal!important;letter-spacing:.05em;background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--hi)!important;text-shadow:0 0 10px rgba(0,229,255,.4)}
+input,select,textarea{background:#07101f!important;border:1px solid var(--line)!important;border-radius:0!important;color:var(--txt)!important}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)!important;box-shadow:0 0 0 1px var(--gold),0 0 14px rgba(0,229,255,.25)!important;outline:none}
+button{border-radius:0!important;font-family:"Chakra Petch","Prompt",sans-serif!important;background:linear-gradient(90deg,#00e5ff,#7ff3ff)!important;color:#001018!important;box-shadow:0 0 16px rgba(0,229,255,.28)!important}
+button.sec,.sec,.mini{background:#07101f!important;color:var(--hi)!important;border:1px solid var(--line)!important;box-shadow:none!important}
+button.sec:hover,.mini:hover{border-color:var(--gold)!important}
+.pc{background:rgba(7,16,31,.9)!important;border:1px solid var(--line)!important;border-left:3px solid var(--gold)!important;border-radius:0!important}
+.pc.late{border-left-color:var(--pink)!important;box-shadow:0 0 14px rgba(255,61,242,.18)}
+.pc.warn{border-left-color:#ffb054!important}
+.pth img,.pth a{border-radius:0!important}
+.tag{border-radius:0!important}.tag.a{background:rgba(61,255,176,.12)!important;color:var(--ok)!important}.tag.r{background:rgba(255,92,138,.14)!important;color:var(--bad)!important}
+.pbadge,#tabs .tbd,.subnav .sb{background:var(--pink)!important;color:#fff!important;border-radius:0!important;box-shadow:0 0 10px var(--pink)!important}
+#msg,.pmsg{font-family:"Chakra Petch",sans-serif}
+/* แถบล่าง */
+#tabs{background:rgba(5,10,22,.96)!important;border-top:1px solid rgba(19,224,255,.45)!important;box-shadow:0 -10px 30px rgba(0,229,255,.12)!important}
+#tabs button{background:none!important;box-shadow:none!important;color:var(--mute)!important}
+#tabs button.on{color:var(--gold)!important;text-shadow:0 0 8px var(--gold)}
+#tabs .pill{border-radius:0!important}
+#tabs button.on .pill{background:rgba(0,229,255,.14)!important;box-shadow:inset 0 0 0 1px rgba(0,229,255,.45)}
+#tabs button.on svg{filter:drop-shadow(0 0 6px var(--gold))}
+/* เมนูย่อย */
+.subnav{background:linear-gradient(180deg,var(--bg) 70%,transparent)!important}
+.subnav button{background:#07101f!important;color:var(--mute)!important;border:1px solid var(--line)!important;border-radius:0!important;box-shadow:none!important}
+.subnav button.on{background:linear-gradient(90deg,var(--gold),var(--hi))!important;color:#001018!important;border-color:transparent!important;box-shadow:0 0 14px rgba(0,229,255,.35)!important}
+/* โปรไฟล์ + หน้าเข้าสู่ระบบ */
+#meBar{border-radius:0!important;border-color:var(--line)!important;background:#07101f!important;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
+#meBar img,.who img,.tm img{border-radius:0!important;border:0!important;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);background:var(--gold);padding:2px}
+.rb{border-radius:0!important}.rb.owner{background:linear-gradient(90deg,var(--gold),var(--hi))!important;color:#001018!important}.rb.admin{background:rgba(255,61,242,.16)!important;color:#ff9cf8!important}
+#login{background:linear-gradient(135deg,rgba(12,28,52,.95),rgba(6,10,22,.95))!important}
+#gate .shield{border-radius:0!important;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);background:#07101f!important;box-shadow:none!important}
+#gate .shield svg{color:var(--gold)!important;filter:drop-shadow(0 0 10px rgba(0,229,255,.7))!important}
+.who{border-radius:0!important;border-color:var(--line)!important;background:#07101f!important}
+.dcbtn{background:#5865f2!important;color:#fff!important;box-shadow:0 0 18px rgba(88,101,242,.45)!important;clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%)}
+.gate-ft i{background:var(--ok)!important;box-shadow:0 0 8px var(--ok)!important}
+/* ตัวช่วยตั้งค่า / บันทึก / สวิตช์ */
+.wz>li::before{border-radius:0!important;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);background:#07101f!important;color:var(--hi)!important}
+.wz>li.done::before{background:var(--ok)!important;color:#002014!important;box-shadow:none!important}
+.wz code,.kv code{border-radius:0!important;background:#07101f!important;border-color:var(--line)!important;color:var(--hi)!important}
+.lg li::before{border-radius:0!important;background:var(--pink)!important;box-shadow:0 0 8px var(--pink)!important}
+.lg b{color:var(--hi)!important}
+.sw i{border-radius:0!important;background:#0e2440!important}.sw i::after{border-radius:0!important}
+.sw input:checked+i{background:linear-gradient(90deg,var(--gold),var(--pink))!important}
+.rres,.evi,.ptsPrev{border-radius:0!important;border-color:var(--line)!important;background:#07101f!important}
+.ptsPrev{color:var(--hi)!important;background:linear-gradient(90deg,rgba(0,229,255,.08),rgba(255,61,242,.06))!important}
+.ptsPrev.none{background:none!important;color:var(--mute)!important}
+/* อีเวนต์ */
+.evm button{border-radius:0!important;background:#07101f!important;border-color:var(--line)!important;color:var(--mute)!important;box-shadow:none!important}
+.evm button.on{background:linear-gradient(135deg,#ff3df2,#b81bd8)!important;color:#fff!important;border-color:transparent!important;box-shadow:0 0 18px rgba(255,61,242,.5)!important}
+.evq button.on{border-color:var(--gold)!important;color:var(--hi)!important;box-shadow:0 0 0 1px var(--gold) inset!important}
+#evGo{background:linear-gradient(90deg,#ff3df2,#ff7ad9)!important;color:#fff!important;box-shadow:0 0 22px rgba(255,61,242,.45)!important;clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%)}
+.evi.live{border-color:rgba(255,61,242,.6)!important;background:linear-gradient(120deg,rgba(255,61,242,.14),#07101f)!important}
+.evi .x{color:var(--pink)!important;text-shadow:0 0 10px var(--pink)}
+.est{border-radius:0!important}.est.live{background:var(--pink)!important}.est.soon{background:#0e2440!important;color:var(--hi)!important}
+/* ร้านค้า / รูป */
+.f-prev{border-radius:0!important;border-color:var(--line)!important}
+.wbtn{border-radius:0!important}
+button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--bad)!important;border:1px solid rgba(255,92,138,.5)!important;box-shadow:none!important}
+.del,button.del{background:rgba(255,92,138,.1)!important;color:var(--bad)!important;border:1px solid rgba(255,92,138,.45)!important;box-shadow:none!important}
+</style>
 </head>
 <body>
 <main>
-  <h1>🛠️ แอดมิน · ส่งของรายวัน</h1>
+  <header class="nxtop"><span class="nxic">🛠️</span><div class="nxt"><b>ROCKMAN</b><small>ADMIN CONSOLE · ส่งของรายวัน</small></div></header>
   <p id="msg"></p>
 
   <div id="meBar" hidden></div>
