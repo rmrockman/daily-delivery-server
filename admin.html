@@ -179,6 +179,14 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
 .ovt.wide{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between}
 #ovCard .ovall{margin:10px 0 0;font-size:.82rem;color:var(--ok)}
 .wz.wzc>li[data-c]{display:none}
+.spr{display:grid;grid-template-columns:44px minmax(0,1fr) 54px 54px 38px 36px;gap:6px;align-items:center;margin-bottom:6px}
+.spr input{margin:0;padding:8px 6px!important;font-size:.85rem}
+.spr .ic{text-align:center}
+.spr label{display:flex;align-items:center;gap:3px;font-size:.72rem;color:var(--mute);white-space:nowrap}
+.spr label input{width:auto}
+.spr button{width:auto!important;padding:6px 9px!important}
+.sph{display:grid;grid-template-columns:44px minmax(0,1fr) 54px 54px 38px 36px;gap:6px;font-size:.68rem;color:var(--mute);margin-bottom:4px}
+.spr .pc2{grid-column:1/-1;font-size:.7rem;color:var(--mute);margin:-2px 0 4px}
 .wzsum{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;border:1px solid rgba(61,255,176,.4);background:rgba(61,255,176,.06);font-size:.85rem}
 .wzsum span{flex:1;min-width:160px}.wzsum button{width:auto;padding:6px 12px;font-size:.8rem}
 .evf label:not(.sw){display:block;font-size:.78rem;color:var(--mute);margin-bottom:10px}
@@ -421,6 +429,18 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <p class="pmsg" id="msnMsg" role="status"></p>
     </section>
 
+    <section class="card" data-sub="spin" data-label="🎡 วงล้อ" id="spinCard" data-tab="tools">
+      <h2>🎡 วงล้อนำโชค</h2>
+      <p class="cnt">สมาชิกหมุนฟรีวันละ 1 ครั้ง + วันที่ส่งของ (อนุมัติแล้ว) ได้อีก 1 ครั้ง · ไม่ต้องลงแต้ม · ระบบสุ่มที่ฐานข้อมูล</p>
+      <label class="sw"><input id="spOn" type="checkbox"><i></i>เปิดวงล้อ</label>
+      <div class="rres" id="spStat" style="margin-bottom:12px">กำลังโหลด…</div>
+      <p class="cnt" style="margin:0 0 6px">ช่องรางวัล (2–12 ช่อง) · "โอกาส" ยิ่งมากยิ่งออกบ่อย · ✔ แจ็กพอต = ได้เหรียญ 🍀 ดวงเฮง</p>
+      <div id="spList"></div>
+      <button class="sec" id="spAdd" type="button" style="width:auto;padding:8px 14px">+ เพิ่มช่อง</button>
+      <div class="rres" id="spAvg" style="margin-top:10px"></div>
+      <button class="sec" id="spSave" type="button" style="margin-top:12px">💾 บันทึกรางวัล</button>
+      <p class="pmsg" id="spMsg" role="status"></p>
+    </section>
     <section class="card" data-sub="ev" data-label="🔥 อีเวนต์" id="evCard" data-tab="tools">
       <h2>🔥 อีเวนต์แต้มคูณ</h2>
       <p class="cnt">ส่งของในช่วงอีเวนต์ได้แต้มคูณ นับตามเวลาที่สมาชิกกดส่ง (อนุมัติทีหลังก็ได้แต้มคูณ) · หน้าสมาชิกจะมีป้ายนับถอยหลังขึ้นเอง</p>
@@ -1378,6 +1398,32 @@ $("tabs").addEventListener("click", e => { const b = e.target.closest("button[da
 $("pendRef").addEventListener("click", () => setTimeout(ovLoad, 300));
 setInterval(() => { if (!document.hidden && $("panel").dataset.t === "pend") ovLoad(); }, 60000);
 
+// ===== วงล้อนำโชค (เฟส 25) =====
+const spm = (t, ok) => { $("spMsg").textContent = t || ""; $("spMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+const spRow = p => '<div class="spr" data-id="' + esc(p.id || "") + '"><input class="ic sp-i" maxlength="8" value="' + esc(p.icon || "⭐") + '"><input class="sp-l" maxlength="30" placeholder="ชื่อรางวัล" value="' + esc(p.label || "") + '"><input class="sp-p" type="number" min="0" max="1000" inputmode="numeric" value="' + esc(p.points == null ? "" : p.points) + '"><input class="sp-w" type="number" min="0" max="10000" inputmode="numeric" value="' + esc(p.weight == null ? "" : p.weight) + '"><label><input class="sp-j" type="checkbox"' + (p.jackpot ? " checked" : "") + '>🍀</label><button class="sec sp-x" type="button" aria-label="ลบช่อง">✕</button><div class="pc2"></div></div>';
+function spCalc() {
+  const rows = [...$("spList").querySelectorAll(".spr")], ws = rows.map(r => Math.max(0, Number(r.querySelector(".sp-w").value) || 0)), tw = ws.reduce((a, b) => a + b, 0);
+  let avg = 0;
+  rows.forEach((r, i) => { const pct = tw ? ws[i] * 100 / tw : 0, pts = Number(r.querySelector(".sp-p").value) || 0; avg += pct / 100 * pts; r.querySelector(".pc2").textContent = "โอกาสออก " + pct.toFixed(1) + "%"; });
+  $("spAvg").innerHTML = tw ? "เฉลี่ย <b>" + avg.toFixed(1) + " แต้ม</b> ต่อการหมุน 1 ครั้ง · ถ้าหมุนครบ 2 ครั้งทุกวัน ≈ " + Math.round(avg * 60).toLocaleString("th-TH") + " แต้ม/เดือน/คน" : "⚠️ ต้องมีอย่างน้อย 1 ช่องที่โอกาสมากกว่า 0";
+}
+async function spLoad() {
+  let r; try { r = await rpc("admin_spin", { p_pass: PASS }); } catch (e) { $("spStat").textContent = "ยังไม่ได้รัน phase25.sql ใน Supabase"; return; }
+  if (!r || !r.ok) return;
+  $("spOn").checked = !!r.enabled;
+  $("spStat").innerHTML = "วันนี้: หมุน <b>" + r.today_spins + "</b> ครั้ง · <b>" + r.today_people + "</b> คน · แจก <b>" + Number(r.today_points).toLocaleString("th-TH") + "</b> แต้ม<br>7 วันล่าสุด: แจก " + Number(r.week_points).toLocaleString("th-TH") + " แต้ม · แจ็กพอต " + r.jackpots + " ครั้ง";
+  if (!$("spinCard").dataset.dirty) { $("spList").innerHTML = '<div class="sph"><span>ไอคอน</span><span>ชื่อ</span><span>แต้ม</span><span>โอกาส</span><span></span><span></span></div>' + (r.prizes || []).map(spRow).join(""); spCalc(); }
+}
+$("spinCard").addEventListener("input", e => { if (e.target.closest("#spList")) { $("spinCard").dataset.dirty = "1"; spCalc(); } });
+$("spList").addEventListener("click", e => { const x = e.target.closest(".sp-x"); if (!x) return; x.closest(".spr").remove(); $("spinCard").dataset.dirty = "1"; spCalc(); });
+$("spAdd").onclick = () => { $("spList").insertAdjacentHTML("beforeend", spRow({ icon: "🎁", points: 1, weight: 10 })); $("spinCard").dataset.dirty = "1"; spCalc(); };
+$("spSave").onclick = async () => {
+  const prizes = [...$("spList").querySelectorAll(".spr")].map(r => ({ id: r.dataset.id || null, icon: r.querySelector(".sp-i").value.trim(), label: r.querySelector(".sp-l").value.trim(), points: r.querySelector(".sp-p").value.trim() || "0", weight: r.querySelector(".sp-w").value.trim() || "0", jackpot: r.querySelector(".sp-j").checked }));
+  try { await pcall("admin_spin_save", { p: { prizes } }); delete $("spinCard").dataset.dirty; spm("บันทึกรางวัลแล้ว ✓ สมาชิกเห็นวงล้อใหม่เมื่อรีเฟรช", true); } catch (er) { spm(er.message); }
+  spLoad();
+};
+$("spOn").onchange = async () => { try { await pcall("admin_spin_save", { p: { enabled: $("spOn").checked } }); spm($("spOn").checked ? "เปิดวงล้อแล้ว ✓" : "ปิดวงล้อแล้ว", true); } catch (er) { spm(er.message); } spLoad(); };
+
 // ===== แจ้ง DM (เฟส 16) =====
 const dmm = (t, ok) => { $("dmMsg").textContent = t || ""; $("dmMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
 function dmRender() {
@@ -1464,7 +1510,7 @@ window.goSub = function (tab, sub) {
   if (sub && window.__pickSub) window.__pickSub(tab, sub);
   scrollTo({ top: 0, behavior: "smooth" });
 };
-const SUB_LOAD = { hook: () => hookLoad(), site: () => siteLoad(true), clr: () => clrLoad(), dc: () => dcLoad(), dm: () => dcLoad(), sum: () => { moLoad(); loadSummary(); } };
+const SUB_LOAD = { spin: () => spLoad(), hook: () => hookLoad(), site: () => siteLoad(true), clr: () => clrLoad(), dc: () => dcLoad(), dm: () => dcLoad(), sum: () => { moLoad(); loadSummary(); } };
 
 // ===== เมนูย่อยในแท็บ (จัดหมวดการ์ดให้หาง่าย) =====
 (function () {
@@ -1472,7 +1518,7 @@ const SUB_LOAD = { hook: () => hookLoad(), site: () => siteLoad(true), clr: () =
   try { Object.assign(pick, JSON.parse(sessionStorage.getItem("rm_sub") || "{}")); } catch (e) {}
   const badgeOf = { red: "shopTabBadge", ireq: "invTabBadge" };
   const HUB = [
-    { g: "🎮 แต้ม & กิจกรรม", items: [["pts", "อัตราแต้มต่อชิ้น · ระดับเลเวล · ปรับแต้มสมาชิก"], ["msn", "เป้าหมายแคลน · ภารกิจรายสัปดาห์"], ["ev", "แต้มคูณพิเศษตามช่วงเวลา"]] },
+    { g: "🎮 แต้ม & กิจกรรม", items: [["pts", "อัตราแต้มต่อชิ้น · ระดับเลเวล · ปรับแต้มสมาชิก"], ["msn", "เป้าหมายแคลน · ภารกิจรายสัปดาห์"], ["ev", "แต้มคูณพิเศษตามช่วงเวลา"], ["spin", "รางวัลวงล้อ · โอกาสออก · เปิด/ปิด"]] },
     { g: "💬 Discord", items: [["hook", "ห้องแจ้งเตือนทุกห้อง · ทดสอบส่ง"], ["dc", "ประกาศเลเวลอัพ · แจกยศอัตโนมัติ"], ["dm", "ส่งข้อความส่วนตัวหาสมาชิก"]] },
     { g: "⚙️ ระบบ", items: [["site", "ประเภทของ · จุดส่ง · ยศแอดมิน"], ["team", "เพิ่ม / ลบแอดมิน"], ["log", "ใครทำอะไร เมื่อไร"], ["clr", "ลบประวัติเก่า (เฉพาะเจ้าของ)"]] }
   ];

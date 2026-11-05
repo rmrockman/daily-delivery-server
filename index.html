@@ -232,7 +232,7 @@ p.sub{line-height:1.5}
 
 /* ===== v4: แยกหน้า + เมนูลอยด้านล่าง ===== */
 body{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
-main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-view=rank]),main[data-v=hist] .view:not([data-view=hist]),main[data-v=shop] .view:not([data-view=shop]),main[data-v=inv] .view:not([data-view=inv]){display:none}
+main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-view=rank]),main[data-v=hist] .view:not([data-view=hist]),main[data-v=shop] .view:not([data-view=shop]),main[data-v=inv] .view:not([data-view=inv]),main[data-v=spin] .view:not([data-view=spin]){display:none}
 .view{animation:up .4s ease-out both}
 .view>.card+.card{margin-top:20px}
 .nav{position:fixed;z-index:50;left:0;right:0;bottom:0;display:flex;align-items:stretch;padding:12px max(8px,calc((100% - 480px)/2)) max(16px,env(safe-area-inset-bottom,0px));background:#15130f;border-top:1px solid rgba(242,180,43,.28);box-shadow:0 -8px 28px rgba(0,0,0,.55)}
@@ -240,6 +240,8 @@ main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-
 .nav .ni{position:relative;display:flex;align-items:center;justify-content:center;width:64px;height:32px}
 .nav .ni::before{content:"";position:absolute;inset:0;border-radius:16px;background:rgba(242,180,43,.24);opacity:0;transform:scaleX(.35);transition:transform .3s cubic-bezier(.2,1.2,.4,1),opacity .2s}
 .nav .ni svg{position:relative;width:24px;height:24px}
+.nav .nbd{position:absolute;top:-4px;right:8px;min-width:18px;height:18px;padding:0 5px;font-style:normal;font-size:.7rem;font-weight:800;line-height:18px;text-align:center;background:var(--pink,#ff3df2);color:#fff;box-shadow:0 0 10px var(--pink,#ff3df2);z-index:1}
+.nav .nbd[hidden]{display:none}
 .nav button.on{color:var(--gold-hi);font-weight:700}
 .nav button.on .ni::before{opacity:1;transform:scaleX(1)}
 .nav button:not(.on):active .ni::before{opacity:1;transform:scaleX(.8);background:rgba(255,255,255,.08)}
@@ -281,7 +283,7 @@ main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-
 #evBanner .cd i{display:block;font-style:normal;font-size:.62rem;font-weight:600;color:#ffcf9a}
 #authCard .bar{height:8px;border-radius:99px;background:#26221a;overflow:hidden;margin:8px 0 4px}
 #authCard .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));transition:width .6s}
-body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-view="hist"],body.rm-lock .view[data-view="shop"],body.rm-lock .view[data-view="inv"],body.rm-lock #invNeed,body.rm-lock #missions{display:none!important}
+body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-view="hist"],body.rm-lock .view[data-view="shop"],body.rm-lock .view[data-view="inv"],body.rm-lock #invNeed,body.rm-lock #missions,body.rm-lock .view[data-view="spin"]{display:none!important}
 .shopTop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
 .shopBal{font-size:1.25rem;font-weight:800;color:var(--gold-hi)}
 .shopGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -297,6 +299,28 @@ body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-v
 .si button{padding:9px;font-size:.9rem}
 .si button:disabled{opacity:.45;filter:grayscale(1)}
 .myr{list-style:none;padding:0;margin:0}
+#wheelCard{margin:0 0 14px}
+.wh-top{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap}
+.wh-top h2{margin:0;flex:1;white-space:nowrap}
+.wh-left{font-size:.8rem;font-weight:800;padding:4px 10px;border:1px solid var(--gold-hi);color:var(--gold-hi);background:rgba(0,229,255,.08)}
+.wh-left.done{border-color:var(--line);color:var(--mute);background:none}
+.wh-sub{margin:6px 0 0;color:var(--mute);font-size:.82rem}
+.wh-stage{position:relative;width:min(280px,78vw);margin:16px auto 6px;aspect-ratio:1}
+.wh-rot{width:100%;height:100%;transition:transform 4.4s cubic-bezier(.12,.75,.12,1);will-change:transform}
+.wh-rot svg{width:100%;height:100%;display:block;filter:drop-shadow(0 0 14px rgba(0,229,255,.35))}
+.wh-pin{position:absolute;left:50%;top:-8px;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:24px solid var(--pink,#ff3df2);filter:drop-shadow(0 0 6px #ff3df2);z-index:2}
+.wh-hub{position:absolute;left:50%;top:50%;width:22%;height:22%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,#0b1a30,#050c1a);border:2px solid var(--gold-hi);display:grid;place-items:center;font-size:1.4rem;z-index:2;box-shadow:0 0 16px rgba(0,229,255,.45)}
+.wh-go{display:block;width:100%;margin-top:10px}
+.wh-res{min-height:1.4em;text-align:center;font-weight:800;margin:8px 0 0;font-size:1.05rem}
+.wh-res.jp{color:var(--pink,#ff3df2);text-shadow:0 0 12px #ff3df2;font-size:1.2rem}
+.wh-today{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0 0}
+.wh-today i{font-style:normal;font-size:.75rem;padding:3px 8px;border:1px solid var(--line);color:var(--gold-hi)}
+.wh-more{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.wh-more button{width:auto!important;padding:6px 12px!important;font-size:.78rem!important;background:none!important;border:1px solid var(--line)!important;color:var(--mute)!important;box-shadow:none!important}
+.wh-odds{list-style:none;padding:0;margin:10px 0 0}
+.wh-odds li{display:flex!important;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:.82rem}
+.wh-jp{margin:8px 0 0;text-align:center;font-size:.75rem;color:var(--mute)}
+@media (prefers-reduced-motion:reduce){.wh-rot{transition:none}}
 .bdg{display:inline-block;margin-left:4px;font-size:.85em;letter-spacing:1px;vertical-align:1px}
 .pod .p[data-ign],.rows li[data-ign]{cursor:pointer}
 .pod .p .pn .bdg{display:block;margin:2px 0 0;font-size:.95rem}
@@ -583,6 +607,9 @@ button{border-radius:0!important}
     <button type="button" class="more" id="hmore" hidden></button>
   </section>
   </div>
+  <div class="view" data-view="spin">
+  <section class="card" id="wheelCard"><p style="margin:0;color:var(--mute)">กำลังโหลดวงล้อ…</p></section>
+  </div>
   <div class="view" data-view="shop">
   <section class="card" id="shopCard">
     <h2>🛒 ร้านค้าแลกแต้ม</h2>
@@ -628,6 +655,7 @@ button{border-radius:0!important}
   <button type="button" data-v="send" class="on" aria-current="page"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span><span class="nl">ส่งของ</span></button>
   <button type="button" data-v="rank" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4 4 5-7 5 7 4-4-2 12H5z"/></svg></span><span class="nl">อันดับ</span></button>
   <button type="button" data-v="hist" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></span><span class="nl">ประวัติ</span></button>
+  <button type="button" data-v="spin" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg><i class="nbd" id="spinBadge" hidden></i></span><span>วงล้อ</span></button>
   <button type="button" data-v="shop" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v7h14v-7"/></svg></span><span>ร้านค้า</span></button>
   <button type="button" data-v="inv" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-5 9 5v12"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg></span><span>คลัง</span></button>
 </nav>
@@ -1812,6 +1840,89 @@ $("send").addEventListener("click", async () => {
     var pf = e.target.closest("[data-pf]"); if (pf) { open(pf.dataset.pf); return; }
     var row = e.target.closest("#pod [data-ign], #rows [data-ign]"); if (row) open(row.dataset.ign);
   });
+})();
+</script>
+<script>
+// ===== วงล้อนำโชค (เฟส 25) =====
+(function () {
+  var card = document.getElementById("wheelCard");
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var S = null, rot = 0, spinning = false, oddsOpen = false, lastMsg = null, busy = false;
+  var COLS = ["#0b2a4a", "#14406e", "#0e3358", "#17507f"];
+  function left() { return S ? (S.free_left ? 1 : 0) + (S.deliver_left || 0) : 0; }
+  function svg(pz) {
+    var n = pz.length, R = 100, h = '<svg viewBox="-104 -104 208 208" aria-hidden="true"><circle r="103" fill="#050c1a" stroke="#00e5ff" stroke-width="2"/>';
+    pz.forEach(function (p, i) {
+      var a0 = (i / n) * 2 * Math.PI - Math.PI / 2, a1 = ((i + 1) / n) * 2 * Math.PI - Math.PI / 2;
+      var x0 = R * Math.cos(a0), y0 = R * Math.sin(a0), x1 = R * Math.cos(a1), y1 = R * Math.sin(a1), big = (a1 - a0) > Math.PI ? 1 : 0;
+      var fill = p.jackpot ? "url(#whJp)" : COLS[i % COLS.length];
+      h += '<path d="M0 0 L' + x0.toFixed(2) + " " + y0.toFixed(2) + " A" + R + " " + R + " 0 " + big + " 1 " + x1.toFixed(2) + " " + y1.toFixed(2) + ' Z" fill="' + fill + '" stroke="#00e5ff" stroke-opacity=".55" stroke-width="1"/>';
+      var mid = (i + 0.5) * 360 / n;
+      h += '<g transform="rotate(' + mid.toFixed(2) + ')"><text y="-70" text-anchor="middle" font-size="17">' + esc(p.icon) + '</text><text y="-50" text-anchor="middle" font-size="12" font-weight="800" fill="' + (p.jackpot ? "#fff" : "#7ff3ff") + '" font-family="Chakra Petch,sans-serif">+' + esc(p.points) + "</text></g>";
+    });
+    return h + '<defs><linearGradient id="whJp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff3df2"/><stop offset="1" stop-color="#7b2cff"/></linearGradient></defs></svg>';
+  }
+  function paint() {
+    if (!S || !S.ok) { card.innerHTML = '<p style="margin:0;color:var(--mute)">' + (S && S.error ? esc(S.error) : "โหลดวงล้อไม่ได้ ลองใหม่อีกครั้ง") + "</p>"; return; }
+    var n = left(), pz = S.prizes || [], today = S.today || [];
+    var got = today.reduce(function (t, x) { return t + (Number(x.points) || 0); }, 0);
+    var show = true;
+    var bd = document.getElementById("spinBadge"); if (bd) { bd.hidden = !(n > 0 && S.enabled); bd.textContent = n; }
+    var sub = !S.enabled ? "⏸️ แอดมินปิดวงล้อไว้ชั่วคราว"
+      : n > 0 ? (S.free_left && S.deliver_left ? "หมุนฟรี 1 + ส่งของ " + S.deliver_left : S.free_left ? "หมุนฟรีวันละ 1 ครั้ง" + (S.pending ? " · ส่งของรออนุมัติ อนุมัติแล้วได้หมุนเพิ่ม" : " · ส่งของได้หมุนเพิ่มอีก 1") : "ได้สิทธิ์จากการส่งของ 🎁")
+      : (today.length ? "วันนี้ได้ +" + got + " แต้มจากวงล้อ · " : "") + (S.pending ? "ส่งของรออนุมัติ อนุมัติแล้วได้หมุนเพิ่ม" : "ส่งของเพื่อรับสิทธิ์หมุนเพิ่ม หรือพรุ่งนี้มาใหม่");
+    var h = '<div class="wh-top"><h2>🎡 วงล้อนำโชค</h2><span class="wh-left' + (n ? "" : " done") + '">' + (n ? "หมุนได้ " + n + " ครั้ง" : "✅ หมุนครบแล้ว") + "</span></div>"
+      + '<p class="wh-sub">' + esc(sub) + "</p>";
+    if (show && pz.length) {
+      h += '<div class="wh-stage"><div class="wh-pin"></div><div class="wh-rot" id="whRot" style="transform:rotate(' + rot + 'deg)">' + svg(pz) + '</div><div class="wh-hub">🎡</div></div>'
+        + '<button type="button" class="wh-go" id="whGo"' + (n && S.enabled && !spinning ? "" : " disabled") + ">" + (spinning ? "กำลังหมุน…" : n ? "🎡 หมุนเลย!" : "พรุ่งนี้มาหมุนใหม่") + "</button>"
+        + '<p class="wh-res' + (lastMsg && lastMsg.jp ? " jp" : "") + '" id="whRes">' + (lastMsg ? esc(lastMsg.t) : "") + "</p>";
+    }
+    if (today.length) h += '<div class="wh-today">' + today.map(function (x) { return "<i>" + esc(x.icon) + " +" + esc(x.points) + (x.kind === "deliver" ? " · ส่งของ" : "") + "</i>"; }).join("") + "</div>";
+    h += '<div class="wh-more"><button type="button" id="whOdds">' + (oddsOpen ? "ซ่อนโอกาส" : "ดูโอกาสได้รางวัล") + "</button></div>";
+    if (oddsOpen) h += '<ul class="wh-odds">' + pz.map(function (p) { return "<li><span>" + esc(p.icon) + " " + esc(p.label) + (p.jackpot ? " · ได้เหรียญ 🍀" : "") + "</span><b>" + esc(p.chance) + "%</b></li>"; }).join("") + "</ul>";
+    var jp = S.jackpots || [];
+    if (jp.length) h += '<p class="wh-jp">🍀 แจ็กพอตล่าสุด: ' + jp.slice(0, 3).map(function (j) { return esc(j.ign); }).join(", ") + "</p>";
+    card.innerHTML = h;
+  }
+  async function load() {
+    if (busy || spinning || !window.__tok || !window.__tok() || document.body.classList.contains("rm-lock")) return;
+    busy = true;
+    try { S = await rpc("spin_status"); } catch (e) { S = null; }
+    busy = false; paint();
+  }
+  async function spin() {
+    if (spinning || !left()) return;
+    try { if (typeof ensureAudio === "function") ensureAudio(); } catch (e) {}
+    spinning = true; lastMsg = null; paint();
+    var r; try { r = await rpc("spin_now"); } catch (e) { r = { ok: false, error: "หมุนไม่สำเร็จ ลองใหม่อีกครั้ง" }; }
+    if (!r || !r.ok) { spinning = false; lastMsg = { t: (r && r.error) || "หมุนไม่สำเร็จ" }; await reload(); return; }
+    var pz = S.prizes || [], i = pz.findIndex(function (p) { return p.id === r.prize_id; });
+    if (i < 0) { spinning = false; lastMsg = { t: "ได้ " + r.icon + " " + r.label + "!", jp: r.jackpot }; await reload(); return; }
+    var seg = 360 / pz.length, center = (i + 0.5) * seg, jitter = (Math.random() - 0.5) * seg * 0.6;
+    var target = rot + 360 * 5 + (((-center - jitter - rot) % 360) + 360) % 360;
+    rot = target;
+    var el = document.getElementById("whRot"); if (el) { void el.offsetWidth; el.style.transform = "rotate(" + rot + "deg)"; }
+    var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTimeout(async function () {
+      spinning = false;
+      lastMsg = { t: r.jackpot ? "🍀 แจ็กพอต! +" + r.points + " แต้ม + เหรียญดวงเฮง" : "🎉 ได้ " + r.icon + " +" + r.points + " แต้ม!", jp: r.jackpot };
+      try { if (typeof ding === "function") ding(); } catch (e) {}
+      await reload();
+      try { document.dispatchEvent(new Event("visibilitychange")); } catch (e) {}
+    }, reduce ? 300 : 4550);
+  }
+  async function reload() { busy = false; await load(); }
+  card.addEventListener("click", function (e) {
+    if (e.target.closest("#whGo")) spin();
+    else if (e.target.closest("#whOdds")) { oddsOpen = !oddsOpen; paint(); }
+  });
+  var tries = 0, t0 = setInterval(function () { if (window.__tok && window.__tok() && !document.body.classList.contains("rm-lock")) { load(); clearInterval(t0); } else if (++tries > 40) clearInterval(t0); }, 1500);
+  new MutationObserver(function () { if (!document.body.classList.contains("rm-lock")) load(); }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  setInterval(function () { if (!document.hidden && S && S.pending) load(); }, 60000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && !spinning) load(); });
+  document.getElementById("nav").addEventListener("click", function (e) { var b = e.target.closest("button[data-v]"); if (b && b.dataset.v === "spin") load(); });
+  setInterval(function () { if (!document.hidden) load(); }, 300000);
 })();
 </script>
 </body>
