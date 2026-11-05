@@ -300,6 +300,32 @@ body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-v
 .si button:disabled{opacity:.45;filter:grayscale(1)}
 .myr{list-style:none;padding:0;margin:0}
 #wheelCard{margin:0 0 14px}
+.gtabs{display:flex;gap:8px;margin:0 0 14px}
+.gtabs button{flex:1;padding:10px 8px!important;font-size:.9rem!important;font-weight:800;background:#07101f!important;color:var(--mute)!important;border:1px solid var(--line)!important;box-shadow:none!important;position:relative}
+.gtabs button.on{background:linear-gradient(90deg,var(--gold),var(--gold-hi))!important;color:#001018!important;border-color:transparent!important;box-shadow:0 0 14px rgba(0,229,255,.35)!important}
+.gtabs #bossDot{position:absolute;top:6px;right:8px;width:8px;height:8px;background:var(--pink,#ff3df2);box-shadow:0 0 8px var(--pink,#ff3df2)}
+.gtabs #bossDot[hidden]{display:none}
+.bs-top{display:flex;align-items:center;gap:12px}
+.bs-ic{width:64px;height:64px;flex:none;display:grid;place-items:center;font-size:2.2rem;background:#1a0716;border:2px solid #ff3df2;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);box-shadow:0 0 18px rgba(255,61,242,.35)}
+.bs-ic.dead{filter:grayscale(1);opacity:.6}
+.bs-top b{display:block;font-size:1.15rem}.bs-top small{color:var(--mute);font-size:.8rem}
+.bs-top>div{flex:1;min-width:0}
+.bs-pill{display:inline-block;margin-top:6px;font-size:.75rem;font-weight:800;padding:3px 9px;border:1px solid #ff3df2;color:#ff9cf6;white-space:nowrap}
+.bs-pill.dead{border-color:var(--ok);color:var(--ok)}.bs-pill.fled{border-color:var(--line);color:var(--mute)}
+.bs-hp{margin:16px 0 4px;height:18px;background:#120a14;border:1px solid rgba(255,61,242,.5);position:relative;overflow:hidden}
+.bs-hp i{display:block;height:100%;background:linear-gradient(90deg,#ff2d55,#ff3df2);box-shadow:0 0 12px #ff3df2;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.bs-hp span{position:absolute;inset:0;display:grid;place-items:center;font-size:.72rem;font-weight:800;color:#fff;text-shadow:0 0 4px #000}
+.bs-nums{display:flex;justify-content:space-between;font-size:.75rem;color:var(--mute)}
+.bs-me{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.bs-me div{padding:10px;border:1px solid var(--line);background:rgba(0,229,255,.05);font-size:.72rem;color:var(--mute)}
+.bs-me b{display:block;font-size:1.2rem;color:var(--gold-hi)}
+.bs-top5{list-style:none;padding:0;margin:0 0 12px}
+.bs-top5 li{display:flex!important;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:.86rem}
+.bs-top5 li.me{color:var(--gold-hi);font-weight:700}
+.bs-rw{padding:10px 12px;border:1px solid rgba(61,255,176,.45);background:rgba(61,255,176,.07);font-size:.84rem;line-height:1.6;margin-bottom:10px}
+.bs-rw.off{border-color:var(--line);background:none;color:var(--mute)}
+.bs-go{display:block;width:100%}
+.bs-prev{margin:10px 0 0;font-size:.75rem;color:var(--mute);text-align:center}
 .wh-top{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap}
 .wh-top h2{margin:0;flex:1;white-space:nowrap}
 .wh-left{font-size:.8rem;font-weight:800;padding:4px 10px;border:1px solid var(--gold-hi);color:var(--gold-hi);background:rgba(0,229,255,.08)}
@@ -608,6 +634,8 @@ button{border-radius:0!important}
   </section>
   </div>
   <div class="view" data-view="spin">
+  <div class="gtabs" id="gTabs"><button type="button" data-g="wheel" class="on">🎡 วงล้อ</button><button type="button" data-g="boss">👹 บอสแคลน<i id="bossDot" hidden></i></button></div>
+  <section class="card" id="bossCard" hidden><p style="margin:0;color:var(--mute)">กำลังโหลดบอส…</p></section>
   <section class="card" id="wheelCard"><p style="margin:0;color:var(--mute)">กำลังโหลดวงล้อ…</p></section>
   </div>
   <div class="view" data-view="shop">
@@ -655,7 +683,7 @@ button{border-radius:0!important}
   <button type="button" data-v="send" class="on" aria-current="page"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span><span class="nl">ส่งของ</span></button>
   <button type="button" data-v="rank" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4 4 5-7 5 7 4-4-2 12H5z"/></svg></span><span class="nl">อันดับ</span></button>
   <button type="button" data-v="hist" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></span><span class="nl">ประวัติ</span></button>
-  <button type="button" data-v="spin" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg><i class="nbd" id="spinBadge" hidden></i></span><span>วงล้อ</span></button>
+  <button type="button" data-v="spin" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="15.5" cy="11.5" r="1" fill="currentColor"/><circle cx="18" cy="13.5" r="1" fill="currentColor"/></svg><i class="nbd" id="spinBadge" hidden></i></span><span>เกม</span></button>
   <button type="button" data-v="shop" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v7h14v-7"/></svg></span><span>ร้านค้า</span></button>
   <button type="button" data-v="inv" aria-current="false"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-5 9 5v12"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg></span><span>คลัง</span></button>
 </nav>
@@ -1923,6 +1951,58 @@ $("send").addEventListener("click", async () => {
   document.addEventListener("visibilitychange", function () { if (!document.hidden && !spinning) load(); });
   document.getElementById("nav").addEventListener("click", function (e) { var b = e.target.closest("button[data-v]"); if (b && b.dataset.v === "spin") load(); });
   setInterval(function () { if (!document.hidden) load(); }, 300000);
+})();
+</script>
+<script>
+// ===== บอสแคลน + แท็บเกม (เฟส 26) =====
+(function () {
+  var card = document.getElementById("bossCard"), tabs = document.getElementById("gTabs"), wheel = document.getElementById("wheelCard");
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var nf = function (n) { return Number(n || 0).toLocaleString("en-US"); };
+  var D = null, busy = false, cur = "wheel";
+  try { cur = localStorage.getItem("rm_game") === "boss" ? "boss" : "wheel"; } catch (e) {}
+  function left(t) { var ms = new Date(t).getTime() - Date.now(); if (ms <= 0) return "หมดเวลา"; var d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4); return d ? d + " วัน " + h + " ชม." : h ? h + " ชม. " + m + " นาที" : m + " นาที"; }
+  function when(t) { return new Date(t).toLocaleString("th-TH", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); }
+  function show(g) {
+    cur = g; try { localStorage.setItem("rm_game", g); } catch (e) {}
+    tabs.querySelectorAll("button").forEach(function (b) { b.classList.toggle("on", b.dataset.g === g); });
+    wheel.hidden = g !== "wheel"; card.hidden = g !== "boss";
+    if (g === "boss") load();
+  }
+  function paint() {
+    if (!D || !D.ok) { card.innerHTML = '<p style="margin:0;color:var(--mute)">' + esc((D && D.error) || "โหลดบอสไม่ได้ (ยังไม่ได้รัน phase26.sql?)") + "</p>"; return; }
+    var b = D.boss, me = (window.__me || "").toLowerCase();
+    document.getElementById("bossDot").hidden = !(b && b.status === "live");
+    if (!b) { card.innerHTML = '<p style="margin:0;color:var(--mute)">ยังไม่มีบอส · บอสตัวใหม่มา ' + esc(when(D.next_at)) + "</p>"; return; }
+    var st = b.status, pill = st === "live" ? "⏳ เหลือ " + left(b.ends_at) : st === "dead" ? "☠️ ตายแล้ว" : st === "fled" ? "💨 หนีไปแล้ว" : "ยกเลิก";
+    var h = '<div class="bs-top"><span class="bs-ic' + (st === "live" ? "" : " dead") + '">' + esc(b.icon) + "</span><div><b>" + esc(b.name) + "</b><small>" + (b.item_type ? "นับเฉพาะ " + esc(b.item_type) : "ส่งของ 1 ชิ้น = 1 ดาเมจ") + '</small><span class="bs-pill ' + (st === "live" ? "" : st) + '">' + pill + "</span></div></div>";
+    h += '<div class="bs-hp"><i style="width:' + b.pct_left + '%"></i><span>❤️ ' + nf(b.hp_left) + " / " + nf(b.max_hp) + " (" + b.pct_left + "%)</span></div>";
+    h += '<div class="bs-nums"><span>⚔️ ทั้งแคลนตีไป ' + nf(b.damage) + "</span><span>👥 " + nf(b.people) + " คนร่วมตี</span></div>";
+    h += '<div class="bs-me"><div><b>' + nf(b.my_damage) + "</b>ดาเมจของฉัน</div><div><b>" + (b.my_rank ? "#" + b.my_rank : "-") + "</b>" + (b.my_rank ? "จาก " + nf(b.people) + " คน" : "ยังไม่ได้ตี") + "</div></div>";
+    var tp = b.top || [], md = ["🥇", "🥈", "🥉", "4", "5"];
+    if (tp.length) h += '<p style="margin:0 0 6px;font-size:.85rem;font-weight:700;color:var(--mute)">⚔️ ตีหนักสุด</p><ol class="bs-top5">' + tp.map(function (x, i) { return '<li class="' + (me && String(x.ign).toLowerCase() === me ? "me" : "") + '"><span>' + md[i] + " " + esc(x.ign) + "</span><b>" + nf(x.dmg) + "</b></li>"; }).join("") + "</ol>";
+    if (st === "live") h += '<div class="bs-rw">🎁 ตีตายก่อน ' + esc(when(b.ends_at)) + "<br>ทุกคนที่ร่วมตีได้ <b>+" + nf(b.reward_all) + "</b> แต้ม · คนตีหนักสุดได้เพิ่ม <b>+" + nf(b.reward_top) + "</b> + เหรียญ ⚔️</div>"
+      + '<button type="button" class="bs-go" id="bsGo">📦 ไปส่งของ = ตีบอส</button>';
+    else if (st === "dead") h += '<div class="bs-rw">' + (b.my_reward ? "🎉 คุณได้ <b>+" + nf(b.my_reward) + "</b> แต้ม" + (b.my_top ? " + เหรียญ ⚔️ นักล่าบอส" : "") : "รอบนี้คุณไม่ได้ร่วมตี ส่งของรอบหน้ามาช่วยกันนะ") + "<br>ตายเมื่อ " + esc(when(b.killed_at)) + " · บอสตัวใหม่มา " + esc(when(D.next_at)) + "</div>";
+    else h += '<div class="bs-rw off">บอสหนีไปแล้ว ไม่มีรางวัลรอบนี้ · บอสตัวใหม่มา ' + esc(when(D.next_at)) + "</div>";
+    var pv = D.prev;
+    if (pv) h += '<p class="bs-prev">รอบที่แล้ว: ' + esc(pv.icon) + " " + esc(pv.name) + " · " + (pv.status === "dead" ? "☠️ ตาย" : "💨 หนี") + (pv.top && pv.top[0] ? " · ตีหนักสุด " + esc(pv.top[0].ign) : "") + "</p>";
+    card.innerHTML = h;
+  }
+  async function load() {
+    if (busy || !window.__tok || !window.__tok() || document.body.classList.contains("rm-lock")) return;
+    busy = true;
+    try { D = await rpc("boss_status"); } catch (e) { D = { ok: false, error: String(e.message || "").indexOf("404") >= 0 ? "ยังไม่ได้รัน phase26.sql" : "โหลดบอสไม่ได้" }; }
+    busy = false;
+    try { window.__me = JSON.parse(localStorage.getItem("rm_names") || "{}").ign || ""; } catch (e) {}
+    paint();
+  }
+  tabs.addEventListener("click", function (e) { var b = e.target.closest("button[data-g]"); if (b) show(b.dataset.g); });
+  card.addEventListener("click", function (e) { if (e.target.closest("#bsGo") && window.goView) window.goView("send"); });
+  document.getElementById("nav").addEventListener("click", function (e) { var b = e.target.closest("button[data-v]"); if (b && b.dataset.v === "spin") { show(cur); load(); } });
+  setInterval(function () { if (!document.hidden && document.querySelector("main").dataset.v === "spin" && cur === "boss") load(); }, 60000);
+  var tries = 0, t0 = setInterval(function () { if (window.__tok && window.__tok() && !document.body.classList.contains("rm-lock")) { load(); clearInterval(t0); } else if (++tries > 40) clearInterval(t0); }, 1500);
+  show(cur);
 })();
 </script>
 </body>

@@ -429,6 +429,33 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <p class="pmsg" id="msnMsg" role="status"></p>
     </section>
 
+    <section class="card" data-sub="boss" data-label="👹 บอสแคลน" id="bossCardA" data-tab="tools">
+      <h2>👹 บอสแคลน</h2>
+      <p class="cnt">ส่งของ 1 ชิ้น = ตี 1 ดาเมจ (นับเมื่ออนุมัติ) · บอสตัวใหม่เกิดเองทุกวันจันทร์ · ตีตายในเวลา ทุกคนที่ร่วมตีได้แต้ม คนตีหนักสุดได้เหรียญ ⚔️</p>
+      <div id="bsNow"><p class="cnt">กำลังโหลด…</p></div>
+      <h3 style="margin:18px 0 8px;font-size:1rem">⚙️ บอสอัตโนมัติ</h3>
+      <label class="sw"><input id="bsAuto" type="checkbox"><i></i>เกิดบอสใหม่ทุกวันจันทร์</label>
+      <div style="display:grid;gap:6px;grid-template-columns:repeat(3,minmax(0,1fr))">
+        <label style="font-size:.75rem;color:var(--mute)">เลือดบอส<input id="bsHp" type="number" min="1000" inputmode="numeric" placeholder="อัตโนมัติ"></label>
+        <label style="font-size:.75rem;color:var(--mute)">ทุกคนได้<input id="bsAll" type="number" min="0" inputmode="numeric"></label>
+        <label style="font-size:.75rem;color:var(--mute)">ตีหนักสุดได้<input id="bsTop" type="number" min="0" inputmode="numeric"></label>
+      </div>
+      <p class="cnt" id="bsHpHint" style="margin:6px 0 0"></p>
+      <button class="sec" id="bsSave" type="button" style="margin-top:10px">💾 บันทึกการตั้งค่า</button>
+      <details style="margin-top:18px"><summary style="cursor:pointer;font-weight:700">➕ สร้างบอสเองตอนนี้</summary>
+        <div style="display:grid;gap:6px;grid-template-columns:60px minmax(0,1fr);margin-top:10px"><input id="bnIcon" maxlength="8" value="👹" style="text-align:center"><input id="bnName" maxlength="40" placeholder="ชื่อบอส เช่น ราชาหินผา"></div>
+        <div style="display:grid;gap:6px;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:6px">
+          <label style="font-size:.75rem;color:var(--mute)">เลือด<input id="bnHp" type="number" min="1000" inputmode="numeric"></label>
+          <label style="font-size:.75rem;color:var(--mute)">กี่วัน<input id="bnDays" type="number" min="1" max="14" value="7" inputmode="numeric"></label>
+          <label style="font-size:.75rem;color:var(--mute)">ทุกคนได้<input id="bnAll" type="number" min="0" value="100" inputmode="numeric"></label>
+          <label style="font-size:.75rem;color:var(--mute)">ตีหนักสุดได้<input id="bnTop" type="number" min="0" value="300" inputmode="numeric"></label>
+        </div>
+        <label style="font-size:.75rem;color:var(--mute);display:block;margin-top:6px">นับดาเมจจาก<select id="bnType"></select></label>
+        <button class="sec" id="bnGo" type="button" style="margin-top:10px">👹 ปล่อยบอส</button>
+      </details>
+      <div id="bsHist" style="margin-top:16px"></div>
+      <p class="pmsg" id="bsMsg" role="status"></p>
+    </section>
     <section class="card" data-sub="spin" data-label="🎡 วงล้อ" id="spinCard" data-tab="tools">
       <h2>🎡 วงล้อนำโชค</h2>
       <p class="cnt">สมาชิกหมุนฟรีวันละ 1 ครั้ง + วันที่ส่งของ (อนุมัติแล้ว) ได้อีก 1 ครั้ง · ไม่ต้องลงแต้ม · ระบบสุ่มที่ฐานข้อมูล</p>
@@ -1398,6 +1425,45 @@ $("tabs").addEventListener("click", e => { const b = e.target.closest("button[da
 $("pendRef").addEventListener("click", () => setTimeout(ovLoad, 300));
 setInterval(() => { if (!document.hidden && $("panel").dataset.t === "pend") ovLoad(); }, 60000);
 
+// ===== บอสแคลน (เฟส 26) =====
+const bsm = (t, ok) => { $("bsMsg").textContent = t || ""; $("bsMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+const BST = { live: "⚔️ กำลังสู้", dead: "☠️ ตาย", fled: "💨 หนี", cancelled: "ยกเลิก" };
+async function bsLoad() {
+  let r; try { r = await rpc("admin_boss", { p_pass: PASS }); } catch (e) { $("bsNow").innerHTML = '<p class="cnt">ยังไม่ได้รัน phase26.sql ใน Supabase</p>'; return; }
+  if (!r || !r.ok) return;
+  const b = r.boss, nf = n => Number(n || 0).toLocaleString("th-TH"), ft = t => new Date(t).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  $("bsNow").innerHTML = b ? '<div class="pc" style="margin-bottom:4px"><div style="display:flex;gap:10px;align-items:center"><span style="font-size:2rem">' + esc(b.icon) + '</span><div style="flex:1;min-width:0"><strong>' + esc(b.name) + '</strong><small style="display:block;color:var(--mute)">หมดเวลา ' + ft(b.ends_at) + (b.item_type ? " · นับเฉพาะ " + esc(b.item_type) : "") + '</small></div></div>'
+      + '<div style="margin:10px 0 4px;height:14px;border:1px solid var(--line);background:#120a14"><div style="height:100%;width:' + b.pct_left + '%;background:linear-gradient(90deg,#ff2d55,#ff3df2)"></div></div>'
+      + '<small style="color:var(--mute)">❤️ เหลือ ' + nf(b.hp_left) + " / " + nf(b.max_hp) + " (" + b.pct_left + "%) · 👥 " + b.people + " คนร่วมตี · 🎁 +" + b.reward_all + " / ตีหนักสุด +" + b.reward_top + "</small>"
+      + '<button class="sec" id="bsCancel" type="button" style="width:auto;padding:7px 12px;margin-top:10px">ยกเลิกบอสตัวนี้ (ไม่แจกรางวัล)</button></div>'
+    : '<div class="rres">ตอนนี้ไม่มีบอส · ' + (r.cfg.auto === "on" ? "บอสตัวใหม่จะเกิดเองวันจันทร์" : "บอสอัตโนมัติปิดอยู่") + " · สร้างเองได้ด้านล่าง</div>";
+  if (!$("bossCardA").dataset.dirty) {
+    $("bsAuto").checked = r.cfg.auto === "on"; $("bsHp").value = /^\d+$/.test(r.cfg.hp) ? r.cfg.hp : ""; $("bsAll").value = r.cfg.reward_all; $("bsTop").value = r.cfg.reward_top;
+    if (!$("bnHp").value) $("bnHp").value = r.auto_hp;
+  }
+  $("bsHpHint").textContent = "เว้นว่างเลือด = อัตโนมัติ ตอนนี้คิดได้ ≈ " + nf(r.auto_hp) + " (90% ของยอดส่งเฉลี่ยต่อสัปดาห์)";
+  const types = (CFG.itemTypes && CFG.itemTypes.length ? CFG.itemTypes : ["แร่", "กำมะถัน"]);
+  if (!$("bnType").options.length) $("bnType").innerHTML = '<option value="">ทุกประเภท</option>' + types.map(t => '<option value="' + esc(t) + '">เฉพาะ ' + esc(t) + "</option>").join("");
+  const hs = r.history || [];
+  $("bsHist").innerHTML = hs.length ? '<p class="cnt" style="margin:0 0 6px">บอสที่ผ่านมา</p>' + hs.map(h => '<div class="rres">' + esc(h.icon) + " <b>" + esc(h.name) + "</b> · " + (BST[h.status] || h.status) + " · เลือด " + nf(h.max_hp) + (h.status === "dead" ? " · " + h.people + " คน · ตีหนักสุด " + esc(h.top || "-") : "") + " <small>" + ft(h.starts_at) + "</small></div>").join("") : "";
+}
+$("bossCardA").addEventListener("input", e => { if (e.target.closest("#bsHp,#bsAll,#bsTop")) $("bossCardA").dataset.dirty = "1"; });
+$("bsNow").addEventListener("click", async e => {
+  if (!e.target.closest("#bsCancel") || !confirm("ยกเลิกบอสตัวนี้? ไม่มีใครได้รางวัล และสัปดาห์นี้จะไม่เกิดบอสอัตโนมัติอีก (สร้างเองได้)")) return;
+  try { await pcall("admin_boss_cancel"); bsm("ยกเลิกบอสแล้ว", true); } catch (er) { bsm(er.message); }
+  bsLoad();
+});
+$("bsSave").onclick = async () => {
+  try { await pcall("admin_boss_save", { p: { auto: $("bsAuto").checked, hp: $("bsHp").value.trim() || "auto", reward_all: $("bsAll").value.trim() || "0", reward_top: $("bsTop").value.trim() || "0" } }); delete $("bossCardA").dataset.dirty; bsm("บันทึกแล้ว ✓ ใช้กับบอสตัวถัดไป", true); } catch (er) { bsm(er.message); }
+  bsLoad();
+};
+$("bsAuto").onchange = () => $("bsSave").click();
+$("bnGo").onclick = async () => {
+  if (!confirm("ปล่อยบอส “" + ($("bnName").value.trim() || "?") + "” ตอนนี้? จะประกาศลง Discord ทันที")) return;
+  try { await pcall("admin_boss_new", { p: { name: $("bnName").value.trim(), icon: $("bnIcon").value.trim(), hp: $("bnHp").value.trim(), days: $("bnDays").value.trim(), reward_all: $("bnAll").value.trim() || "0", reward_top: $("bnTop").value.trim() || "0", item_type: $("bnType").value } }); bsm("ปล่อยบอสแล้ว ✓", true); $("bnName").value = ""; } catch (er) { bsm(er.message); }
+  bsLoad();
+};
+
 // ===== วงล้อนำโชค (เฟส 25) =====
 const spm = (t, ok) => { $("spMsg").textContent = t || ""; $("spMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
 const spRow = p => '<div class="spr" data-id="' + esc(p.id || "") + '"><input class="ic sp-i" maxlength="8" value="' + esc(p.icon || "⭐") + '"><input class="sp-l" maxlength="30" placeholder="ชื่อรางวัล" value="' + esc(p.label || "") + '"><input class="sp-p" type="number" min="0" max="1000" inputmode="numeric" value="' + esc(p.points == null ? "" : p.points) + '"><input class="sp-w" type="number" min="0" max="10000" inputmode="numeric" value="' + esc(p.weight == null ? "" : p.weight) + '"><label><input class="sp-j" type="checkbox"' + (p.jackpot ? " checked" : "") + '>🍀</label><button class="sec sp-x" type="button" aria-label="ลบช่อง">✕</button><div class="pc2"></div></div>';
@@ -1510,7 +1576,7 @@ window.goSub = function (tab, sub) {
   if (sub && window.__pickSub) window.__pickSub(tab, sub);
   scrollTo({ top: 0, behavior: "smooth" });
 };
-const SUB_LOAD = { spin: () => spLoad(), hook: () => hookLoad(), site: () => siteLoad(true), clr: () => clrLoad(), dc: () => dcLoad(), dm: () => dcLoad(), sum: () => { moLoad(); loadSummary(); } };
+const SUB_LOAD = { boss: () => bsLoad(), spin: () => spLoad(), hook: () => hookLoad(), site: () => siteLoad(true), clr: () => clrLoad(), dc: () => dcLoad(), dm: () => dcLoad(), sum: () => { moLoad(); loadSummary(); } };
 
 // ===== เมนูย่อยในแท็บ (จัดหมวดการ์ดให้หาง่าย) =====
 (function () {
@@ -1518,7 +1584,7 @@ const SUB_LOAD = { spin: () => spLoad(), hook: () => hookLoad(), site: () => sit
   try { Object.assign(pick, JSON.parse(sessionStorage.getItem("rm_sub") || "{}")); } catch (e) {}
   const badgeOf = { red: "shopTabBadge", ireq: "invTabBadge" };
   const HUB = [
-    { g: "🎮 แต้ม & กิจกรรม", items: [["pts", "อัตราแต้มต่อชิ้น · ระดับเลเวล · ปรับแต้มสมาชิก"], ["msn", "เป้าหมายแคลน · ภารกิจรายสัปดาห์"], ["ev", "แต้มคูณพิเศษตามช่วงเวลา"], ["spin", "รางวัลวงล้อ · โอกาสออก · เปิด/ปิด"]] },
+    { g: "🎮 แต้ม & กิจกรรม", items: [["pts", "อัตราแต้มต่อชิ้น · ระดับเลเวล · ปรับแต้มสมาชิก"], ["msn", "เป้าหมายแคลน · ภารกิจรายสัปดาห์"], ["ev", "แต้มคูณพิเศษตามช่วงเวลา"], ["spin", "รางวัลวงล้อ · โอกาสออก · เปิด/ปิด"], ["boss", "บอสประจำสัปดาห์ · เลือด · รางวัล"]] },
     { g: "💬 Discord", items: [["hook", "ห้องแจ้งเตือนทุกห้อง · ทดสอบส่ง"], ["dc", "ประกาศเลเวลอัพ · แจกยศอัตโนมัติ"], ["dm", "ส่งข้อความส่วนตัวหาสมาชิก"]] },
     { g: "⚙️ ระบบ", items: [["site", "ประเภทของ · จุดส่ง · ยศแอดมิน"], ["team", "เพิ่ม / ลบแอดมิน"], ["log", "ใครทำอะไร เมื่อไร"], ["clr", "ลบประวัติเก่า (เฉพาะเจ้าของ)"]] }
   ];
