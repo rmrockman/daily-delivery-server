@@ -802,9 +802,12 @@ async function shopUpload(file) {
   const blob = await new Promise(res => c.toBlob(res, "image/jpeg", .85)); if (!blob) throw new Error("แปลงรูปไม่ได้");
   const path = "shop-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + ".jpg";
   const h = { apikey: KEY, "Content-Type": "image/jpeg" }; if (!KEY.startsWith("sb_")) h.Authorization = "Bearer " + KEY; if (window.__tok && window.__tok()) h.Authorization = "Bearer " + window.__tok();
-  const r = await fetch(URL_ + "/storage/v1/object/delivery-photos/" + path, { method: "POST", headers: h, body: blob });
-  if (!r.ok) throw new Error("อัปโหลดรูปไม่สำเร็จ (" + r.status + ")");
-  return URL_ + "/storage/v1/object/public/delivery-photos/" + path;
+  const r = await fetch(URL_ + "/storage/v1/object/shop-images/" + path, { method: "POST", headers: h, body: blob });
+  if (!r.ok) {
+    let why = ""; try { const j = await r.json(); why = j.message || j.error || ""; } catch (e) {}
+    throw new Error("อัปโหลดรูปไม่สำเร็จ (" + r.status + ")" + (/bucket/i.test(why) ? " — ยังไม่ได้รัน shop-images.sql" : /security|policy|unauthor/i.test(why) ? " — บัญชีนี้ไม่มีสิทธิ์อัปรูป (ตรวจว่ารัน shop-images.sql แล้ว)" : why ? " — " + why : ""));
+  }
+  return URL_ + "/storage/v1/object/public/shop-images/" + path;
 }
 $("itemList").addEventListener("change", async e => {
   const inp = e.target.closest(".f-file"); if (!inp || !inp.files[0]) return;
