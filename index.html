@@ -270,6 +270,8 @@ main[data-v=send] .view:not([data-view=send]),main[data-v=rank] .view:not([data-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <style>
 #authCard{margin-bottom:14px}
+#authCard .bar{height:8px;border-radius:99px;background:#26221a;overflow:hidden;margin:8px 0 4px}
+#authCard .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));transition:width .6s}
 body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-view="hist"]{display:none!important}
 #authCard h2{margin:0 0 6px;font-size:1.05rem}
 #authCard p{margin:6px 0 12px;color:var(--mute);font-size:.92rem}
@@ -1145,7 +1147,7 @@ $("send").addEventListener("click", async () => {
       h = head("เข้าสู่ระบบแล้ว") + '<div class="today" style="display:block">⏳ รอแอดมินอนุมัติบัญชี · ชื่อในเกม <b>' + esc(member.ign) + '</b></div><button class="sm" id="aOut">ออกจากระบบ</button>';
       lock(true);
     } else { // approved
-      h = head("ชื่อในเกม: <b>" + esc(member.ign) + "</b> · อนุมัติแล้ว ✅") + '<button class="sm" id="aOut">ออกจากระบบ</button>';
+      h = head("ชื่อในเกม: <b>" + esc(member.ign) + "</b> · อนุมัติแล้ว ✅") + '<div id="aStats" style="margin-top:6px"></div><button class="sm" id="aOut">ออกจากระบบ</button>';
       lock(false);
       $("ign").value = member.ign; $("ign").readOnly = true;
       try { localStorage.setItem("rm_names", JSON.stringify({ ign: member.ign })); } catch (e) {}
@@ -1153,6 +1155,7 @@ $("send").addEventListener("click", async () => {
       if (lastIgn !== member.ign) { lastIgn = member.ign; try { refreshToday(); } catch (e) {} }
     }
     card.innerHTML = h;
+    if (st === "approved") loadStats();
   }
   async function refresh() {
     if (!session) { member = null; stopPoll(); paint("out"); return; }
@@ -1183,6 +1186,18 @@ $("send").addEventListener("click", async () => {
       } catch (er) { msg.textContent = "ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้ง"; b.disabled = false; }
     }
   });
+  var nf = function (n) { return Number(n).toLocaleString("en-US"); };
+  async function loadStats() {
+    var box = $("aStats"); if (!box || !member || member.status !== "approved") return;
+    try {
+      var st = await rpc("my_stats");
+      if (!st || st.level == null) { box.innerHTML = ""; return; }
+      var cur = st.cur_min || 0, nx = st.next_min, pct = nx != null ? Math.max(0, Math.min(100, Math.round((st.lifetime - cur) / (nx - cur) * 100))) : 100;
+      box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b>Lv.' + st.level + " · " + esc(st.level_name) + "</b><span>⭐ " + nf(st.balance) + ' แต้ม</span></div><div class="bar"><i style="width:' + pct + '%"></i></div><div style="color:var(--mute);font-size:.82rem">' + (nx != null ? "อีก " + nf(nx - st.lifetime) + " แต้มถึง Lv." + st.next_lv + " · " + esc(st.next_name) : "เลเวลสูงสุดแล้ว 🏆") + "</div>";
+    } catch (e) {}
+  }
+  setInterval(loadStats, 30000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) loadStats(); });
   paint("load");
   SBA.auth.onAuthStateChange(function (ev, s) { session = s; setTimeout(refresh, 0); });
 })();

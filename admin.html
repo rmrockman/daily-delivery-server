@@ -147,6 +147,24 @@ button.mini{width:auto;padding:6px 11px;font-size:.76rem;background:#0a0a0a;colo
       <button class="sec" id="sum">โพสต์สรุปเข้า Discord</button>
     </section>
 
+    <section class="card" id="ptsCard" data-tab="tools">
+      <h2>⭐ แต้มและเลเวล</h2>
+      <p class="cnt">อัตราแต้มต่อหมวด: ทุก (กี่ชิ้น) ได้ (กี่แต้ม) · หมวดที่ไม่อยู่ในรายการจะไม่ได้แต้ม</p>
+      <div id="rateList"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="sec" id="rateAdd" type="button" style="width:auto;padding:8px 14px">+ เพิ่มหมวด</button>
+        <button class="sec" id="rateSave" type="button" style="width:auto;padding:8px 14px">💾 บันทึกอัตราแต้ม</button>
+      </div>
+      <p class="cnt" style="margin-top:18px">เลเวล (คิดจากแต้มสะสม ไม่ลดตอนสมาชิกแลกของ)</p>
+      <div id="lvList"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="sec" id="lvAdd" type="button" style="width:auto;padding:8px 14px">+ เพิ่มเลเวล</button>
+        <button class="sec" id="lvSave" type="button" style="width:auto;padding:8px 14px">💾 บันทึกเลเวล</button>
+      </div>
+      <p class="cnt" style="margin-top:18px">ของที่ส่งก่อนเริ่มระบบแต้มจะไม่มีแต้ม กดปุ่มนี้เพื่อนับย้อนหลังจากประวัติเดิมให้สมาชิกที่อนุมัติแล้ว (ชื่อในเกมต้องตรงกับประวัติ กดซ้ำได้ ไม่นับซ้ำ)</p>
+      <button class="sec" id="ptsBackfill" type="button">📥 นับแต้มย้อนหลังจากประวัติเดิม</button>
+      <p class="pmsg" id="ptsMsg" role="status"></p>
+    </section>
     <section class="card" data-tab="list">
       <h2>📋 รายการล่าสุด</h2>
       <input id="q" type="search" placeholder="ค้นหา ชื่อ / Discord / หมวด / วันที่ / #เลข" autocomplete="off">
@@ -489,9 +507,9 @@ function renderMembers() {
   $("memList").innerHTML = list.map(m => {
     const lab = m.status === "approved" ? "อนุมัติแล้ว" : m.status === "rejected" ? "ไม่อนุมัติ" : "รออนุมัติ";
     const cls = m.status === "approved" ? " a" : m.status === "rejected" ? " r" : "";
-    const bs = (m.status === "approved" ? '<button class="sec" data-s="approved" style="width:auto;padding:8px 14px">บันทึกชื่อ</button><button class="sec" data-s="rejected" style="width:auto;padding:8px 14px">ระงับ</button>'
+    const bs = (m.status === "approved" ? '<button class="sec" data-s="approved" style="width:auto;padding:8px 14px">บันทึกชื่อ</button><button class="sec" data-s="rejected" style="width:auto;padding:8px 14px">ระงับ</button><button class="sec" data-adj="1" style="width:auto;padding:8px 14px">± แต้ม</button>'
       : '<button class="sec" data-s="approved" style="width:auto;padding:8px 14px">✅ อนุมัติ</button>' + (m.status === "pending" ? '<button class="sec" data-s="rejected" style="width:auto;padding:8px 14px">❌ ปฏิเสธ</button>' : ""));
-    return '<div class="pc" data-u="' + esc(m.user_id) + '" style="margin-bottom:10px"><div class="ph" style="display:flex;gap:10px;align-items:center">' + (m.avatar_url ? '<img src="' + esc(m.avatar_url) + '" alt="" style="width:36px;height:36px;border-radius:50%">' : "") + "<strong>" + esc(m.discord_name || "-") + '</strong><span class="tag' + cls + '">' + lab + '</span></div><label style="display:block;margin:8px 0 4px;color:var(--mute);font-size:.8rem">ชื่อในเกม (แก้ให้ตรงกับประวัติเดิมได้)</label><input class="mi" value="' + esc(m.ign) + '" maxlength="50"><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' + bs + "</div></div>";
+    return '<div class="pc" data-u="' + esc(m.user_id) + '" style="margin-bottom:10px"><div class="ph" style="display:flex;gap:10px;align-items:center">' + (m.avatar_url ? '<img src="' + esc(m.avatar_url) + '" alt="" style="width:36px;height:36px;border-radius:50%">' : "") + "<strong>" + esc(m.discord_name || "-") + '</strong><span class="tag' + cls + '">' + lab + '</span>' + (m.status === "approved" ? '<span style="margin-left:auto;color:var(--gold);font-weight:700">⭐ ' + (m.points || 0) + " · Lv." + (m.level || 1) + "</span>" : "") + '</div><label style="display:block;margin:8px 0 4px;color:var(--mute);font-size:.8rem">ชื่อในเกม (แก้ให้ตรงกับประวัติเดิมได้)</label><input class="mi" value="' + esc(m.ign) + '" maxlength="50"><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' + bs + "</div></div>";
   }).join("");
 }
 $("memAll").addEventListener("click", () => { memAll = !memAll; renderMembers(); });
@@ -506,6 +524,43 @@ $("memList").addEventListener("click", async e => {
 });
 new MutationObserver(() => { if (!$("panel").hidden) loadMembers(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
 setInterval(() => { if (PASS && !$("panel").hidden) loadMembers(); }, 20000);
+
+// ===== แต้มและเลเวล =====
+let PCFG = { rates: [], levels: [] };
+const pmsg = (t, ok) => { $("ptsMsg").textContent = t || ""; $("ptsMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+const G = "display:grid;gap:6px;margin-bottom:6px;align-items:center;";
+const rateRow = r => '<div class="rr" style="' + G + 'grid-template-columns:1.4fr 1fr 1fr auto"><input class="rt" placeholder="หมวด" value="' + esc(r.item_type) + '"><input class="rq" type="number" min="1" placeholder="ทุกกี่ชิ้น" value="' + esc(r.per_qty) + '"><input class="rp" type="number" min="0" placeholder="ได้กี่แต้ม" value="' + esc(r.points) + '"><button class="sec rx" type="button" style="width:auto;padding:6px 10px">✕</button></div>';
+const lvRow = (r, i) => '<div class="lr" style="' + G + 'grid-template-columns:auto 1.6fr 1fr auto"><b class="ln">Lv.' + (i + 1) + '</b><input class="lnm" placeholder="ชื่อเลเวล" value="' + esc(r.name) + '"><input class="lmp" type="number" min="0" placeholder="แต้มที่ต้องใช้" value="' + esc(r.min_points) + '"><button class="sec lx" type="button" style="width:auto;padding:6px 10px">✕</button></div>';
+function renderPts() {
+  $("rateList").innerHTML = '<div style="' + G + 'grid-template-columns:1.4fr 1fr 1fr auto;color:var(--mute);font-size:.75rem"><span>หมวด</span><span>ทุกกี่ชิ้น</span><span>ได้กี่แต้ม</span><span></span></div>' + PCFG.rates.map(rateRow).join("");
+  $("lvList").innerHTML = PCFG.levels.map(lvRow).join("");
+}
+async function loadPts() {
+  try { PCFG = await rpc("admin_points_config", { p_pass: PASS }); }
+  catch (e) { pmsg("โหลดไม่ได้ (ยังไม่ได้รัน phase2.sql ใน Supabase?)"); return; }
+  pmsg(""); renderPts();
+}
+const readRates = () => [...document.querySelectorAll("#rateList .rr")].map(r => ({ item_type: r.querySelector(".rt").value.trim(), per_qty: r.querySelector(".rq").value.trim(), points: r.querySelector(".rp").value.trim() }));
+const readLevels = () => [...document.querySelectorAll("#lvList .lr")].map(r => ({ name: r.querySelector(".lnm").value.trim(), min_points: r.querySelector(".lmp").value.trim() }));
+$("rateAdd").addEventListener("click", () => { PCFG.rates = readRates(); PCFG.rates.push({ item_type: "", per_qty: 100, points: 1 }); renderPts(); });
+$("lvAdd").addEventListener("click", () => { PCFG.levels = readLevels(); PCFG.levels.push({ name: "", min_points: "" }); renderPts(); });
+$("rateList").addEventListener("click", e => { if (!e.target.closest(".rx")) return; PCFG.rates = readRates(); const i = [...document.querySelectorAll("#rateList .rr")].indexOf(e.target.closest(".rr")); PCFG.rates.splice(i, 1); renderPts(); });
+$("lvList").addEventListener("click", e => { if (!e.target.closest(".lx")) return; PCFG.levels = readLevels(); const i = [...document.querySelectorAll("#lvList .lr")].indexOf(e.target.closest(".lr")); PCFG.levels.splice(i, 1); renderPts(); });
+$("rateSave").addEventListener("click", async () => { try { await pcall("admin_save_rates", { p_rates: readRates() }); pmsg("บันทึกอัตราแต้มแล้ว ✓ (ใช้กับรายการที่อนุมัติหลังจากนี้)", true); loadPts(); } catch (e) { pmsg(e.message); } });
+$("lvSave").addEventListener("click", async () => { try { await pcall("admin_save_levels", { p_levels: readLevels() }); pmsg("บันทึกเลเวลแล้ว ✓", true); loadPts(); } catch (e) { pmsg(e.message); } });
+$("ptsBackfill").addEventListener("click", async () => {
+  if (!confirm("นับแต้มย้อนหลังจากประวัติเดิมให้สมาชิกที่อนุมัติแล้ว?")) return;
+  try { const r = await pcall("admin_backfill_points"); pmsg("นับย้อนหลังแล้ว: " + r.members + " คน รวม " + r.points + " แต้ม", true); loadMembers(); } catch (e) { pmsg(e.message); }
+});
+$("memList").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-adj]"); if (!b) return;
+  const row = b.closest(".pc");
+  const v = prompt("ปรับแต้มกี่แต้ม? (ใส่ตัวเลขบวกเพื่อเพิ่ม ใส่ลบเพื่อหัก เช่น 20 หรือ -20)"); if (v === null) return;
+  const n = parseInt(v, 10); if (!n) { alert("จำนวนแต้มไม่ถูกต้อง"); return; }
+  const why = prompt("เหตุผล (เว้นว่างได้)") || "";
+  try { await pcall("admin_adjust_points", { p_user: row.dataset.u, p_points: n, p_note: why }); await loadMembers(); } catch (er) { alert(er.message || "ไม่สำเร็จ"); }
+});
+new MutationObserver(() => { if (!$("panel").hidden) loadPts(); }).observe($("panel"), { attributes: true, attributeFilter: ["hidden"] });
 </script>
 </body>
 </html>
