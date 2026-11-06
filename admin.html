@@ -359,6 +359,31 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <p class="pmsg" id="itemMsgA" role="status"></p>
       <button class="sec hookJump" type="button" style="margin-top:14px">🔗 ตั้งห้อง Discord ที่เมนู จัดการ › Webhook</button>
     </section>
+    <section class="card" data-sub="auc" data-label="🔨 ประมูล" id="aucCard" data-tab="shop">
+      <h2>🔨 ประมูล</h2>
+      <p class="cnt">สมาชิกเสนอแต้มแข่งกัน คนเสนอสูงสุดตอนปิดได้ของ · โดนแซงคืนแต้มทันที · ชนะแล้วเข้า "🛒 คำขอแลก" ให้มอบของเหมือนแลกปกติ · เสนอช่วง 3 นาทีสุดท้ายต่อเวลา 3 นาที</p>
+      <div class="rres" id="aucHook" style="margin-bottom:10px">กำลังโหลด…</div>
+      <button class="sec" id="aucAdd" type="button">➕ เปิดประมูลใหม่</button>
+      <div id="aucForm" class="pc" hidden style="margin-top:10px">
+        <label style="font-size:.75rem;color:var(--mute)">คัดลอกจากสินค้าในร้าน (ไม่บังคับ)<select id="aucPick"><option value="">— พิมพ์เองด้านล่าง —</option></select></label>
+        <div style="display:grid;gap:6px;grid-template-columns:64px minmax(0,1fr);margin-top:6px">
+          <label style="font-size:.75rem;color:var(--mute)">ไอคอน<input id="aucEmoji" maxlength="8" placeholder="🎁"></label>
+          <label style="font-size:.75rem;color:var(--mute)">ชื่อของ<input id="aucTitle" maxlength="60" placeholder="เช่น พรีเมียม 30 วัน"></label>
+        </div>
+        <label style="font-size:.75rem;color:var(--mute)">รายละเอียด (ไม่บังคับ)<input id="aucDesc" maxlength="300" placeholder="เช่น มอบในเกมภายใน 1 วันหลังปิด"></label>
+        <label style="font-size:.75rem;color:var(--mute)">ลิงก์รูป (ไม่บังคับ)<input id="aucImg" placeholder="https://..." autocomplete="off"></label>
+        <div style="display:grid;gap:6px;grid-template-columns:repeat(2,minmax(0,1fr))">
+          <label style="font-size:.75rem;color:var(--mute)">ราคาเริ่ม (แต้ม)<input id="aucStart" type="number" min="0" inputmode="numeric" value="100"></label>
+          <label style="font-size:.75rem;color:var(--mute)">เพิ่มครั้งละอย่างน้อย<input id="aucStep" type="number" min="1" inputmode="numeric" value="20"></label>
+        </div>
+        <label style="font-size:.75rem;color:var(--mute)">ปิดประมูลเมื่อ<input id="aucEnd" type="datetime-local"></label>
+        <div class="wr" id="aucQuick" style="margin-top:6px"><button class="sec" type="button" data-q="t21" style="width:auto;padding:6px 10px">พรุ่งนี้ 21:00</button><button class="sec" type="button" data-q="d3" style="width:auto;padding:6px 10px">3 วัน (21:00)</button><button class="sec" type="button" data-q="d7" style="width:auto;padding:6px 10px">7 วัน (21:00)</button></div>
+        <p class="cnt" id="aucHint" style="margin:4px 0 8px;font-size:.75rem"></p>
+        <div class="wr"><button id="aucGo" type="button">🔨 เปิดประมูล</button><button class="sec" id="aucX" type="button">ยกเลิก</button></div>
+      </div>
+      <p class="pmsg" id="aucMsg" role="status"></p>
+      <div id="aucList" style="margin-top:12px"></div>
+    </section>
     <section class="card" id="toolsHub" data-tab="tools">
       <h2>⚙️ จัดการ</h2>
       <div id="hubList"></div>
@@ -1263,6 +1288,7 @@ const HOOKS = [
   { s: "bot", k: "monthly_webhook", icon: "🏆", name: "สรุปประจำเดือน", what: ["Top 3 ประจำเดือน + แต้มรางวัล (วันที่ 1 ของเดือน)"], fb: ["levelup_webhook", "pending_webhook"] },
   { s: "app", k: "shop_webhook", icon: "🛒", name: "ร้านค้า", what: ["มีคนแลกของ (รอแอดมินมอบของ)"], fb: ["pending_webhook"] },
   { s: "bot", k: "inventory_webhook", icon: "📦", name: "คลังกลาง", what: ["มีคำขอเบิกของใหม่", "อนุมัติเบิกออก (บอกของคงเหลือ)", "แอดมินปรับจำนวนของ"], fb: ["pending_webhook"] },
+  { s: "bot", k: "auction_webhook", icon: "🔨", name: "ห้องประมูล (สมาชิกเห็น)", what: ["เปิดประมูลใหม่", "มีคนเสนอ / แซงราคา", "⏰ เหลือ 1 ชั่วโมง", "🏆 ปิดประมูล + แท็กคนชนะ"], fb: ["event_webhook", "levelup_webhook"] },
   { s: "bot", k: "game_webhook", icon: "🎰", name: "ห้องเกม (วงล้อ & จับคู่)", what: ["ใครหมุนวงล้อ / ตู้จับคู่ ได้อะไร", "🍀 แจ็กพอต (แท็กชื่อคนได้)", "เลือกแจ้งทุกครั้ง / เฉพาะรางวัลใหญ่ ได้ที่ จัดการ › วงล้อ & จับคู่"], fb: [] }
 ];
 let HK = null;
@@ -1499,6 +1525,78 @@ $("mcSave").onclick = async () => {
 };
 $("mcOn").onchange = () => $("mcSave").click();
 
+// ===== 🔨 ประมูล (เฟส 30) =====
+let AUC = null;
+const aum = (t, ok) => { $("aucMsg").textContent = t || ""; $("aucMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+const aucT = t => new Date(t).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const aucLocal = d => new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+function aucAt(days) { const d = new Date(); d.setDate(d.getDate() + days); d.setHours(21, 0, 0, 0); return aucLocal(d); }
+function aucHint() {
+  const v = $("aucEnd").value, ms = v ? new Date(v) - Date.now() : 0, h = ms / 3600e3;
+  $("aucHint").textContent = !v ? "" : ms < 10 * 60e3 ? "⚠️ ต้องปิดหลังจากนี้อย่างน้อย 10 นาที" : "เปิดตอนนี้ · ปิด " + aucT(new Date(v)) + " (อีก " + (h >= 24 ? (h / 24).toFixed(1) + " วัน" : h.toFixed(1) + " ชม.") + ") · แนะนำปิดช่วงคนออนเยอะ เช่น 20:00–22:00";
+}
+async function aucLoad() {
+  try { AUC = await rpc("admin_auctions", { p_pass: PASS }); } catch (e) { $("aucHook").textContent = "ยังไม่ได้รัน phase30.sql ใน Supabase"; $("aucList").innerHTML = ""; return; }
+  const HN = { auction: "✅ ส่งเข้า 🔨 ห้องประมูล", event: "↪️ ยังไม่ตั้งห้องประมูล · ส่งเข้า 🔥 อีเวนต์ & ภารกิจ แทน", levelup: "↪️ ยังไม่ตั้งห้องประมูล · ส่งเข้า 🎉 ห้องประกาศ แทน" };
+  $("aucHook").innerHTML = "Discord: " + (HN[AUC.hook] ? esc(HN[AUC.hook]) : '<b style="color:var(--bad)">⚠️ ยังไม่ได้ตั้งห้อง · ไม่แจ้ง</b>') + '<br><button class="sec hookJump" type="button" style="margin-top:8px;width:auto;padding:6px 12px">🔗 ตั้งห้องที่ จัดการ › Webhook</button>';
+  const A = AUC.auctions || [];
+  $("aucList").innerHTML = A.length ? A.map(a => {
+    const live = a.status === "live", nm = (a.emoji ? a.emoji + " " : "") + a.title;
+    const tag = live ? '<span class="tag a">🟢 กำลังประมูล</span>' : a.status === "cancelled" ? '<span class="tag r">🚫 ยกเลิก</span>' : a.winner ? '<span class="tag">🏆 จบแล้ว</span>' : '<span class="tag">⌛ ไม่มีคนเสนอ</span>';
+    const red = a.winner ? (a.red_status === "delivered" ? " · ✅ มอบของแล้ว" : a.red_status === "cancelled" ? " · ↩️ ยกเลิกแลก (คืนแต้มแล้ว)" : ' · <button class="sec aucRed" type="button" style="width:auto;padding:3px 9px;font-size:.78rem">⏳ รอมอบของ ›</button>') : "";
+    const info = live ? (a.top ? "นำ: <b>" + esc(a.top_ign) + "</b> ⭐ " + Number(a.top).toLocaleString("th-TH") : "ยังไม่มีคนเสนอ · เริ่ม ⭐ " + Number(a.start_bid).toLocaleString("th-TH")) + " · ปิด " + aucT(a.ends_at)
+      : a.winner ? "ผู้ชนะ <b>" + esc(a.winner) + "</b> ⭐ " + Number(a.win_bid).toLocaleString("th-TH") + red : a.status === "cancelled" ? (a.note ? "เหตุผล: " + esc(a.note) : "ยกเลิกแล้ว คืนแต้มให้คนเสนอแล้ว") : "ปิด " + aucT(a.ended_at || a.ends_at);
+    const log = (a.log || []).map(l => "<li>" + esc(l.ign) + " · ⭐ " + Number(l.amount).toLocaleString("th-TH") + ' <span style="color:var(--mute)">' + aucT(l.at) + "</span></li>").join("");
+    return '<div class="pc" data-id="' + a.id + '" data-n="' + esc(nm) + '"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><strong>' + esc(nm) + "</strong>" + tag + "</div>"
+      + '<p class="cnt" style="margin:0 0 6px">' + info + "<br>" + a.people + " คน · " + a.bids + " ครั้ง · เริ่ม ⭐ " + Number(a.start_bid).toLocaleString("th-TH") + " · เพิ่มครั้งละ " + a.step + "</p>"
+      + (log ? '<details><summary style="font-size:.8rem;color:var(--mute);cursor:pointer">ดูการเสนอล่าสุด</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:.8rem">' + log + "</ul></details>" : "")
+      + (live ? '<div class="wr" style="margin-top:8px"><button class="sec aucEndB" type="button">⏹️ ปิดตอนนี้</button><button class="sec aucCan" type="button">🚫 ยกเลิก (คืนแต้ม)</button></div>' : "") + "</div>";
+  }).join("") : '<p class="cnt">ยังไม่มีประมูล กด “➕ เปิดประมูลใหม่”</p>';
+}
+$("aucAdd").onclick = async () => {
+  $("aucForm").hidden = false; $("aucAdd").hidden = true;
+  if (!$("aucEnd").value) $("aucEnd").value = aucAt(1);
+  aucHint();
+  if (!SHOP || !(SHOP.items || []).length) { try { const r = await rpc("admin_shop", { p_pass: PASS }); if (r && r.items) SHOP = r; } catch (e) {} }
+  const its = (SHOP && SHOP.items) || [];
+  $("aucPick").innerHTML = '<option value="">— พิมพ์เองด้านล่าง —</option>' + its.map(it => '<option value="' + it.id + '">' + esc((it.emoji ? it.emoji + " " : "") + it.name) + " · ร้าน ⭐ " + Number(it.cost).toLocaleString("th-TH") + "</option>").join("");
+};
+$("aucX").onclick = () => { $("aucForm").hidden = true; $("aucAdd").hidden = false; aum(""); };
+$("aucPick").onchange = () => {
+  const it = ((SHOP && SHOP.items) || []).find(x => String(x.id) === $("aucPick").value); if (!it) return;
+  $("aucTitle").value = it.name || ""; $("aucEmoji").value = it.emoji || ""; $("aucImg").value = it.image_url || ""; $("aucDesc").value = it.description || "";
+  const st = Math.max(1, Math.round(it.cost * 0.4 / 10) * 10); $("aucStart").value = st; $("aucStep").value = Math.max(5, Math.round(st * 0.1 / 5) * 5);
+  aum("ตั้งราคาเริ่ม ≈ 40% ของราคาในร้านให้แล้ว แก้ได้", true);
+};
+$("aucQuick").addEventListener("click", e => { const b = e.target.closest("[data-q]"); if (!b) return; $("aucEnd").value = aucAt({ t21: 1, d3: 3, d7: 7 }[b.dataset.q]); aucHint(); });
+$("aucEnd").addEventListener("input", aucHint);
+$("aucGo").onclick = async () => {
+  const v = $("aucEnd").value; if (!v) { aum("เลือกเวลาปิดประมูล"); return; }
+  const p = { title: $("aucTitle").value.trim(), emoji: $("aucEmoji").value.trim(), image_url: $("aucImg").value.trim(), description: $("aucDesc").value.trim(),
+    start_bid: $("aucStart").value.trim() || "0", step: $("aucStep").value.trim() || "1", ends_at: new Date(v).toISOString() };
+  if (!p.title) { aum("ใส่ชื่อของ"); return; }
+  if (!confirm("เปิดประมูล “" + p.title + "” เริ่ม ⭐ " + p.start_bid + " ปิด " + aucT(new Date(v)) + " ?\nจะประกาศลง Discord ทันที")) return;
+  $("aucGo").disabled = true;
+  try { await pcall("admin_auction_new", { p }); aum("เปิดประมูลแล้ว ✓ ประกาศลง Discord แล้ว", true); ["aucTitle", "aucEmoji", "aucImg", "aucDesc"].forEach(id => $(id).value = ""); $("aucPick").value = ""; $("aucForm").hidden = true; $("aucAdd").hidden = false; }
+  catch (er) { aum(er.message); }
+  $("aucGo").disabled = false; aucLoad();
+};
+$("aucList").addEventListener("click", async e => {
+  const c = e.target.closest(".pc[data-id]"); if (!c) return;
+  const id = Number(c.dataset.id), nm = c.dataset.n;
+  if (e.target.closest(".aucRed")) { goSub("shop", "red"); return; }
+  if (e.target.closest(".aucEndB")) {
+    if (!confirm("ปิดประมูล “" + nm + "” ตอนนี้เลย? คนที่นำอยู่จะชนะทันที")) return;
+    try { const r = await pcall("admin_auction_end", { p_id: id }); aum(r.winner ? "ปิดแล้ว ✓ ผู้ชนะ " + r.winner + " ⭐ " + r.win_bid + " · ไปมอบของที่ 🛒 คำขอแลก" : "ปิดแล้ว ✓ ไม่มีคนเสนอ", true); } catch (er) { aum(er.message); }
+    aucLoad(); if (typeof loadShopA === "function") loadShopA();
+  }
+  if (e.target.closest(".aucCan")) {
+    const rs = prompt("ยกเลิกประมูล “" + nm + "” และคืนแต้มให้คนที่เสนอไว้\nเหตุผล (ไม่บังคับ):", ""); if (rs === null) return;
+    try { await pcall("admin_auction_cancel", { p_id: id, p_reason: rs }); aum("ยกเลิกแล้ว ✓ คืนแต้มแล้ว", true); } catch (er) { aum(er.message); }
+    aucLoad();
+  }
+});
+
 // ===== แจ้งเตือนเกมใน Discord (เฟส 29) =====
 const gnShow = () => { $("gnMinL").style.visibility = $("gnMode").value === "big" ? "visible" : "hidden"; };
 async function gnLoad() {
@@ -1631,7 +1729,7 @@ window.goSub = function (tab, sub) {
   if (sub && window.__pickSub) window.__pickSub(tab, sub);
   scrollTo({ top: 0, behavior: "smooth" });
 };
-const SUB_LOAD = { boss: () => bsLoad(), spin: () => spLoad(), hook: () => hookLoad(), site: () => siteLoad(true), clr: () => clrLoad(), dc: () => dcLoad(), dm: () => dcLoad(), sum: () => { moLoad(); loadSummary(); } };
+const SUB_LOAD = { auc: () => aucLoad(), boss: () => bsLoad(), spin: () => spLoad(), hook: () => hookLoad(), site: () => siteLoad(true), clr: () => clrLoad(), dc: () => dcLoad(), dm: () => dcLoad(), sum: () => { moLoad(); loadSummary(); } };
 
 // ===== เมนูย่อยในแท็บ (จัดหมวดการ์ดให้หาง่าย) =====
 (function () {

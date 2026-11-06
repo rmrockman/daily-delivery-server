@@ -336,6 +336,34 @@ body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-v
 .bs-rw.off{border-color:var(--line);background:none;color:var(--mute)}
 .bs-go{display:block;width:100%}
 .bs-prev{margin:10px 0 0;font-size:.75rem;color:var(--mute);text-align:center}
+#aucCard{margin:0 0 20px}
+.au-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.au-hd h2{margin:0;flex:1;white-space:nowrap}
+.au-held{font-size:.75rem;color:var(--gold-hi);border:1px solid var(--line);padding:3px 9px;white-space:nowrap}
+.au{border:1px solid var(--line);background:#07101f;padding:12px;margin-top:12px}
+.au-top{display:flex;gap:12px;align-items:center}
+.au-ic{width:64px;height:64px;flex:none;display:grid;place-items:center;font-size:2.2rem;border:1px solid var(--line);background:#050c1a;overflow:hidden}
+.au-ic img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+.au-top b{display:block;font-size:1.05rem}.au-top small{display:block;color:var(--mute);font-size:.8rem;margin-top:2px}
+.au-st{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0 8px}
+.au-st div{padding:9px 10px;border:1px solid var(--line);background:rgba(0,229,255,.05);font-size:.72rem;color:var(--mute);min-width:0}
+.au-st b{display:block;font-size:1.2rem;color:var(--gold-hi);white-space:nowrap}
+.au-st span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.au-st .soon b{color:var(--err)}
+.au-me{padding:8px 10px;font-size:.84rem;margin-bottom:8px;border:1px solid var(--line)}
+.au-me.lead{border-color:rgba(61,255,176,.5);background:rgba(61,255,176,.08);color:var(--ok)}
+.au-me.lost{border-color:rgba(255,92,138,.5);background:rgba(255,92,138,.08);color:var(--err)}
+.au-bid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.au-bid input{width:100%;font:inherit;font-size:1.05rem;font-weight:700;padding:12px;background:#050c1a;color:var(--ink);border:1px solid var(--line);border-radius:0;min-width:0}
+.au-bid button{width:auto;padding:12px 18px;white-space:nowrap}
+.au-q{display:flex;gap:6px;margin-top:6px}
+.au-q button{flex:1;width:auto;padding:7px 4px;font-size:.8rem;background:#050c1a;color:var(--gold-hi);border:1px solid var(--line);box-shadow:none}
+.au-msg{min-height:1.2em;font-size:.86rem;margin:8px 0 0}
+.au-log{list-style:none;padding:0;margin:10px 0 0;font-size:.8rem}
+.au-log li{display:flex!important;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--line);color:var(--mute)}
+.au-log li.me{color:var(--gold-hi)}.au-log li:first-child b{color:var(--ink)}
+.au-rc{margin:12px 0 0;padding:0;list-style:none;font-size:.82rem;color:var(--mute)}
+.au-rc li{padding:6px 0;border-top:1px solid var(--line)}.au-rc li.me{color:var(--ok);font-weight:700}
+.au-rule{margin:12px 0 0;font-size:.75rem;color:var(--mute);line-height:1.6}
 .wh-top{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap}
 .wh-top h2{margin:0;flex:1;white-space:nowrap}
 .wh-left{font-size:.8rem;font-weight:800;padding:4px 10px;border:1px solid var(--gold-hi);color:var(--gold-hi);background:rgba(0,229,255,.08)}
@@ -650,6 +678,7 @@ button{border-radius:0!important}
   <section class="card" id="wheelCard"><p style="margin:0;color:var(--mute)">กำลังโหลดวงล้อ…</p></section>
   </div>
   <div class="view" data-view="shop">
+  <section class="card" id="aucCard" hidden></section>
   <section class="card" id="shopCard">
     <h2>🛒 ร้านค้าแลกแต้ม</h2>
     <div class="shopTop"><span style="color:var(--mute)">แต้มคงเหลือ</span><span class="shopBal" id="shopBal">-</span></div>
@@ -1585,6 +1614,95 @@ $("send").addEventListener("click", async () => {
   $("shopGrid").addEventListener("click", function (e) { var im = e.target.closest("img.pic"); if (im) window.open(im.src, "_blank", "noopener"); });
   $("nav").addEventListener("click", function (e) { var b = e.target.closest("button[data-v]"); if (b && b.dataset.v === "shop") { smsg(""); loadShop(); } });
   document.addEventListener("visibilitychange", function () { if (!document.hidden && document.querySelector("main").dataset.v === "shop") loadShop(); });
+})();
+</script>
+
+<script>
+// ===== 🔨 ประมูล (เฟส 30) =====
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var nf = function (n) { return Number(n || 0).toLocaleString("en-US"); };
+  var card = $("aucCard"), D = null, skew = 0, busy = false, msgs = {}, typed = {}, poll = null, ticker = null, loading = false;
+  function onShop() { return document.querySelector("main").dataset.v === "shop" && !document.hidden; }
+  function left(ms) {
+    if (ms <= 0) return "กำลังปิด…";
+    var s = Math.floor(ms / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+    var two = function (n) { return (n < 10 ? "0" : "") + n; };
+    return d ? d + " วัน " + h + " ชม." : h + ":" + two(m) + ":" + two(x);
+  }
+  function ago(t) { var s = Math.max(0, Math.round((Date.now() + skew - new Date(t)) / 1000)); return s < 60 ? "เมื่อกี้" : s < 3600 ? Math.floor(s / 60) + " นาทีก่อน" : s < 86400 ? Math.floor(s / 3600) + " ชม.ก่อน" : Math.floor(s / 86400) + " วันก่อน"; }
+  function tick() {
+    var due = false;
+    card.querySelectorAll("[data-end]").forEach(function (el) {
+      var ms = new Date(el.dataset.end) - (Date.now() + skew);
+      el.textContent = left(ms); el.parentNode.classList.toggle("soon", ms < 3600e3);
+      if (ms <= 0) due = true;
+    });
+    if (due && !loading) setTimeout(load, 1500);
+  }
+  function render() {
+    var A = D.auctions || [], R = D.recent || [];
+    card.hidden = !A.length && !R.length;
+    if (card.hidden) return;
+    card.querySelectorAll(".au-bid input").forEach(function (i) { if (i.dataset.dirty) typed[i.dataset.id] = i.value; });
+    var h = '<div class="au-hd"><h2>🔨 ประมูล</h2>' + (D.held > 0 ? '<span class="au-held">🔒 กันไว้ ' + nf(D.held) + " แต้ม</span>" : "") + "</div>";
+    h += A.map(function (a) {
+      var started = a.started, me = a.top_me ? '<div class="au-me lead">🏆 คุณนำอยู่ · กันแต้มไว้ ' + nf(a.top) + " แต้ม</div>"
+        : a.me_in ? '<div class="au-me lost">💸 โดนแซงแล้ว · คืนแต้มให้แล้ว เสนอใหม่ได้</div>' : "";
+      var v = a.id in typed ? typed[a.id] : a.next_min;
+      var log = (a.log || []).map(function (l) { return '<li class="' + (l.me ? "me" : "") + '"><span><b>' + esc(l.ign) + "</b>" + (l.me ? " (คุณ)" : "") + " · " + ago(l.at) + "</span><span>⭐ " + nf(l.amount) + "</span></li>"; }).join("");
+      return '<div class="au" data-id="' + a.id + '">'
+        + '<div class="au-top"><div class="au-ic">' + (a.image_url ? '<img alt="" loading="lazy" src="' + esc(a.image_url) + '">' : esc(a.emoji || "🎁")) + "</div><div><b>" + esc((a.image_url && a.emoji ? a.emoji + " " : "") + a.title) + "</b>" + (a.description ? "<small>" + esc(a.description) + "</small>" : "") + "</div></div>"
+        + '<div class="au-st"><div>' + (a.top ? "ราคาตอนนี้" : "ราคาเริ่ม") + "<b>⭐ " + nf(a.top || a.next_min) + "</b><span>" + (a.top ? "โดย " + esc(a.top_ign) + (a.top_me ? " (คุณ)" : "") : "ยังไม่มีคนเสนอ") + "</span></div>"
+        + "<div>" + (started ? "ปิดใน" : "เริ่มใน") + '<b data-end="' + esc(started ? a.ends_at : a.starts_at) + '">-</b><span>' + a.people + " คน · " + a.bids + " ครั้ง</span></div></div>"
+        + me
+        + (started ? '<div class="au-bid"><input type="number" inputmode="numeric" min="' + a.next_min + '" step="' + a.step + '" data-id="' + a.id + '" value="' + esc(v) + '" aria-label="จำนวนแต้มที่เสนอ"><button type="button" class="au-go" data-id="' + a.id + '"' + (busy ? " disabled" : "") + ">🔨 เสนอ</button></div>"
+          + '<div class="au-q"><button type="button" data-set="' + a.next_min + '">ขั้นต่ำ ' + nf(a.next_min) + '</button><button type="button" data-set="' + (a.next_min + a.step) + '">' + nf(a.next_min + a.step) + '</button><button type="button" data-set="' + (a.next_min + a.step * 4) + '">' + nf(a.next_min + a.step * 4) + "</button></div>" : "")
+        + '<p class="au-msg" role="status" style="color:' + (msgs[a.id] && msgs[a.id][1] ? "var(--ok)" : "var(--err)") + '">' + esc((msgs[a.id] || [""])[0]) + "</p>"
+        + (log ? '<ul class="au-log">' + log + "</ul>" : "") + "</div>";
+    }).join("");
+    if (R.length) h += '<ul class="au-rc">' + R.map(function (r) {
+      return '<li class="' + (r.me ? "me" : "") + '">' + (r.status === "cancelled" ? "🚫 " + esc(r.title) + " · ยกเลิก" : r.winner ? "🏆 " + esc(r.title) + " · " + (r.me ? "คุณชนะ! ⭐ " + nf(r.win_bid) + " · รอแอดมินมอบของ" : esc(r.winner) + " ชนะ ⭐ " + nf(r.win_bid)) : "⌛ " + esc(r.title) + " · ไม่มีคนเสนอ") + "</li>";
+    }).join("") + "</ul>";
+    if (A.length) h += '<p class="au-rule">เสนอแล้วกันแต้มไว้ · โดนแซงคืนแต้มทันที · ชนะแล้วรอแอดมินมอบของในเกม · เสนอช่วง 3 นาทีสุดท้ายจะต่อเวลา 3 นาที</p>';
+    card.innerHTML = h;
+    tick();
+  }
+  async function load() {
+    if (loading) return; loading = true;
+    try { var r = await rpc("auction_status"); if (r && r.ok) { D = r; skew = new Date(r.now) - Date.now(); render(); } else card.hidden = true; }
+    catch (e) { card.hidden = true; }
+    loading = false;
+    clearInterval(poll); poll = null;
+    if (D && (D.auctions || []).length && onShop()) poll = setInterval(function () { if (onShop()) load(); }, 15000);
+  }
+  card.addEventListener("input", function (e) { if (e.target.matches(".au-bid input")) e.target.dataset.dirty = "1"; });
+  card.addEventListener("click", async function (e) {
+    var im = e.target.closest(".au-ic img"); if (im) { window.open(im.src, "_blank", "noopener"); return; }
+    var q = e.target.closest("[data-set]");
+    if (q) { var inp = q.closest(".au").querySelector(".au-bid input"); inp.value = q.dataset.set; inp.dataset.dirty = "1"; return; }
+    var b = e.target.closest(".au-go"); if (!b || busy) return;
+    var id = Number(b.dataset.id), a = (D.auctions || []).filter(function (x) { return x.id === id; })[0]; if (!a) return;
+    var box = b.closest(".au"), n = Math.floor(Number(box.querySelector(".au-bid input").value));
+    if (!n || n < a.next_min) { msgs[id] = ["ต้องเสนออย่างน้อย " + nf(a.next_min) + " แต้ม"]; render(); return; }
+    var add = a.top_me ? n - a.top : n;
+    if (!confirm("เสนอ ⭐ " + nf(n) + " แต้ม สำหรับ “" + a.title + "”?\n\nจะกันแต้มไว้ " + nf(add) + " แต้ม" + (a.top_me ? " (เพิ่มจากที่กันไว้)" : "") + "\nถ้าโดนแซง คืนแต้มทันที")) return;
+    busy = true; msgs[id] = ["กำลังเสนอ…", true]; render();
+    try {
+      var r = await rpc("auction_bid", { p_id: id, p_amount: n });
+      if (r && r.ok) { msgs[id] = ["เสนอสำเร็จ 🎉 คุณนำอยู่ · แต้มคงเหลือ " + nf(r.balance) + (r.extended ? " · ⏱️ ต่อเวลา 3 นาที" : ""), true]; delete typed[id]; }
+      else msgs[id] = [(r && r.error) || "เสนอไม่สำเร็จ"];
+    } catch (er) { msgs[id] = ["เสนอไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่"]; }
+    busy = false;
+    setTimeout(function () { delete msgs[id]; }, 8000);
+    await load();
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  $("nav").addEventListener("click", function (e) { var b = e.target.closest("button[data-v]"); if (b && b.dataset.v === "shop") { typed = {}; load(); } });
+  document.addEventListener("visibilitychange", function () { if (onShop() && !busy) load(); });
+  ticker = setInterval(function () { if (onShop() && D) tick(); }, 1000);
+  setTimeout(function () { if (onShop()) load(); }, 800);
 })();
 </script>
 
