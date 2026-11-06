@@ -300,6 +300,16 @@ body.rm-lock #nav,body.rm-lock .view[data-view="rank"],body.rm-lock .view[data-v
 .si button:disabled{opacity:.45;filter:grayscale(1)}
 .myr{list-style:none;padding:0;margin:0}
 #wheelCard{margin:0 0 14px}
+#matchCard{margin:0 0 14px}
+.gtabs button{font-size:.82rem!important;padding:10px 4px!important}
+.mc-reels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0 4px;padding:12px;background:#050c1a;border:1px solid var(--line);box-shadow:inset 0 0 24px rgba(0,229,255,.12)}
+.mc-r{aspect-ratio:1;display:grid;place-items:center;background:#07101f;border:1px solid var(--line);font-size:2.6rem;overflow:hidden;position:relative}
+.mc-r.run span{filter:blur(1.5px);animation:mcj .16s linear infinite}
+.mc-r.stop span{animation:mcs .28s cubic-bezier(.2,1.6,.4,1)}
+.mc-r.hit{border-color:var(--ok);box-shadow:0 0 16px rgba(61,255,176,.45),inset 0 0 14px rgba(61,255,176,.2)}
+@keyframes mcj{0%{transform:translateY(-6px)}50%{transform:translateY(6px)}100%{transform:translateY(-6px)}}
+@keyframes mcs{0%{transform:translateY(-14px) scale(.9)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){.mc-r.run span,.mc-r.stop span{animation:none}}
 .gtabs{display:flex;gap:8px;margin:0 0 14px}
 .gtabs button{flex:1;padding:10px 8px!important;font-size:.9rem!important;font-weight:800;background:#07101f!important;color:var(--mute)!important;border:1px solid var(--line)!important;box-shadow:none!important;position:relative}
 .gtabs button.on{background:linear-gradient(90deg,var(--gold),var(--gold-hi))!important;color:#001018!important;border-color:transparent!important;box-shadow:0 0 14px rgba(0,229,255,.35)!important}
@@ -634,8 +644,9 @@ button{border-radius:0!important}
   </section>
   </div>
   <div class="view" data-view="spin">
-  <div class="gtabs" id="gTabs"><button type="button" data-g="wheel" class="on">🎡 วงล้อ</button><button type="button" data-g="boss">👹 บอสแคลน<i id="bossDot" hidden></i></button></div>
+  <div class="gtabs" id="gTabs"><button type="button" data-g="wheel" class="on">🎡 วงล้อ</button><button type="button" data-g="match">🧩 จับคู่</button><button type="button" data-g="boss">👹 บอสแคลน<i id="bossDot" hidden></i></button></div>
   <section class="card" id="bossCard" hidden><p style="margin:0;color:var(--mute)">กำลังโหลดบอส…</p></section>
+  <section class="card" id="matchCard" hidden><p style="margin:0;color:var(--mute)">กำลังโหลด…</p></section>
   <section class="card" id="wheelCard"><p style="margin:0;color:var(--mute)">กำลังโหลดวงล้อ…</p></section>
   </div>
   <div class="view" data-view="shop">
@@ -1937,7 +1948,7 @@ $("send").addEventListener("click", async () => {
       lastMsg = { t: r.jackpot ? "🍀 แจ็กพอต! +" + r.points + " แต้ม + เหรียญดวงเฮง" : "🎉 ได้ " + r.icon + " +" + r.points + " แต้ม!", jp: r.jackpot };
       try { if (typeof ding === "function") ding(); } catch (e) {}
       await reload();
-      try { document.dispatchEvent(new Event("visibilitychange")); } catch (e) {}
+      try { document.dispatchEvent(new Event("rm-spin-wheel")); document.dispatchEvent(new Event("visibilitychange")); } catch (e) {}
     }, reduce ? 300 : 4550);
   }
   async function reload() { busy = false; await load(); }
@@ -1950,6 +1961,7 @@ $("send").addEventListener("click", async () => {
   setInterval(function () { if (!document.hidden && S && S.pending) load(); }, 60000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden && !spinning) load(); });
   document.getElementById("nav").addEventListener("click", function (e) { var b = e.target.closest("button[data-v]"); if (b && b.dataset.v === "spin") load(); });
+  document.addEventListener("rm-spin", function () { if (!spinning) { busy = false; load(); } });
   setInterval(function () { if (!document.hidden) load(); }, 300000);
 })();
 </script>
@@ -1960,13 +1972,15 @@ $("send").addEventListener("click", async () => {
   var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var nf = function (n) { return Number(n || 0).toLocaleString("en-US"); };
   var D = null, busy = false, cur = "wheel";
-  try { cur = localStorage.getItem("rm_game") === "boss" ? "boss" : "wheel"; } catch (e) {}
+  try { var sv = localStorage.getItem("rm_game"); cur = sv === "boss" || sv === "match" ? sv : "wheel"; } catch (e) {}
   function left(t) { var ms = new Date(t).getTime() - Date.now(); if (ms <= 0) return "หมดเวลา"; var d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4); return d ? d + " วัน " + h + " ชม." : h ? h + " ชม. " + m + " นาที" : m + " นาที"; }
   function when(t) { return new Date(t).toLocaleString("th-TH", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); }
   function show(g) {
     cur = g; try { localStorage.setItem("rm_game", g); } catch (e) {}
     tabs.querySelectorAll("button").forEach(function (b) { b.classList.toggle("on", b.dataset.g === g); });
     wheel.hidden = g !== "wheel"; card.hidden = g !== "boss";
+    var mc = document.getElementById("matchCard"); if (mc) mc.hidden = g !== "match";
+    try { document.dispatchEvent(new CustomEvent("rm-game-show", { detail: g })); } catch (e) {}
     if (g === "boss") load();
   }
   function paint() {
@@ -2003,6 +2017,65 @@ $("send").addEventListener("click", async () => {
   setInterval(function () { if (!document.hidden && document.querySelector("main").dataset.v === "spin" && cur === "boss") load(); }, 60000);
   var tries = 0, t0 = setInterval(function () { if (window.__tok && window.__tok() && !document.body.classList.contains("rm-lock")) { load(); clearInterval(t0); } else if (++tries > 40) clearInterval(t0); }, 1500);
   show(cur);
+})();
+</script>
+<script>
+// ===== 🧩 ตู้จับคู่ (เฟส 28) — ใช้สิทธิ์หมุนร่วมกับวงล้อ =====
+(function () {
+  var card = document.getElementById("matchCard");
+  var esc = function (t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var S = null, busy = false, spinning = false, last = null, shown = [5, 5, 5];
+  function left() { return S ? (S.free_left ? 1 : 0) + (S.deliver_left || 0) : 0; }
+  function sym(i) { return (S && S.match && S.match.symbols[i]) || "❓"; }
+  function paint() {
+    if (!S || !S.ok) { card.innerHTML = '<p style="margin:0;color:var(--mute)">' + esc((S && S.error) || "โหลดตู้จับคู่ไม่ได้ (ยังไม่ได้รัน phase28.sql?)") + "</p>"; return; }
+    var m = S.match || {}, n = left(), on = m.enabled !== false && S.enabled;
+    var bd = document.getElementById("spinBadge"); if (bd) { bd.hidden = !(n > 0 && S.enabled); bd.textContent = n; }
+    var h = '<div class="wh-top"><h2>🧩 ตู้จับคู่</h2><span class="wh-left' + (n ? "" : " done") + '">' + (n ? "หมุนได้ " + n + " ครั้ง" : "✅ หมุนครบแล้ว") + "</span></div>"
+      + '<p class="wh-sub">' + (on ? "ใช้สิทธิ์หมุนเดียวกับวงล้อ · ลุ้นให้ไอคอนตรงกัน" : "⏸️ แอดมินปิดตู้จับคู่ไว้ชั่วคราว") + "</p>"
+      + '<div class="mc-reels">' + [0, 1, 2].map(function (i) { return '<div class="mc-r' + (last && last.hit && last.hit[i] ? " hit" : "") + (spinning ? " run" : "") + '" id="mcR' + i + '"><span>' + esc(sym(shown[i])) + "</span></div>"; }).join("") + "</div>"
+      + '<button type="button" class="wh-go" id="mcGo"' + (n && on && !spinning ? "" : " disabled") + ">" + (spinning ? "กำลังหมุน…" : n ? "🧩 หมุนเลย!" : "พรุ่งนี้มาหมุนใหม่") + "</button>"
+      + '<p class="wh-res' + (last && last.jp ? " jp" : "") + '" id="mcRes">' + (last ? esc(last.t) : "") + "</p>"
+      + '<ul class="wh-odds"><li><span>❌ ไม่ตรงกันเลย</span><b>+' + esc(m.none) + '</b></li><li><span>✌️ ตรงกัน 2 ช่อง</span><b>+' + esc(m.pair) + '</b></li><li><span>🔥 ตรงกัน 3 ช่อง</span><b>+' + esc(m.triple) + '</b></li><li><span>👑 มงกุฎ RM 3 ช่อง · ได้เหรียญ 🍀</span><b>+' + esc(m.crown) + "</b></li></ul>";
+    var td = (S.today || []).filter(function (x) { return x.game === "match"; });
+    if (td.length) h += '<div class="wh-today">' + td.map(function (x) { return "<i>" + esc(x.icon) + " +" + esc(x.points) + "</i>"; }).join("") + "</div>";
+    card.innerHTML = h;
+  }
+  async function load() {
+    if (busy || spinning || !window.__tok || !window.__tok() || document.body.classList.contains("rm-lock")) return;
+    busy = true; try { S = await rpc("spin_status"); } catch (e) { S = null; } busy = false; paint();
+  }
+  async function spin() {
+    if (spinning || !left()) return;
+    try { if (typeof ensureAudio === "function") ensureAudio(); } catch (e) {}
+    spinning = true; last = null; paint();
+    var r; try { r = await rpc("match_now"); } catch (e) { r = { ok: false, error: "หมุนไม่สำเร็จ ลองใหม่อีกครั้ง" }; }
+    if (!r || !r.ok) { spinning = false; last = { t: (r && r.error) || "หมุนไม่สำเร็จ" }; busy = false; await load(); return; }
+    var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, stopAt = reduce ? [0, 0, 0] : [700, 1250, 1900], t0 = Date.now(), stopped = [false, false, false];
+    var tick = setInterval(function () {
+      var el, dt = Date.now() - t0;
+      for (var i = 0; i < 3; i++) {
+        el = document.getElementById("mcR" + i); if (!el) continue;
+        if (!stopped[i] && dt >= stopAt[i]) { stopped[i] = true; shown[i] = r.reels[i]; el.classList.remove("run"); el.classList.add("stop"); el.firstChild.textContent = sym(r.reels[i]); }
+        else if (!stopped[i]) { el.firstChild.textContent = sym(Math.floor(Math.random() * 6)); }
+      }
+      if (stopped[0] && stopped[1] && stopped[2]) {
+        clearInterval(tick);
+        var a = r.reels, hit = [a[0] === a[1] || a[0] === a[2], a[1] === a[0] || a[1] === a[2], a[2] === a[0] || a[2] === a[1]];
+        last = { hit: hit, jp: r.jackpot, t: r.result === "crown" ? "👑 แจ็กพอต! +" + r.points + " แต้ม + เหรียญดวงเฮง" : r.result === "triple" ? "🔥 3 ช่องตรงกัน! +" + r.points + " แต้ม" : r.result === "pair" ? "✌️ ได้คู่ +" + r.points + " แต้ม" : "ไม่ตรงกัน ได้ +" + r.points + " แต้ม" };
+        setTimeout(async function () {
+          spinning = false;
+          try { if (r.points > 1 && typeof ding === "function") ding(); } catch (e) {}
+          busy = false; await load();
+          try { document.dispatchEvent(new Event("rm-spin")); document.dispatchEvent(new Event("visibilitychange")); } catch (e) {}
+        }, 350);
+      }
+    }, 80);
+  }
+  card.addEventListener("click", function (e) { if (e.target.closest("#mcGo")) spin(); });
+  document.addEventListener("rm-spin-wheel", function () { if (!spinning) load(); });
+  document.addEventListener("rm-game-show", function (e) { if (e.detail === "match") load(); });
+  var tries = 0, t0 = setInterval(function () { if (window.__tok && window.__tok() && !document.body.classList.contains("rm-lock")) { load(); clearInterval(t0); } else if (++tries > 40) clearInterval(t0); }, 1500);
 })();
 </script>
 </body>

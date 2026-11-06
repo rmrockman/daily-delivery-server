@@ -458,7 +458,7 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <div id="bsHist" style="margin-top:16px"></div>
       <p class="pmsg" id="bsMsg" role="status"></p>
     </section>
-    <section class="card" data-sub="spin" data-label="🎡 วงล้อ" id="spinCard" data-tab="tools">
+    <section class="card" data-sub="spin" data-label="🎡 วงล้อ & จับคู่" id="spinCard" data-tab="tools">
       <h2>🎡 วงล้อนำโชค</h2>
       <p class="cnt">สมาชิกหมุนฟรีวันละ 1 ครั้ง + วันที่ส่งของ (อนุมัติแล้ว) ได้อีก 1 ครั้ง · ไม่ต้องลงแต้ม · ระบบสุ่มที่ฐานข้อมูล</p>
       <label class="sw"><input id="spOn" type="checkbox"><i></i>เปิดวงล้อ</label>
@@ -468,6 +468,25 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <button class="sec" id="spAdd" type="button" style="width:auto;padding:8px 14px">+ เพิ่มช่อง</button>
       <div class="rres" id="spAvg" style="margin-top:10px"></div>
       <button class="sec" id="spSave" type="button" style="margin-top:12px">💾 บันทึกรางวัล</button>
+      <h3 style="margin:22px 0 6px;font-size:1rem">🧩 ตู้จับคู่</h3>
+      <p class="cnt" style="margin:0 0 6px">3 ช่อง ลุ้นไอคอนตรงกัน · ใช้สิทธิ์หมุนเดียวกับวงล้อ (แต้มรวมต่อวันไม่เพิ่ม) · มงกุฎ 3 ช่องได้เหรียญ 🍀</p>
+      <label class="sw"><input id="mcOn" type="checkbox"><i></i>เปิดตู้จับคู่</label>
+      <div style="display:grid;gap:6px;grid-template-columns:repeat(2,minmax(0,1fr))">
+        <label style="font-size:.75rem;color:var(--mute)">❌ ไม่ตรงกัน (55.6%)<input id="mcNone" type="number" min="0" inputmode="numeric"></label>
+        <label style="font-size:.75rem;color:var(--mute)">✌️ ได้คู่ (41.7%)<input id="mcPair" type="number" min="0" inputmode="numeric"></label>
+        <label style="font-size:.75rem;color:var(--mute)">🔥 3 ช่องตรง (2.3%)<input id="mcTriple" type="number" min="0" inputmode="numeric"></label>
+        <label style="font-size:.75rem;color:var(--mute)">👑 มงกุฎ 3 ช่อง (0.5%)<input id="mcCrown" type="number" min="0" inputmode="numeric"></label>
+      </div>
+      <div class="rres" id="mcAvg" style="margin-top:8px"></div>
+      <button class="sec" id="mcSave" type="button" style="margin-top:8px">💾 บันทึกตู้จับคู่</button>
+      <h3 style="margin:22px 0 6px;font-size:1rem">📣 แจ้งเตือน Discord</h3>
+      <p class="cnt" style="margin:0 0 6px">ส่งการ์ด "ใครหมุนได้อะไร" เข้า 🎰 ห้องเกม · ทั้งวงล้อและตู้จับคู่ · แจ็กพอตแจ้งเสมอ (ถ้าไม่ปิด)</p>
+      <div id="gnHook" class="rres" style="margin-bottom:8px">กำลังโหลด…</div>
+      <div style="display:grid;gap:6px;grid-template-columns:minmax(0,2fr) minmax(0,1fr)">
+        <label style="font-size:.75rem;color:var(--mute)">แจ้งเมื่อไหร่<select id="gnMode"><option value="all">ทุกครั้ง</option><option value="big">เฉพาะรางวัลใหญ่</option><option value="off">ปิด</option></select></label>
+        <label id="gnMinL" style="font-size:.75rem;color:var(--mute)">ใหญ่ = ตั้งแต่ (แต้ม)<input id="gnMin" type="number" min="1" max="1000" inputmode="numeric"></label>
+      </div>
+      <button class="sec" id="gnSave" type="button" style="margin-top:8px">💾 บันทึกการแจ้งเตือน</button>
       <p class="pmsg" id="spMsg" role="status"></p>
     </section>
     <section class="card" data-sub="ev" data-label="🔥 อีเวนต์" id="evCard" data-tab="tools">
@@ -1243,7 +1262,8 @@ const HOOKS = [
   { s: "bot", k: "event_webhook", icon: "🔥", name: "อีเวนต์ & ภารกิจ", what: ["เริ่ม / จบอีเวนต์แต้ม xN", "เป้าหมายแคลนใหม่ / สำเร็จ", "ภารกิจใหม่ / มีคนทำภารกิจสำเร็จ"], fb: ["levelup_webhook"] },
   { s: "bot", k: "monthly_webhook", icon: "🏆", name: "สรุปประจำเดือน", what: ["Top 3 ประจำเดือน + แต้มรางวัล (วันที่ 1 ของเดือน)"], fb: ["levelup_webhook", "pending_webhook"] },
   { s: "app", k: "shop_webhook", icon: "🛒", name: "ร้านค้า", what: ["มีคนแลกของ (รอแอดมินมอบของ)"], fb: ["pending_webhook"] },
-  { s: "bot", k: "inventory_webhook", icon: "📦", name: "คลังกลาง", what: ["มีคำขอเบิกของใหม่", "อนุมัติเบิกออก (บอกของคงเหลือ)", "แอดมินปรับจำนวนของ"], fb: ["pending_webhook"] }
+  { s: "bot", k: "inventory_webhook", icon: "📦", name: "คลังกลาง", what: ["มีคำขอเบิกของใหม่", "อนุมัติเบิกออก (บอกของคงเหลือ)", "แอดมินปรับจำนวนของ"], fb: ["pending_webhook"] },
+  { s: "bot", k: "game_webhook", icon: "🎰", name: "ห้องเกม (วงล้อ & จับคู่)", what: ["ใครหมุนวงล้อ / ตู้จับคู่ ได้อะไร", "🍀 แจ็กพอต (แท็กชื่อคนได้)", "เลือกแจ้งทุกครั้ง / เฉพาะรางวัลใหญ่ ได้ที่ จัดการ › วงล้อ & จับคู่"], fb: [] }
 ];
 let HK = null;
 const hkm = (t, ok) => { $("hookMsg").textContent = t || ""; $("hookMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
@@ -1466,6 +1486,35 @@ $("bnGo").onclick = async () => {
   bsLoad();
 };
 
+// ===== ตู้จับคู่ (เฟส 28) =====
+function mcCalc(mc) {
+  const v = id => Math.max(0, Number($(id).value) || 0);
+  const avg = 120 / 216 * v("mcNone") + 90 / 216 * v("mcPair") + 5 / 216 * v("mcTriple") + 1 / 216 * v("mcCrown");
+  $("mcAvg").innerHTML = "เฉลี่ย <b>" + avg.toFixed(1) + " แต้ม</b> ต่อการหมุน 1 ครั้ง (วงล้อตอนนี้ดูได้ด้านบน ควรใกล้เคียงกัน)" + (mc && mc.today_spins != null ? "<br>วันนี้: หมุน " + mc.today_spins + " ครั้ง · แจก " + Number(mc.today_points).toLocaleString("th-TH") + " แต้ม" : "");
+}
+["mcNone", "mcPair", "mcTriple", "mcCrown"].forEach(id => $(id).addEventListener("input", () => { $("spinCard").dataset.mcdirty = "1"; mcCalc(); }));
+$("mcSave").onclick = async () => {
+  try { await pcall("admin_spin_save", { p: { match: { enabled: $("mcOn").checked, none: $("mcNone").value.trim() || "0", pair: $("mcPair").value.trim() || "0", triple: $("mcTriple").value.trim() || "0", crown: $("mcCrown").value.trim() || "0" } } }); delete $("spinCard").dataset.mcdirty; spm("บันทึกตู้จับคู่แล้ว ✓", true); } catch (er) { spm(er.message); }
+  spLoad();
+};
+$("mcOn").onchange = () => $("mcSave").click();
+
+// ===== แจ้งเตือนเกมใน Discord (เฟส 29) =====
+const gnShow = () => { $("gnMinL").style.visibility = $("gnMode").value === "big" ? "visible" : "hidden"; };
+async function gnLoad() {
+  let g; try { g = await rpc("admin_game_notify", { p_pass: PASS }); } catch (e) { $("gnHook").textContent = "ยังไม่ได้รัน phase29.sql ใน Supabase"; return; }
+  if (!g || !g.ok) return;
+  if (!$("spinCard").dataset.gndirty) { $("gnMode").value = g.mode; $("gnMin").value = g.min; }
+  gnShow();
+  $("gnHook").innerHTML = g.hook_set ? "🎰 ห้องเกม: <b style=\"color:var(--ok)\">✅ ตั้งแล้ว</b>" : '🎰 ห้องเกม: <b style="color:var(--bad)">⚠️ ยังไม่ได้ใส่ลิงก์ · ยังไม่แจ้ง</b><br><button class="sec hookJump" type="button" style="margin-top:8px">🔗 ไปใส่ลิงก์ที่ จัดการ › Webhook</button>';
+}
+$("gnMode").onchange = () => { $("spinCard").dataset.gndirty = "1"; gnShow(); };
+$("gnMin").oninput = () => { $("spinCard").dataset.gndirty = "1"; };
+$("gnSave").onclick = async () => {
+  try { await pcall("admin_game_notify_save", { p_mode: $("gnMode").value, p_min: $("gnMin").value.trim() || "8" }); delete $("spinCard").dataset.gndirty; spm("บันทึกการแจ้งเตือนแล้ว ✓", true); } catch (er) { spm(er.message); }
+  gnLoad();
+};
+
 // ===== วงล้อนำโชค (เฟส 25) =====
 const spm = (t, ok) => { $("spMsg").textContent = t || ""; $("spMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
 const spRow = p => '<div class="spr" data-id="' + esc(p.id || "") + '"><input class="ic sp-i" maxlength="8" value="' + esc(p.icon || "⭐") + '"><input class="sp-l" maxlength="30" placeholder="ชื่อรางวัล" value="' + esc(p.label || "") + '"><input class="sp-p" type="number" min="0" max="1000" inputmode="numeric" value="' + esc(p.points == null ? "" : p.points) + '"><input class="sp-w" type="number" min="0" max="10000" inputmode="numeric" value="' + esc(p.weight == null ? "" : p.weight) + '"><label><input class="sp-j" type="checkbox"' + (p.jackpot ? " checked" : "") + '>🍀</label><button class="sec sp-x" type="button" aria-label="ลบช่อง">✕</button><div class="pc2"></div></div>';
@@ -1480,6 +1529,10 @@ async function spLoad() {
   if (!r || !r.ok) return;
   $("spOn").checked = !!r.enabled;
   $("spStat").innerHTML = "วันนี้: หมุน <b>" + r.today_spins + "</b> ครั้ง · <b>" + r.today_people + "</b> คน · แจก <b>" + Number(r.today_points).toLocaleString("th-TH") + "</b> แต้ม<br>7 วันล่าสุด: แจก " + Number(r.week_points).toLocaleString("th-TH") + " แต้ม · แจ็กพอต " + r.jackpots + " ครั้ง";
+  const mc = r.match || {};
+  if (!$("spinCard").dataset.mcdirty && r.match) { $("mcOn").checked = !!mc.enabled; $("mcNone").value = mc.none; $("mcPair").value = mc.pair; $("mcTriple").value = mc.triple; $("mcCrown").value = mc.crown; }
+  mcCalc(mc);
+  gnLoad();
   if (!$("spinCard").dataset.dirty) { $("spList").innerHTML = '<div class="sph"><span>ไอคอน</span><span>ชื่อ</span><span>แต้ม</span><span>โอกาส</span><span></span><span></span></div>' + (r.prizes || []).map(spRow).join(""); spCalc(); }
 }
 $("spinCard").addEventListener("input", e => { if (e.target.closest("#spList")) { $("spinCard").dataset.dirty = "1"; spCalc(); } });
@@ -1586,7 +1639,7 @@ const SUB_LOAD = { boss: () => bsLoad(), spin: () => spLoad(), hook: () => hookL
   try { Object.assign(pick, JSON.parse(sessionStorage.getItem("rm_sub") || "{}")); } catch (e) {}
   const badgeOf = { red: "shopTabBadge", ireq: "invTabBadge" };
   const HUB = [
-    { g: "🎮 แต้ม & กิจกรรม", items: [["pts", "อัตราแต้มต่อชิ้น · ระดับเลเวล · ปรับแต้มสมาชิก"], ["msn", "เป้าหมายแคลน · ภารกิจรายสัปดาห์"], ["ev", "แต้มคูณพิเศษตามช่วงเวลา"], ["spin", "รางวัลวงล้อ · โอกาสออก · เปิด/ปิด"], ["boss", "บอสประจำสัปดาห์ · เลือด · รางวัล"]] },
+    { g: "🎮 แต้ม & กิจกรรม", items: [["pts", "อัตราแต้มต่อชิ้น · ระดับเลเวล · ปรับแต้มสมาชิก"], ["msn", "เป้าหมายแคลน · ภารกิจรายสัปดาห์"], ["ev", "แต้มคูณพิเศษตามช่วงเวลา"], ["spin", "วงล้อ + ตู้จับคู่ · รางวัล · เปิด/ปิด"], ["boss", "บอสประจำสัปดาห์ · เลือด · รางวัล"]] },
     { g: "💬 Discord", items: [["hook", "ห้องแจ้งเตือนทุกห้อง · ทดสอบส่ง"], ["dc", "ประกาศเลเวลอัพ · แจกยศอัตโนมัติ"], ["dm", "ส่งข้อความส่วนตัวหาสมาชิก"]] },
     { g: "⚙️ ระบบ", items: [["site", "ประเภทของ · จุดส่ง · ยศแอดมิน"], ["team", "เพิ่ม / ลบแอดมิน"], ["log", "ใครทำอะไร เมื่อไร"], ["clr", "ลบประวัติเก่า (เฉพาะเจ้าของ)"]] }
   ];
