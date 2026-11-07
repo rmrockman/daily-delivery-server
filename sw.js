@@ -1,8 +1,8 @@
 // Service worker ของแอป Rockman · ส่งของรายวัน
 // โหลดจากเน็ตก่อนเสมอ (ได้ข้อมูลล่าสุดทุกครั้ง) ถ้าไม่มีเน็ตจึงใช้ไฟล์ที่เก็บไว้ในเครื่อง
 // เปลี่ยนเลขเวอร์ชันเมื่ออยากล้างแคชเก่าทั้งหมด
-const CACHE = "rockman-v1";
-const CORE = ["./", "./index.html", "./config.js", "./manifest.json", "./icons/icon-192.png", "./icons/icon-512.png"];
+const CACHE = "rockman-v2";
+const CORE = ["./", "./index.html", "./config.js", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
