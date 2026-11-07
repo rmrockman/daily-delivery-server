@@ -1,8 +1,9 @@
 {
   "name": "Rockman · ส่งของรายวัน",
   "short_name": "Rockman",
-  "description": "ส่งของรายวัน สะสมแต้ม แลกของ และเบิกคลังของแคลน Rockman",
+  "description": "ส่งของรายวัน สะสมแต้ม แลกของ และเบิกคลังของแคลน Rockman · พัฒนาโดย RM กอล์ฟ",
   "lang": "th",
+  "developer": { "name": "RM กอล์ฟ" },
   "id": "./",
   "start_url": "./",
   "scope": "./",
