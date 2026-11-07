@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
 <title>ส่งของรายวัน | Rockman</title>
+<!-- PWA: ติดตั้งเป็นแอป -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#050505">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rockman">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&family=Kanit:ital,wght@1,700;1,800&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#050505;--card:#121110;--ink:#eceff1;--mute:#a7a59d;--line:#3d3322;--gold:#f2b42b;--gold-hi:#ffd978;--gold-lo:#b9780a;--err:#ff8a7a;--ok:#8fe3a8;color-scheme:dark}
@@ -2199,6 +2208,12 @@ $("send").addEventListener("click", async () => {
   document.addEventListener("rm-game-show", function (e) { if (e.detail === "match") load(); });
   var tries = 0, t0 = setInterval(function () { if (window.__tok && window.__tok() && !document.body.classList.contains("rm-lock")) { load(); clearInterval(t0); } else if (++tries > 40) clearInterval(t0); }, 1500);
 })();
+</script>
+<script>
+// PWA: ลงทะเบียน service worker
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+}
 </script>
 </body>
 
