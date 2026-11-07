@@ -825,8 +825,9 @@ function ding() {
 // ===== ป้ายสถานะวันนี้ / การ์ดสถิติของฉัน / นับถอยหลังปิดอันดับ =====
 const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 function setToday(state, why) {
-  const box = $("today"); box.hidden = false; box.className = "today " + state;
-  box.textContent = state === "done" ? "✅ วันนี้คุณส่งของแล้ว พรุ่งนี้ส่งใหม่ได้"
+  const box = $("today"); box.hidden = false; box.className = "today " + (state === "more" ? "done" : state);
+  box.textContent = state === "done" ? "✅ วันนี้คุณส่งของครบแล้ว" + (why && why.limit > 1 ? " (" + why.done + "/" + why.limit + " รอบ)" : "") + " พรุ่งนี้ส่งใหม่ได้"
+    : state === "more" ? "✅ วันนี้ส่งแล้ว " + why.done + "/" + why.limit + " รอบ · ส่งเพิ่มได้อีก " + (why.limit - why.done) + " รอบ"
     : state === "pending" ? "⏳ ส่งเรื่องแล้ว รอแอดมินอนุมัติ (ยังไม่นับยอด / ยังไม่ลง Discord)"
     : state === "rej" ? "❌ แอดมินไม่อนุมัติ" + (why ? ": " + why : "") + " — แก้ไขแล้วส่งใหม่ได้"
     : "📦 วันนี้ยังไม่ได้ส่งของ — ส่งเลย!";
@@ -839,9 +840,12 @@ async function refreshToday() {
     if (!BOARD_ON) return;
     const p = await rpc("my_pending", { p_ign: ign });
     if (p && p.status === "pending") { setToday("pending"); return; }
-    const sent = !!(await rpc("already_sent", { p_ign: ign }));
-    if (sent) {
-      setToday("done");
+    let dt = null; try { dt = await rpc("deliver_today", { p_ign: ign }); } catch (e) {}
+    const hasDt = dt && typeof dt.done === "number";
+    const sent = hasDt ? dt.done >= dt.limit : !!(await rpc("already_sent", { p_ign: ign }));
+    const some = hasDt ? dt.done > 0 : sent;
+    if (some) {
+      if (sent) setToday("done", dt); else if (!(p && p.status === "rejected")) setToday("more", dt);
       let mine = null; try { mine = localStorage.getItem(PEND_KEY); } catch (e) {}
       if (p && p.status === "approved" && mine && String(p.id) === mine) { // แอดมินเพิ่งอนุมัติ → ฉลองให้สมาชิก
         try { localStorage.removeItem(PEND_KEY); } catch (e) {}
@@ -849,7 +853,7 @@ async function refreshToday() {
         celebrate(ign, its.map(x => x.type).join(" + "), its.reduce((t, x) => t + (Number(x.qty) || 0), 0));
         loadBoard(); try { window.logHist(); } catch (e) {}
       }
-      return;
+      if (sent || !(p && p.status === "rejected")) return;
     }
     if (p && p.status === "rejected") { setToday("rej", p.reject_reason); return; }
     setToday("todo");
@@ -1132,7 +1136,7 @@ $("send").addEventListener("click", async () => {
     if (blobs.some(x => x.size > 8 * 1024 * 1024)) throw userErr("รูปใหญ่เกิน 8 MB กรุณาเลือกรูปที่เล็กกว่านี้");
     let sentToday = false;
     try { sentToday = await rpc("already_sent", { p_ign: ign }); } catch (e) { throw userErr("เชื่อมต่อฐานข้อมูลไม่ได้ ลองใหม่อีกครั้ง"); }
-    if (sentToday) throw userErr("วันนี้ส่งของในชื่อ “" + ign + "” ไปแล้ว พรุ่งนี้ส่งได้ใหม่");
+    if (sentToday) throw userErr("วันนี้ส่งของในชื่อ “" + ign + "” ครบรอบแล้ว พรุ่งนี้ส่งได้ใหม่");
 
     msg("กำลังอัปโหลดรูป...");
     const paths = blobs.map((x, i) => Date.now() + "-" + i + "-" + Math.random().toString(36).slice(2, 8) + "." + (EXT[x.type] || "jpg"));

@@ -411,6 +411,23 @@ button.no,.pact button.no{background:rgba(255,92,138,.1)!important;color:var(--b
       <button class="sec" id="siteSave" type="button" style="margin-top:12px">💾 บันทึกการตั้งค่า</button>
       <p class="pmsg" id="siteMsg" role="status"></p>
     </section>
+    <section class="card" data-sub="rounds" data-label="📦 รอบส่งของ" id="rdCard" data-tab="tools">
+      <h2>📦 รอบส่งของต่อวัน</h2>
+      <p class="cnt">สมาชิกส่งของได้วันละกี่รอบ (นับรอบที่แอดมินอนุมัติ) · รอบที่ 2+ ยอดรวมเข้าวันเดียวกัน แต้มคิดแยกตามรอบ · สิทธิ์หมุนจากการส่งของยังได้วันละ 1</p>
+      <div style="display:grid;gap:8px;grid-template-columns:minmax(0,1fr) auto;align-items:end">
+        <label style="font-size:.75rem;color:var(--mute)">ทุกคนส่งได้วันละ<select id="rdPer"><option value="1">1 รอบ (แบบเดิม)</option><option value="2">2 รอบ</option><option value="3">3 รอบ</option></select></label>
+        <button class="sec" id="rdSave" type="button" style="width:auto;padding:10px 14px">💾 บันทึก</button>
+      </div>
+      <h3 style="margin:20px 0 6px;font-size:1rem">➕ ให้ส่งเพิ่มวันนี้ (รายคน)</h3>
+      <p class="cnt" style="margin:0 0 6px">ใช้ตอนคนส่งผิด / มีของเพิ่ม · ได้เฉพาะวันนี้ พรุ่งนี้กลับเป็นปกติเอง</p>
+      <div style="display:grid;gap:8px;grid-template-columns:minmax(0,1fr) auto;align-items:end">
+        <label style="font-size:.75rem;color:var(--mute)">ชื่อในเกม<input id="rdIgn" list="rdIgnList" autocomplete="off" placeholder="พิมพ์ชื่อ"></label>
+        <button id="rdAdd" type="button" style="width:auto;padding:10px 14px">+1 รอบ</button>
+      </div>
+      <datalist id="rdIgnList"></datalist>
+      <p class="pmsg" id="rdMsg" role="status"></p>
+      <div id="rdList"></div>
+    </section>
     <section class="card" data-sub="pts" data-label="⭐ เลเวล" id="ptsCard" data-tab="tools">
       <h2>⭐ แต้มและเลเวล</h2>
       <p class="cnt">อัตราแต้มต่อหมวด: ทุก (กี่ชิ้น) ได้ (กี่แต้ม) · หมวดที่ไม่อยู่ในรายการจะไม่ได้แต้ม</p>
@@ -1525,6 +1542,34 @@ $("mcSave").onclick = async () => {
 };
 $("mcOn").onchange = () => $("mcSave").click();
 
+// ===== 📦 รอบส่งของต่อวัน (เฟส 31) =====
+const rdm = (t, ok) => { $("rdMsg").textContent = t || ""; $("rdMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
+async function rdLoad() {
+  let r; try { r = await rpc("admin_deliver_cfg", { p_pass: PASS }); } catch (e) { rdm("ยังไม่ได้รัน phase31.sql ใน Supabase"); return; }
+  if (!$("rdCard").dataset.dirty) $("rdPer").value = r.per_day;
+  if (!MEMS.length) { try { MEMS = (await rpc("admin_members", { p_pass: PASS })) || []; } catch (e) {} }
+  $("rdIgnList").innerHTML = MEMS.filter(m => m.status === "approved" && m.ign).map(m => '<option value="' + esc(m.ign) + '">').join("");
+  const ex = r.extras || [], mu = r.multi || [];
+  $("rdList").innerHTML = (ex.length ? '<p class="cnt" style="margin:10px 0 4px">ให้ส่งเพิ่มวันนี้</p>' + ex.map(e => '<div class="pc" style="display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:6px"><span style="flex:1"><b>' + esc(e.ign) + "</b> · เพิ่ม +" + e.extra + ' · ส่งแล้ว ' + e.done + "/" + e.limit + ' รอบ</span><button class="sec rdX" type="button" data-k="' + esc(e.ign) + '" style="width:auto;padding:5px 10px">ยกเลิก</button></div>').join("") : "")
+    + (mu.length ? '<p class="cnt" style="margin:10px 0 4px">วันนี้ส่งมากกว่า 1 รอบ: ' + mu.map(m => esc(m.ign) + " (" + m.n + ")").join(", ") + "</p>" : "");
+}
+$("rdPer").onchange = () => { $("rdCard").dataset.dirty = "1"; };
+$("rdSave").onclick = async () => {
+  try { await pcall("admin_deliver_cfg_save", { p_per_day: $("rdPer").value }); delete $("rdCard").dataset.dirty; rdm("บันทึกแล้ว ✓ ทุกคนส่งได้วันละ " + $("rdPer").value + " รอบ", true); } catch (er) { rdm(er.message); }
+  rdLoad();
+};
+$("rdAdd").onclick = async () => {
+  const ign = $("rdIgn").value.trim(); if (!ign) { rdm("พิมพ์ชื่อในเกมก่อน"); return; }
+  const cur = (((await rpc("admin_deliver_cfg", { p_pass: PASS }).catch(() => null)) || {}).extras || []).find(e => e.ign.toLowerCase() === ign.toLowerCase());
+  try { const r = await pcall("admin_deliver_extra", { p_ign: ign, p_extra: (cur ? cur.extra : 0) + 1 }); rdm("✓ " + r.ign + " ส่งได้ " + r.limit + " รอบวันนี้ (ส่งแล้ว " + r.done + ")", true); $("rdIgn").value = ""; } catch (er) { rdm(er.message); }
+  rdLoad();
+};
+$("rdList").addEventListener("click", async e => {
+  const b = e.target.closest(".rdX"); if (!b) return;
+  try { await pcall("admin_deliver_extra", { p_ign: b.dataset.k, p_extra: 0 }); rdm("ยกเลิกแล้ว ✓", true); } catch (er) { rdm(er.message); }
+  rdLoad();
+});
+
 // ===== 🔨 ประมูล (เฟส 30) =====
 let AUC = null;
 const aum = (t, ok) => { $("aucMsg").textContent = t || ""; $("aucMsg").style.color = ok ? "var(--ok)" : "var(--bad)"; };
@@ -1729,7 +1774,7 @@ window.goSub = function (tab, sub) {
   if (sub && window.__pickSub) window.__pickSub(tab, sub);
   scrollTo({ top: 0, behavior: "smooth" });
 };
-const SUB_LOAD = { auc: () => aucLoad(), boss: () => bsLoad(), spin: () => spLoad(), hook: () => hookLoad(), site: () => siteLoad(true), clr: () => clrLoad(), dc: () => dcLoad(), dm: () => dcLoad(), sum: () => { moLoad(); loadSummary(); } };
+const SUB_LOAD = { rounds: () => rdLoad(), auc: () => aucLoad(), boss: () => bsLoad(), spin: () => spLoad(), hook: () => hookLoad(), site: () => siteLoad(true), clr: () => clrLoad(), dc: () => dcLoad(), dm: () => dcLoad(), sum: () => { moLoad(); loadSummary(); } };
 
 // ===== เมนูย่อยในแท็บ (จัดหมวดการ์ดให้หาง่าย) =====
 (function () {
@@ -1737,7 +1782,7 @@ const SUB_LOAD = { auc: () => aucLoad(), boss: () => bsLoad(), spin: () => spLoa
   try { Object.assign(pick, JSON.parse(sessionStorage.getItem("rm_sub") || "{}")); } catch (e) {}
   const badgeOf = { red: "shopTabBadge", ireq: "invTabBadge" };
   const HUB = [
-    { g: "🎮 แต้ม & กิจกรรม", items: [["pts", "อัตราแต้มต่อชิ้น · ระดับเลเวล · ปรับแต้มสมาชิก"], ["msn", "เป้าหมายแคลน · ภารกิจรายสัปดาห์"], ["ev", "แต้มคูณพิเศษตามช่วงเวลา"], ["spin", "วงล้อ + ตู้จับคู่ · รางวัล · เปิด/ปิด"], ["boss", "บอสประจำสัปดาห์ · เลือด · รางวัล"]] },
+    { g: "🎮 แต้ม & กิจกรรม", items: [["pts", "อัตราแต้มต่อชิ้น · ระดับเลเวล · ปรับแต้มสมาชิก"], ["rounds", "ส่งได้วันละกี่รอบ · ให้ส่งเพิ่มรายคน"], ["msn", "เป้าหมายแคลน · ภารกิจรายสัปดาห์"], ["ev", "แต้มคูณพิเศษตามช่วงเวลา"], ["spin", "วงล้อ + ตู้จับคู่ · รางวัล · เปิด/ปิด"], ["boss", "บอสประจำสัปดาห์ · เลือด · รางวัล"]] },
     { g: "💬 Discord", items: [["hook", "ห้องแจ้งเตือนทุกห้อง · ทดสอบส่ง"], ["dc", "ประกาศเลเวลอัพ · แจกยศอัตโนมัติ"], ["dm", "ส่งข้อความส่วนตัวหาสมาชิก"]] },
     { g: "⚙️ ระบบ", items: [["site", "ประเภทของ · จุดส่ง · ยศแอดมิน"], ["team", "เพิ่ม / ลบแอดมิน"], ["log", "ใครทำอะไร เมื่อไร"], ["clr", "ลบประวัติเก่า (เฉพาะเจ้าของ)"]] }
   ];
